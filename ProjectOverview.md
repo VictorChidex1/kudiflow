@@ -84,3 +84,37 @@ _AI Assistant: Await the developer's command to begin each step. Do not proceed 
 - **Step 8:** Set up the Firebase Local Emulator Suite to securely write the Cloud Functions for the WhatsApp/Payment APIs.
 - **Step 9:** Deploy to Vercel for rigorous mobile and airplane-mode testing.
 - **Step 10:** Final production deployment to Firebase Hosting.
+
+Here is the master folder tree for KudiFlow:
+src/
+├── assets/ # Static assets (logo PNGs, custom SVGs)
+├── components/ # All React components, strictly categorized
+│ ├── ui/ # Reusable dumb components (Buttons, Inputs, Modals, Spinners)
+│ ├── layout/ # App Shell (TopNav.tsx, BottomNav.tsx, AppLayout.tsx)
+│ ├── landing/ # Landing page sections (Hero.tsx, Features.tsx, LandingNavbar.tsx)
+│ ├── sales/ # Sales-specific (QuickKeypad.tsx, CartDrawer.tsx)
+│ ├── debtors/ # Debtor-specific (DebtorList.tsx, WhatsAppReminderButton.tsx)
+│ └── inventory/ # Inventory-specific (StockItem.tsx, LowStockAlert.tsx)
+├── hooks/ # Custom React hooks containing our business logic
+│ ├── useAuth.ts # Firebase Auth state listener
+│ ├── useOfflineSync.ts # The offline-first magic logic
+│ └── useDebtors.ts # Logic for fetching/updating debts
+├── pages/ # The main route views
+│ ├── LandingPage.tsx # The public-facing site
+│ ├── Login.tsx # Auth screen
+│ ├── Signup.tsx # Auth screen
+│ ├── Dashboard.tsx # Protected home (metrics)
+│ ├── SalesView.tsx # Protected route for the ledger
+│ ├── DebtorsView.tsx # Protected route for the debt collector
+│ └── InventoryView.tsx # Protected route for stock management
+├── services/ # Backend and third-party connections
+│ ├── firebase.ts # Firebase initialization and exports (Auth, Firestore)
+│ └── api.ts # Axios/Fetch calls to our Cloud Functions
+├── types/ # Strict TypeScript interfaces
+│ └── index.ts # The DB schema we defined (BusinessProfile, Sale, Debtor, etc.)
+├── utils/ # Helper functions
+│ ├── currency.ts # Formats numbers to Naira (e.g., ₦15,000)
+│ └── dates.ts # Formats Firebase Timestamps to readable dates
+├── App.tsx # Main wrapper (handles React Router and global Auth state)
+├── main.tsx # React DOM entry point
+└── index.css # Tailwind v4 theme configuration

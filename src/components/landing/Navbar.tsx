@@ -1,5 +1,4 @@
 import { Link, useLocation } from "react-router-dom";
-import { Wallet } from "lucide-react";
 
 export function LandingNavbar() {
   const location = useLocation();
@@ -13,8 +12,12 @@ export function LandingNavbar() {
             to="/"
             className="flex items-center gap-2.5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-kudi-green focus-visible:ring-offset-2 rounded-lg"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-kudi-green text-white shadow-sm shadow-kudi-green/20 transition-transform duration-300 group-hover:scale-105 group-active:scale-95">
-              <Wallet className="h-5 w-5" strokeWidth={2.5} />
+            <div className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl shadow-sm shadow-kudi-green/20 transition-transform duration-300 group-hover:scale-105 group-active:scale-95 bg-white">
+              <img
+                src="/assets/logo.webp"
+                alt="KudiFlow Logo"
+                className="h-full w-full object-contain p-1"
+              />
             </div>
             <span className="text-xl font-bold tracking-tight text-slate-800 transition-colors duration-300 group-hover:text-kudi-green">
               KudiFlow

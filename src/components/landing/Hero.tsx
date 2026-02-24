@@ -1,5 +1,12 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, WifiOff, ShieldCheck, Zap } from "lucide-react";
+import {
+  ArrowRight,
+  WifiOff,
+  ShieldCheck,
+  Zap,
+  Star,
+  Globe,
+} from "lucide-react";
 import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
 
@@ -66,24 +73,75 @@ export function Hero() {
             variants={itemVariant}
             className="max-w-4xl text-[2.75rem] leading-[1.05] tracking-tight font-extrabold text-slate-900 sm:text-7xl lg:text-[5.5rem] mb-6"
           >
-            The <span className="text-kudi-green">Offline-First</span>
+            The{" "}
+            <span className="text-kudi-green relative whitespace-nowrap">
+              Offline-First
+            </span>
             <br className="hidden sm:block" /> MSME Business OS.
           </motion.h1>
 
           {/* Refined Subtitle */}
           <motion.p
             variants={itemVariant}
-            className="max-w-2xl text-lg sm:text-xl lg:text-2xl text-slate-500 mb-10 leading-relaxed font-medium"
+            className="max-w-2xl text-lg sm:text-xl lg:text-2xl text-slate-500 mb-8 leading-relaxed font-medium"
           >
             Ditch the messy paper ledgers. Track daily sales, manage inventory,
             and seamlessly collect debts via WhatsApp—
             <strong className="text-slate-800">all without data.</strong>
           </motion.p>
 
+          {/* Trust Core: Avatar Social Proof Cluster */}
+          <motion.div
+            variants={itemVariant}
+            className="flex flex-col sm:flex-row items-center justify-center gap-5 mb-10 w-full relative z-20"
+          >
+            <div className="flex -space-x-3">
+              <div className="w-12 h-12 rounded-full border-[3px] border-white bg-slate-200 overflow-hidden shadow-sm shadow-slate-900/10">
+                <img
+                  src="https://randomuser.me/api/portraits/men/70.jpg"
+                  alt="Nigerian MSME Owner"
+                />
+              </div>
+              <div className="w-12 h-12 rounded-full border-[3px] border-white bg-slate-200 overflow-hidden shadow-sm shadow-slate-900/10">
+                <img
+                  src="https://randomuser.me/api/portraits/women/16.jpg"
+                  alt="Nigerian MSME Owner"
+                />
+              </div>
+              <div className="w-12 h-12 rounded-full border-[3px] border-white bg-slate-200 overflow-hidden shadow-sm shadow-slate-900/10">
+                <img
+                  src="https://randomuser.me/api/portraits/men/53.jpg"
+                  alt="Nigerian MSME Owner"
+                />
+              </div>
+              <div className="w-12 h-12 rounded-full border-[3px] border-white bg-slate-200 overflow-hidden shadow-sm shadow-slate-900/10">
+                <img
+                  src="https://randomuser.me/api/portraits/women/54.jpg"
+                  alt="Nigerian MSME Owner"
+                />
+              </div>
+              <div className="w-12 h-12 rounded-full border-[3px] border-white bg-emerald-100 flex items-center justify-center text-xs font-extrabold text-emerald-700 shadow-sm shadow-emerald-900/10">
+                10k+
+              </div>
+            </div>
+
+            <div className="flex flex-col items-center sm:items-start text-sm">
+              <div className="flex gap-1 text-amber-500 mb-1">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4 fill-current border-none" />
+                ))}
+              </div>
+              <span className="font-semibold text-slate-600">
+                Join our thriving{" "}
+                <span className="text-kudi-green">African MSMEs</span>
+              </span>
+            </div>
+          </motion.div>
+
           {/* Minimal, Sleek CTA Buttons */}
           <motion.div
             variants={itemVariant}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto mb-16 lg:mb-24 relative z-20"
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto mb-8 relative z-20"
           >
             <Link
               to="/signup"
@@ -104,6 +162,17 @@ export function Hero() {
             >
               Sign In to Account
             </Link>
+          </motion.div>
+
+          {/* Platform Availability Badges */}
+          <motion.div
+            variants={itemVariant}
+            className="flex items-center justify-center gap-6 text-sm font-semibold text-slate-400 mb-16 lg:mb-24 relative z-20"
+          >
+            <span className="flex items-center gap-2 transition-colors hover:text-slate-600 cursor-default">
+              <Globe className="w-5 h-5" />
+              Works smoothly on any smartphone or computer
+            </span>
           </motion.div>
 
           {/* Massive Bleeding Dashboard Reveal Image (Multi-App Style) */}

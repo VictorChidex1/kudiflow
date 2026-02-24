@@ -10,16 +10,16 @@ export function LandingNavbar() {
           {/* Left Side: Logo & Brand */}
           <Link
             to="/"
-            className="flex items-center gap-2.5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-kudi-green focus-visible:ring-offset-2 rounded-lg"
+            className="flex items-center group focus:outline-none focus-visible:ring-2 focus-visible:ring-kudi-green focus-visible:ring-offset-2 rounded-lg"
           >
-            <div className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl shadow-sm shadow-kudi-green/20 transition-transform duration-300 group-hover:scale-105 group-active:scale-95 bg-white">
+            <div className="relative flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center transition-transform duration-300 group-hover:scale-105 group-active:scale-95">
               <img
                 src="/assets/logo.webp"
                 alt="KudiFlow Logo"
-                className="h-full w-full object-contain p-1"
+                className="h-full w-full object-contain drop-shadow-sm"
               />
             </div>
-            <span className="text-xl font-bold tracking-tight text-slate-800 transition-colors duration-300 group-hover:text-kudi-green">
+            <span className="-ml-3 sm:-ml-4 text-2xl font-extrabold tracking-tight text-slate-800 transition-colors duration-300 group-hover:text-kudi-green">
               KudiFlow
             </span>
           </Link>

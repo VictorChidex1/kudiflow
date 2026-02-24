@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { auth } from "../lib/firebase";
 import {
   signInWithEmailAndPassword,
@@ -69,21 +69,31 @@ export function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative">
+      <div className="absolute top-4 left-4 sm:top-8 sm:left-8">
+        <Link
+          to="/"
+          className="flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors group"
+        >
+          <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+          Back to Home
+        </Link>
+      </div>
+
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
           <Link
             to="/"
-            className="flex items-center gap-2 group focus:outline-none focus-visible:ring-2 focus-visible:ring-kudi-green focus-visible:ring-offset-2 rounded-lg"
+            className="flex items-center group focus:outline-none focus-visible:ring-2 focus-visible:ring-kudi-green focus-visible:ring-offset-2 rounded-lg"
           >
-            <div className="relative flex h-12 w-12 items-center justify-center transition-transform duration-300 group-hover:scale-105 group-active:scale-95">
+            <div className="relative flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center transition-transform duration-300 group-hover:scale-105 group-active:scale-95">
               <img
                 src="/assets/logo.webp"
                 alt="KudiFlow Logo"
                 className="h-full w-full object-contain drop-shadow-sm"
               />
             </div>
-            <span className="-ml-2 text-2xl font-extrabold tracking-tight text-slate-800 transition-colors duration-300 group-hover:text-kudi-green">
+            <span className="-ml-3 sm:-ml-4 text-2xl font-extrabold tracking-tight text-slate-800 transition-colors duration-300 group-hover:text-kudi-green">
               KudiFlow
             </span>
           </Link>

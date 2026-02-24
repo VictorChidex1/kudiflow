@@ -1,10 +1,29 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 
 export function LandingNavbar() {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      // Close mobile menu if clicked outside of the navbar area entirely
+      if (
+        isMobileMenuOpen &&
+        navRef.current &&
+        !navRef.current.contains(event.target as Node)
+      ) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMobileMenuOpen]);
 
   // Future Navigation Links Array
   const navLinks = [
@@ -14,7 +33,10 @@ export function LandingNavbar() {
   ];
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-slate-200/60 bg-white/80 backdrop-blur-xl transition-all duration-300">
+    <nav
+      ref={navRef}
+      className="sticky top-0 z-50 w-full border-b border-slate-200/60 bg-white/80 backdrop-blur-xl transition-all duration-300"
+    >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between lg:h-20">
           {/* Left Side: Logo & Brand */}
@@ -107,6 +129,11 @@ export function LandingNavbar() {
             ? "opacity-100 translate-y-0 visible"
             : "opacity-0 -translate-y-4 invisible"
         }`}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            setIsMobileMenuOpen(false);
+          }
+        }}
       >
         <div className="flex flex-col px-4 pt-6 pb-12 space-y-8">
           {/* Mobile Nav Links */}

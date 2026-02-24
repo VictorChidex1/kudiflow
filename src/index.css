@@ -9,6 +9,7 @@
 
   --animate-blob: blob 7s infinite;
   --animate-fade-in-up: fade-in-up 0.8s ease-out forwards;
+  --animate-marquee: marquee 35s linear infinite;
 }
 
 @layer base {
@@ -59,5 +60,14 @@
   100% {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
   }
 }

@@ -1,10 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export function LandingNavbar() {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [activeHash, setActiveHash] = useState("");
   const navRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -19,11 +22,73 @@ export function LandingNavbar() {
       }
     };
 
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isMobileMenuOpen) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
     document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, [isMobileMenuOpen]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+
+      // Scroll Spy Logic
+      const sections = ["features", "pricing", "testimonials"];
+      const scrollPosition = window.scrollY + 100; // offset
+
+      let currentActiveHash = "";
+      for (const section of sections) {
+        const element = document.getElementById(section);
+        if (element) {
+          const { offsetTop, offsetHeight } = element;
+          if (
+            scrollPosition >= offsetTop &&
+            scrollPosition < offsetTop + offsetHeight
+          ) {
+            currentActiveHash = `#${section}`;
+            break;
+          }
+        }
+      }
+      setActiveHash(currentActiveHash);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const handleScrollToSection = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string
+  ) => {
+    if (href.startsWith("#") && location.pathname === "/") {
+      e.preventDefault();
+      const targetId = href.replace("#", "");
+      const element = document.getElementById(targetId);
+
+      if (element) {
+        const navHeight = 80;
+        const elementPosition =
+          element.getBoundingClientRect().top + window.scrollY;
+        window.scrollTo({
+          top: elementPosition - navHeight,
+          behavior: "smooth",
+        });
+      }
+      setIsMobileMenuOpen(false);
+    } else {
+      setIsMobileMenuOpen(false);
+    }
+  };
 
   // Future Navigation Links Array
   const navLinks = [
@@ -35,7 +100,11 @@ export function LandingNavbar() {
   return (
     <nav
       ref={navRef}
-      className="sticky top-0 z-50 w-full border-b border-slate-200/60 bg-white/80 backdrop-blur-xl transition-all duration-300"
+      className={`sticky top-0 z-50 w-full transition-all duration-300 ${
+        isScrolled
+          ? "bg-white/80 backdrop-blur-xl border-b border-slate-200/60 shadow-sm"
+          : "bg-transparent border-transparent"
+      }`}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between lg:h-20">
@@ -59,15 +128,29 @@ export function LandingNavbar() {
 
           {/* Desktop Navigation Links (Hidden on Mobile) */}
           <div className="hidden lg:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                className="text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors"
-              >
-                {link.name}
-              </a>
-            ))}
+            {navLinks.map((link) => {
+              const isActive = activeHash === link.href;
+              return (
+                <a
+                  key={link.name}
+                  href={link.href}
+                  onClick={(e) => handleScrollToSection(e, link.href)}
+                  className={`text-sm font-semibold transition-colors relative py-1 ${
+                    isActive
+                      ? "text-kudi-green"
+                      : "text-slate-500 hover:text-slate-900"
+                  }`}
+                >
+                  {link.name}
+                  {isActive && (
+                    <motion.div
+                      layoutId="desktop-active-indicator"
+                      className="absolute -bottom-1 left-0 right-0 h-0.5 bg-kudi-green rounded-full"
+                    />
+                  )}
+                </a>
+              );
+            })}
           </div>
 
           {/* Desktop Right Side: Auth Buttons (Hidden on Mobile) */}
@@ -123,55 +206,88 @@ export function LandingNavbar() {
       </div>
 
       {/* Mobile Dropdown Menu Overlay */}
-      <div
-        className={`lg:hidden fixed inset-x-0 top-[64px] sm:top-[80px] h-[calc(100vh-64px)] sm:h-[calc(100vh-80px)] bg-white/95 backdrop-blur-2xl transition-all duration-300 ease-in-out border-t border-slate-100 overflow-y-auto ${
-          isMobileMenuOpen
-            ? "opacity-100 translate-y-0 visible"
-            : "opacity-0 -translate-y-4 invisible"
-        }`}
-        onClick={(e) => {
-          if (e.target === e.currentTarget) {
-            setIsMobileMenuOpen(false);
-          }
-        }}
-      >
-        <div className="flex flex-col px-4 pt-6 pb-12 space-y-8">
-          {/* Mobile Nav Links */}
-          <div className="flex flex-col space-y-4 px-2">
-            {navLinks.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                className="text-2xl font-bold tracking-tight text-slate-800 hover:text-kudi-green transition-colors duration-200"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                {link.name}
-              </a>
-            ))}
-          </div>
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10, transition: { duration: 0.2 } }}
+            className="lg:hidden fixed inset-x-0 top-[64px] sm:top-[80px] h-[calc(100vh-64px)] sm:h-[calc(100vh-80px)] bg-white/95 backdrop-blur-2xl border-t border-slate-100 overflow-y-auto z-40"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setIsMobileMenuOpen(false);
+              }
+            }}
+          >
+            <div className="flex flex-col px-4 pt-6 pb-12 space-y-8">
+              {/* Mobile Nav Links */}
+              <div className="flex flex-col space-y-4 px-2">
+                {navLinks.map((link, i) => {
+                  const isActive = activeHash === link.href;
+                  return (
+                    <motion.a
+                      key={link.name}
+                      href={link.href}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1 + i * 0.1, duration: 0.3 }}
+                      className={`text-2xl font-bold tracking-tight transition-colors duration-200 flex items-center gap-3 ${
+                        isActive
+                          ? "text-kudi-green"
+                          : "text-slate-800 hover:text-kudi-green"
+                      }`}
+                      onClick={(e) => handleScrollToSection(e, link.href)}
+                    >
+                      {link.name}
+                      {isActive && (
+                        <div className="h-2 w-2 rounded-full bg-kudi-green shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                      )}
+                    </motion.a>
+                  );
+                })}
+              </div>
 
-          <hr className="border-slate-200/60 mx-2" />
+              <motion.hr
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="border-slate-200/60 mx-2"
+              />
 
-          {/* Mobile Auth Block Buttons */}
-          <div className="flex flex-col space-y-4 px-2">
-            <Link
-              to="/signup"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="w-full flex justify-center py-4 px-4 border border-transparent rounded-2xl shadow-lg shadow-kudi-green/20 text-lg font-bold text-white bg-kudi-green hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-kudi-green transition-all"
-            >
-              Create Free Shop
-            </Link>
+              {/* Mobile Auth Block Buttons */}
+              <div className="flex flex-col space-y-4 px-2">
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5, duration: 0.3 }}
+                >
+                  <Link
+                    to="/signup"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="w-full flex justify-center py-4 px-4 border border-transparent rounded-2xl shadow-lg shadow-kudi-green/20 text-lg font-bold text-white bg-kudi-green hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-kudi-green transition-all transform active:scale-[0.98]"
+                  >
+                    Create Free Shop
+                  </Link>
+                </motion.div>
 
-            <Link
-              to="/login"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="w-full flex justify-center py-4 px-4 border border-slate-300 rounded-2xl shadow-sm bg-white text-lg font-bold text-slate-800 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-kudi-green transition-all"
-            >
-              Sign In to Account
-            </Link>
-          </div>
-        </div>
-      </div>
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6, duration: 0.3 }}
+                >
+                  <Link
+                    to="/login"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="w-full flex justify-center py-4 px-4 border border-slate-300 rounded-2xl shadow-sm bg-white text-lg font-bold text-slate-800 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-kudi-green transition-all transform active:scale-[0.98]"
+                  >
+                    Sign In to Account
+                  </Link>
+                </motion.div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 }

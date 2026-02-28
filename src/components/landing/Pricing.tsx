@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
 import { Check, X } from "lucide-react";
@@ -38,9 +39,16 @@ export function Pricing() {
           transition={{ duration: 0.6 }}
           className="text-center max-w-3xl mx-auto mb-16"
         >
-          <h2 className="text-kudi-green font-bold tracking-widest uppercase text-sm mb-3">
-            Transparent Pricing
-          </h2>
+          <div className="relative inline-flex items-center justify-center mb-6">
+            <div className="absolute inset-0 bg-kudi-green/20 blur-xl rounded-full animate-pulse pointer-events-none" />
+            <div className="relative inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-kudi-green/10 text-kudi-green text-sm font-semibold tracking-wide">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-kudi-green opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-kudi-green"></span>
+              </span>
+              <span>Transparent Pricing</span>
+            </div>
+          </div>
           <p className="mt-2 text-4xl leading-tight font-extrabold tracking-tight text-kudi-dark sm:text-5xl">
             Simple, transparent pricing for growing businesses
           </p>
@@ -85,7 +93,7 @@ export function Pricing() {
             }`}
           >
             Billed Yearly
-            <span className="inline-flex items-center rounded-full bg-kudi-green/10 px-2.5 py-0.5 text-xs font-semibold text-kudi-green">
+            <span className="inline-flex items-center rounded-full bg-kudi-green/10 px-2.5 py-0.5 text-xs font-semibold text-kudi-green animate-pulse">
               Save 16%
             </span>
           </span>
@@ -102,7 +110,7 @@ export function Pricing() {
           {/* Starter (Free) Card */}
           <motion.div
             variants={cardVariants}
-            className="bg-white/60 backdrop-blur-xl rounded-3xl p-8 lg:p-10 border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300 relative flex flex-col"
+            className="bg-white/40 backdrop-blur-3xl rounded-3xl p-8 lg:p-10 border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)] hover:shadow-lg hover:border-white/80 transition-all duration-300 relative flex flex-col"
           >
             <div className="mb-8">
               <h3 className="text-2xl font-bold text-kudi-dark">Starter</h3>
@@ -111,8 +119,10 @@ export function Pricing() {
               </p>
             </div>
 
-            <div className="mb-8 flex items-baseline text-kudi-dark">
-              <span className="text-5xl font-extrabold tracking-tight">₦0</span>
+            <div className="mb-8 flex items-baseline">
+              <span className="text-5xl lg:text-6xl font-black tracking-tighter text-kudi-dark">
+                ₦0
+              </span>
               <span className="ml-1 text-xl font-medium text-gray-500">
                 /mo
               </span>
@@ -149,26 +159,30 @@ export function Pricing() {
               ))}
             </ul>
 
-            <button className="w-full py-4 px-6 rounded-xl font-semibold text-kudi-dark bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-colors duration-200 shadow-sm">
+            <Link
+              to="/signup"
+              className="block w-full py-4 px-6 text-center rounded-xl font-semibold text-kudi-dark bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:text-kudi-green transition-all duration-300 shadow-sm hover:shadow-md"
+            >
               Get Started for Free
-            </button>
+            </Link>
           </motion.div>
 
           {/* Pro Card (Hero) */}
           <motion.div
             variants={cardVariants}
-            className="bg-white rounded-3xl p-8 lg:p-10 border-2 border-kudi-green/80 shadow-[0_20px_40px_rgba(16,185,129,0.15)] relative flex flex-col md:-mt-4 md:mb-4 md:scale-105 z-10"
+            className="bg-white rounded-3xl p-8 lg:p-10 border-2 border-kudi-green/40 shadow-[0_20px_40px_rgba(16,185,129,0.15)] hover:shadow-[0_25px_50px_rgba(16,185,129,0.25)] relative flex flex-col md:-mt-4 md:mb-4 lg:scale-105 z-10 transition-all duration-500"
           >
             {/* Ambient Glow immediately behind the Pro card */}
             <div className="absolute inset-0 bg-linear-to-b from-kudi-green/5 to-transparent rounded-3xl -z-10" />
+            <div className="absolute top-[-50px] right-[-50px] w-48 h-48 bg-emerald-400/20 blur-[60px] rounded-full pointer-events-none animate-pulse" />
 
             <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
-              <span className="inline-flex items-center rounded-full bg-kudi-dark px-4 py-1.5 text-sm font-semibold text-white shadow-lg tracking-wide uppercase">
+              <span className="inline-flex items-center rounded-full bg-kudi-dark px-5 py-1.5 text-xs font-bold text-white shadow-xl tracking-widest uppercase ring-1 ring-white/20">
                 Most Popular
               </span>
             </div>
 
-            <div className="mb-8 mt-2">
+            <div className="mb-8 mt-2 relative z-10">
               <h3 className="text-2xl font-bold text-kudi-dark">
                 KudiFlow Pro
               </h3>
@@ -177,9 +191,9 @@ export function Pricing() {
               </p>
             </div>
 
-            <div className="mb-8 flex flex-col">
-              <div className="flex items-baseline text-kudi-dark">
-                <span className="text-5xl font-extrabold tracking-tight">
+            <div className="mb-8 flex flex-col relative z-10">
+              <div className="flex items-baseline">
+                <span className="text-5xl lg:text-6xl font-black tracking-tighter text-transparent bg-clip-text bg-linear-to-br from-kudi-dark to-slate-600">
                   {isYearly ? "₦25,000" : "₦2,500"}
                 </span>
                 <span className="ml-1 text-xl font-medium text-gray-500">
@@ -215,9 +229,12 @@ export function Pricing() {
               ))}
             </ul>
 
-            <button className="w-full py-4 px-6 rounded-xl font-semibold text-white bg-linear-to-r from-kudi-green to-emerald-500 hover:from-emerald-500 hover:to-kudi-green transition-all duration-300 shadow-md shadow-kudi-green/20 hover:shadow-lg hover:shadow-kudi-green/40 hover:-translate-y-0.5">
+            <Link
+              to="/signup"
+              className="block w-full py-4 px-6 text-center rounded-xl font-semibold text-white bg-linear-to-r from-kudi-green to-emerald-500 hover:from-emerald-500 hover:to-kudi-green transition-all duration-300 shadow-md shadow-kudi-green/20 hover:shadow-lg hover:shadow-kudi-green/40 hover:-translate-y-0.5"
+            >
               Upgrade to Pro
-            </button>
+            </Link>
           </motion.div>
         </motion.div>
       </div>

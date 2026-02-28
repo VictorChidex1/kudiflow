@@ -3,6 +3,7 @@ import { Hero } from "../components/landing/Hero";
 import { Features } from "../components/landing/Features";
 import { HowItWorks } from "../components/landing/HowItWorks";
 import { Pricing } from "../components/landing/Pricing";
+import { ScrollToTop } from "../components/ui/ScrollToTop";
 
 export default function LandingPage() {
   return (
@@ -15,6 +16,8 @@ export default function LandingPage() {
         <HowItWorks />
         <Pricing />
       </main>
+
+      <ScrollToTop />
     </div>
   );
 }

@@ -77,7 +77,7 @@ export function Hero() {
             <span className="text-kudi-green relative whitespace-nowrap">
               Offline-First
             </span>
-            <br className="hidden sm:block" /> MSME Business OS.
+            <br className="hidden sm:block" /> App for Smart Vendors.
           </motion.h1>
 
           {/* Refined Subtitle */}
@@ -132,8 +132,8 @@ export function Hero() {
                 ))}
               </div>
               <span className="font-semibold text-slate-600">
-                Join our thriving{" "}
-                <span className="text-kudi-green">African MSMEs</span>
+                Join our community{" "}
+                <span className="text-kudi-green">of smart Market Vendors</span>
               </span>
             </div>
           </motion.div>

@@ -78,12 +78,35 @@ export function Features() {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="relative text-center max-w-3xl mx-auto mb-16"
         >
-          {/* Ambient Glowing Blob */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-kudi-green/20 rounded-full blur-[80px] -z-10" />
-          <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-48 h-48 bg-emerald-400/20 rounded-full blur-[60px] -z-10" />
+          {/* Ambient Glowing Blobs */}
+          <motion.div
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [0.3, 0.5, 0.3],
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/4 w-[500px] h-[500px] bg-kudi-green/30 rounded-full blur-[100px] -z-10 pointer-events-none"
+          />
+          <motion.div
+            animate={{
+              scale: [1, 1.3, 1],
+              opacity: [0.2, 0.4, 0.2],
+            }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 1,
+            }}
+            className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-emerald-400/30 rounded-full blur-[80px] -z-10 pointer-events-none"
+          />
 
           <h2 className="text-kudi-green font-bold tracking-widest uppercase text-sm mb-3">
-            Built for MSMEs
+            Built for Shop Owners
           </h2>
           <p className="mt-2 text-4xl leading-tight font-extrabold tracking-tight text-kudi-dark sm:text-5xl">
             Everything you need,

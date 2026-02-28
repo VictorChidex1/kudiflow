@@ -1,73 +1,97 @@
-# React + TypeScript + Vite
+# KudiFlow - The Offline-First Shop Manager
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**KudiFlow** is a lightweight, offline-first Progressive Web App (PWA) designed for micro, small, and medium enterprises (MSMEs) in emerging markets. It solves the problem of paper-based record keeping by providing a blazing-fast digital ledger that works flawlessly without a reliable internet connection.
 
-Currently, two official plugins are available:
+## 🚀 Core Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+1. **3-Second Sales Ledger:** Rapid offline data entry for daily cash and transfer sales.
+2. **Polite Debt Collector:** A debtor management system that triggers automated, polite payment reminder links via WhatsApp.
+3. **Inventory Traffic Light:** Visual stock management (Green/Yellow/Red) to alert vendors when fast-moving goods are low.
 
-## React Compiler
+## 🛠 Technology Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Frontend:** React 19, Vite, TypeScript, Tailwind CSS v4, Framer Motion
+- **Backend / Database:** Firebase Firestore (configured for local offline persistence)
+- **Authentication:** Firebase Auth (Email/Password & Google Sign-in)
+- **Cloud Logic (APIs):** Firebase Cloud Functions (Node.js/TypeScript)
+- **Hosting:** Firebase Hosting
+- **Icons:** Lucide React
 
-## Expanding the ESLint configuration
+## 📂 Project Structure
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```text
+src/
+├── assets/         # Static assets (images, custom SVGs)
+├── components/     # React components
+│   ├── ui/         # Reusable basic components (Buttons, Inputs, etc.)
+│   ├── layout/     # App Shell components (Navbar, Sidebar, etc.)
+│   ├── landing/    # Landing page sections (Hero, Features, HowItWorks)
+│   └── ...         # Feature-specific components (Sales, Debtors, Inventory)
+├── hooks/          # Custom React hooks (Auth, Offline Sync)
+├── pages/          # Main route views (LandingPage, Auth, Dashboard, etc.)
+├── services/       # Backend and third-party connections (Firebase)
+├── types/          # Strict TypeScript interfaces
+└── utils/          # Helper utilities (currency formatting, dates)
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## ⚙️ Development Setup
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Prerequisites
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- Node.js (v18 or higher recommended)
+- Firebase CLI (`npm install -g firebase-tools`)
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/VictorChidex1/kudiflow.git
+cd kudiflow
 ```
+
+### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+### 3. Set up Environment Variables
+
+Create a `.env` file in the root directory and add your Firebase configuration:
+
+```env
+VITE_FIREBASE_API_KEY=your_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
+VITE_FIREBASE_APP_ID=your_app_id
+```
+
+### 4. Run the Development Server
+
+```bash
+npm run dev
+```
+
+The app will be available at `http://localhost:5173`.
+
+## 📦 Build & Deployment
+
+To build the project for production:
+
+```bash
+npm run build
+```
+
+To deploy to Firebase Hosting:
+
+```bash
+firebase deploy --only hosting
+```
+
+## 🎨 UI/UX Branding
+
+- **Primary Font:** Inter
+- **Primary Color:** Kudi Green (Emerald-600)
+- **Accent Color:** Kudi Gold (Amber-500)
+- **Design Ethos:** Clean, high-contrast, thumb-friendly interfaces built for mid-range mobile devices with ultra-glassmorphic aesthetic elements on larger screens.

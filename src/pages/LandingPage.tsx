@@ -2,6 +2,7 @@ import { LandingNavbar } from "../components/landing/Navbar";
 import { Hero } from "../components/landing/Hero";
 import { Features } from "../components/landing/Features";
 import { HowItWorks } from "../components/landing/HowItWorks";
+import { Pricing } from "../components/landing/Pricing";
 
 export default function LandingPage() {
   return (
@@ -12,6 +13,7 @@ export default function LandingPage() {
         <Hero />
         <Features />
         <HowItWorks />
+        <Pricing />
       </main>
     </div>
   );

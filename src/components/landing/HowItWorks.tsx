@@ -1,9 +1,6 @@
 import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
 import { Calculator, MessageCircle, Store } from "lucide-react";
-import step1 from "../../../public/assets/step1.webp";
-import step2 from "../../../public/assets/step2.webp";
-import step3 from "../../../public/assets/step3.webp";
 
 const steps = [
   {
@@ -13,7 +10,7 @@ const steps = [
       "Sign up in seconds right from your browser. Once you're logged in, KudiFlow's offline-first engine takes over, keep recording sales even if your data subscription finishes.",
     icon: Store,
     color: "kudi-green",
-    image: step1,
+    image: "/assets/step1.webp",
   },
   {
     id: "02",
@@ -22,7 +19,7 @@ const steps = [
       "Use our 3-second quick keypad to punch in daily cash and transfer sales faster than writing them down in a physical paper ledger.",
     icon: Calculator,
     color: "emerald-500",
-    image: step2,
+    image: "/assets/step2.webp",
   },
   {
     id: "03",
@@ -31,7 +28,7 @@ const steps = [
       "Stop arguing with customers over owed money. Tap a button to send a polite, automated WhatsApp payment reminder when a debt is overdue.",
     icon: MessageCircle,
     color: "teal-500",
-    image: step3,
+    image: "/assets/step3.webp",
   },
 ];
 
@@ -143,16 +140,17 @@ export function HowItWorks() {
                       className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-3/4 bg-${step.color}/20 rounded-full blur-[80px] -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none`}
                     />
 
-                    <div className="relative bg-white/40 backdrop-blur-3xl rounded-3xl p-8 lg:p-10 border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] hover:shadow-[0_20px_40px_rgba(16,185,129,0.1)] hover:-translate-y-1 hover:border-kudi-green/30 transition-all duration-500 overflow-hidden">
+                    <div className="relative flex flex-col bg-white/40 backdrop-blur-3xl rounded-3xl border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] hover:shadow-[0_20px_40px_rgba(16,185,129,0.1)] hover:-translate-y-1 hover:border-kudi-green/30 transition-all duration-500 overflow-hidden">
                       {/* Subtly textured background noise (Optional but premium) */}
                       <div
                         className="absolute inset-0 opacity-[0.02] mix-blend-overlay pointer-events-none"
                         style={{
                           backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
                         }}
-                      ></div>
+                      />
 
-                      <div className="relative z-10 flex flex-col md:flex-row gap-6 md:items-start">
+                      {/* Content Section with Padding */}
+                      <div className="relative z-10 flex flex-col md:flex-row gap-6 md:items-start p-8 lg:p-10 pb-8">
                         <div
                           className={`shrink-0 inline-flex items-center justify-center p-5 bg-white rounded-2xl shadow-sm text-${step.color} group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-${step.color}/20 transition-all duration-500 ring-1 ring-gray-100`}
                         >
@@ -169,15 +167,18 @@ export function HowItWorks() {
                           <p className="text-lg text-gray-500 leading-relaxed font-medium">
                             {step.description}
                           </p>
-
-                          <div className="relative w-full h-56 md:h-72 mt-8 rounded-2xl overflow-hidden border border-white/20 shadow-inner bg-slate-50/50">
-                            <img
-                              src={step.image}
-                              alt={step.title}
-                              className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
-                            />
-                          </div>
                         </div>
+                      </div>
+
+                      {/* Edge-to-Edge Image Showcase */}
+                      <div className="relative w-full h-64 md:h-80 overflow-hidden border-t border-white/30 bg-white/10 mt-auto">
+                        <img
+                          src={step.image}
+                          alt={step.title}
+                          className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
+                        />
+                        {/* Optional subtle gradient at bottom to blend into card corners */}
+                        <div className="absolute inset-x-0 bottom-0 h-10 bg-linear-to-t from-white/20 to-transparent pointer-events-none" />
                       </div>
                     </div>
                   </div>

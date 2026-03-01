@@ -130,28 +130,28 @@ export function Footer() {
                   </a>
                 </li>
                 <li>
-                  <a
-                    href="#"
+                  <Link
+                    to="/coming-soon"
                     className="text-slate-500 hover:text-kudi-green hover:translate-x-1 inline-block transition-transform duration-300"
                   >
                     Video Tutorials
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#"
+                  <Link
+                    to="/coming-soon"
                     className="text-slate-500 hover:text-kudi-green hover:translate-x-1 inline-block transition-transform duration-300"
                   >
                     Blog
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#"
+                  <Link
+                    to="/coming-soon"
                     className="text-slate-500 hover:text-kudi-green hover:translate-x-1 inline-block transition-transform duration-300"
                   >
                     Merchant Stories
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>

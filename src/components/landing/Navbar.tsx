@@ -100,6 +100,7 @@ export function LandingNavbar() {
     { name: "Features", href: "/#features" },
     { name: "Pricing", href: "/#pricing" },
     { name: "Testimonials", href: "/#testimonials" },
+    { name: "Docs", href: "/docs" },
   ];
 
   return (
@@ -134,9 +135,14 @@ export function LandingNavbar() {
           {/* Desktop Navigation Links (Hidden on Mobile) */}
           <div className="hidden lg:flex items-center gap-8">
             {navLinks.map((link) => {
-              // Convert "/#features" to "#features" for active check
-              const hashOnly = link.href.replace("/", "");
-              const isActive = activeHash === hashOnly;
+              // Active check: if it's a hash link, check activeHash. If it's a route link, check location.pathname.
+              let isActive = false;
+              if (link.href.startsWith("/#")) {
+                const hashOnly = link.href.replace("/", "");
+                isActive = activeHash === hashOnly;
+              } else {
+                isActive = location.pathname === link.href;
+              }
               return (
                 <Link
                   key={link.name}
@@ -230,8 +236,13 @@ export function LandingNavbar() {
               {/* Mobile Nav Links */}
               <div className="flex flex-col space-y-4 px-2">
                 {navLinks.map((link, i) => {
-                  const hashOnly = link.href.replace("/", "");
-                  const isActive = activeHash === hashOnly;
+                  let isActive = false;
+                  if (link.href.startsWith("/#")) {
+                    const hashOnly = link.href.replace("/", "");
+                    isActive = activeHash === hashOnly;
+                  } else {
+                    isActive = location.pathname === link.href;
+                  }
                   return (
                     <motion.div
                       key={link.name}

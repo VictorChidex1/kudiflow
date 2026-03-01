@@ -211,7 +211,7 @@ export function Footer() {
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
             <span className="text-xs font-medium text-slate-500 uppercase tracking-widest">
-              Systems Operational
+              Powered by CV Digitals LTD
             </span>
           </div>
         </div>

@@ -66,35 +66,40 @@ export function LandingNavbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleScrollToSection = (
+  const handleNavigation = (
     e: React.MouseEvent<HTMLAnchorElement>,
     href: string
   ) => {
-    if (href.startsWith("#") && location.pathname === "/") {
-      e.preventDefault();
-      const targetId = href.replace("#", "");
-      const element = document.getElementById(targetId);
+    // If the href is a hash link (like /#features)
+    if (href.startsWith("/#")) {
+      const targetId = href.replace("/#", "");
 
-      if (element) {
-        const navHeight = 80;
-        const elementPosition =
-          element.getBoundingClientRect().top + window.scrollY;
-        window.scrollTo({
-          top: elementPosition - navHeight,
-          behavior: "smooth",
-        });
+      // If we are already on the landing page, just scroll smoothly
+      if (location.pathname === "/") {
+        e.preventDefault();
+        const element = document.getElementById(targetId);
+
+        if (element) {
+          const navHeight = 80;
+          const elementPosition =
+            element.getBoundingClientRect().top + window.scrollY;
+          window.scrollTo({
+            top: elementPosition - navHeight,
+            behavior: "smooth",
+          });
+        }
       }
-      setIsMobileMenuOpen(false);
-    } else {
-      setIsMobileMenuOpen(false);
+      // If we are NOT on the landing page, the normal <Link to="/#href"> behavior
+      // will transition us to the landing page and the browser will jump to the hash.
     }
+
+    setIsMobileMenuOpen(false);
   };
 
-  // Future Navigation Links Array
   const navLinks = [
-    { name: "Features", href: "#" },
-    { name: "Pricing", href: "#" },
-    { name: "Testimonials", href: "#" },
+    { name: "Features", href: "/#features" },
+    { name: "Pricing", href: "/#pricing" },
+    { name: "Testimonials", href: "/#testimonials" },
   ];
 
   return (
@@ -129,12 +134,14 @@ export function LandingNavbar() {
           {/* Desktop Navigation Links (Hidden on Mobile) */}
           <div className="hidden lg:flex items-center gap-8">
             {navLinks.map((link) => {
-              const isActive = activeHash === link.href;
+              // Convert "/#features" to "#features" for active check
+              const hashOnly = link.href.replace("/", "");
+              const isActive = activeHash === hashOnly;
               return (
-                <a
+                <Link
                   key={link.name}
-                  href={link.href}
-                  onClick={(e) => handleScrollToSection(e, link.href)}
+                  to={link.href}
+                  onClick={(e) => handleNavigation(e, link.href)}
                   className={`text-sm font-semibold transition-colors relative py-1 ${
                     isActive
                       ? "text-kudi-green"
@@ -148,7 +155,7 @@ export function LandingNavbar() {
                       className="absolute -bottom-1 left-0 right-0 h-0.5 bg-kudi-green rounded-full"
                     />
                   )}
-                </a>
+                </Link>
               );
             })}
           </div>
@@ -223,26 +230,30 @@ export function LandingNavbar() {
               {/* Mobile Nav Links */}
               <div className="flex flex-col space-y-4 px-2">
                 {navLinks.map((link, i) => {
-                  const isActive = activeHash === link.href;
+                  const hashOnly = link.href.replace("/", "");
+                  const isActive = activeHash === hashOnly;
                   return (
-                    <motion.a
+                    <motion.div
                       key={link.name}
-                      href={link.href}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.1 + i * 0.1, duration: 0.3 }}
-                      className={`text-2xl font-bold tracking-tight transition-colors duration-200 flex items-center gap-3 ${
-                        isActive
-                          ? "text-kudi-green"
-                          : "text-slate-800 hover:text-kudi-green"
-                      }`}
-                      onClick={(e) => handleScrollToSection(e, link.href)}
                     >
-                      {link.name}
-                      {isActive && (
-                        <div className="h-2 w-2 rounded-full bg-kudi-green shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                      )}
-                    </motion.a>
+                      <Link
+                        to={link.href}
+                        className={`text-2xl font-bold tracking-tight transition-colors duration-200 flex items-center gap-3 ${
+                          isActive
+                            ? "text-kudi-green"
+                            : "text-slate-800 hover:text-kudi-green"
+                        }`}
+                        onClick={(e) => handleNavigation(e, link.href)}
+                      >
+                        {link.name}
+                        {isActive && (
+                          <div className="h-2 w-2 rounded-full bg-kudi-green shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                        )}
+                      </Link>
+                    </motion.div>
                   );
                 })}
               </div>

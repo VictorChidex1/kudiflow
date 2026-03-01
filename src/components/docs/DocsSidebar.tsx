@@ -5,7 +5,10 @@ import {
   Users,
   ShieldCheck,
   WifiOff,
+  ArrowLeft,
 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 
 export type DocCategory =
   | "getting-started"
@@ -66,41 +69,59 @@ export function DocsSidebar({
       `}
       >
         <div className="p-6">
+          {/* Back to Home Button (Merchants' Lifeline) */}
+          <Link
+            to="/"
+            className="group flex items-center gap-2 mb-10 w-fit text-slate-500 hover:text-slate-900 transition-colors duration-200"
+          >
+            <div className="p-2 rounded-lg bg-white border border-slate-200 shadow-sm group-hover:border-slate-300 group-hover:-translate-x-1 group-hover:shadow-md transition-all duration-300 flex items-center justify-center">
+              <ArrowLeft className="w-4 h-4" />
+            </div>
+            <span className="font-semibold text-sm">Back to Home</span>
+          </Link>
+
           <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">
             Help Center Guides
           </h3>
 
           <nav className="space-y-1">
-            {categories.map((cat) => {
+            {categories.map((cat, index) => {
               const Icon = cat.icon;
               const isActive = activeCategory === cat.id;
 
               return (
-                <button
+                <motion.button
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05 + 0.1, duration: 0.3 }}
                   key={cat.id}
                   onClick={() => {
                     onSelectCategory(cat.id);
                     setIsMobileMenuOpen(false);
                   }}
                   className={`
-                    w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-medium transition-all duration-200
+                    w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-medium transition-all duration-300 relative overflow-hidden group
                     ${
                       isActive
-                        ? "bg-emerald-50 text-kudi-green"
-                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                        ? "bg-emerald-50 text-kudi-green shadow-inner border border-emerald-100"
+                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 border border-transparent"
                     }
                   `}
                 >
+                  {/* Subtle active state left-border indicator */}
+                  {isActive && (
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-kudi-green rounded-r-full" />
+                  )}
+
                   <Icon
-                    className={`w-5 h-5 ${
-                      isActive ? "text-kudi-green" : "text-slate-400"
+                    className={`w-5 h-5 transition-colors duration-300 z-10 ${
+                      isActive
+                        ? "text-kudi-green"
+                        : "text-slate-400 group-hover:text-slate-600"
                     }`}
                   />
-                  <span>{cat.label}</span>
-                  {isActive && (
-                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-kudi-green" />
-                  )}
-                </button>
+                  <span className="z-10 relative">{cat.label}</span>
+                </motion.button>
               );
             })}
           </nav>

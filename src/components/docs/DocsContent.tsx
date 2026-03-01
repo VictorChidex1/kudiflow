@@ -166,6 +166,120 @@ export function DocsContent({ activeCategory }: DocsContentProps) {
           </div>
         );
 
+      case "inventory":
+        return (
+          <div className="prose prose-slate max-w-none">
+            <h1 className="text-4xl font-extrabold tracking-tight mb-2">
+              Managing Your Inventory
+            </h1>
+            <p className="text-xl text-slate-500 mb-10">
+              Keep track of what's in stock and get alerted before you run out.
+            </p>
+
+            <h2 className="text-2xl font-bold mt-10 mb-4">
+              Adding and Editing Items
+            </h2>
+            <p>
+              Navigate to the <strong>"Inventory"</strong> tab. Here you can see
+              a complete list of all your products. Tap any product to update
+              its price or adjust the stock quantity.
+            </p>
+
+            <h2 className="text-2xl font-bold mt-10 mb-4">
+              Traffic-Light Alerts
+            </h2>
+            <p>
+              KudiFlow uses a simple color-coded system to tell you how your
+              stock is doing:
+            </p>
+            <ul className="list-disc pl-6 space-y-2 mt-4">
+              <li>
+                <strong className="text-kudi-green">Green:</strong> You have
+                plenty of stock.
+              </li>
+              <li>
+                <strong className="text-amber-500">Yellow:</strong> Stock is
+                getting low, plan to restock soon.
+              </li>
+              <li>
+                <strong className="text-red-500">Red:</strong> Out of stock or
+                critically low!
+              </li>
+            </ul>
+
+            <div className="my-10 p-6 bg-emerald-50 rounded-2xl border border-emerald-100 flex gap-4">
+              <div className="shrink-0 mt-1">
+                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-kudi-green">
+                  <Lightbulb size={24} />
+                </div>
+              </div>
+              <div>
+                <h4 className="text-lg font-bold text-slate-900 m-0 mb-1">
+                  Automatic Deductions
+                </h4>
+                <p className="m-0 text-slate-700">
+                  You don't need to update your inventory manually when you sell
+                  something. Every time you record a sale, KudiFlow
+                  automatically reduces the stock count for those items!
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+
+      case "security":
+        return (
+          <div className="prose prose-slate max-w-none">
+            <h1 className="text-4xl font-extrabold tracking-tight mb-2">
+              Account Security & Privacy
+            </h1>
+            <p className="text-xl text-slate-500 mb-10">
+              Your business data is yours. We keep it safe and private.
+            </p>
+
+            <h2 className="text-2xl font-bold mt-10 mb-4">
+              Who can see my sales?
+            </h2>
+            <p>
+              <strong>Only you.</strong> KudiFlow uses bank-grade encryption to
+              protect your records. Our team cannot see your sales, your
+              customers, or your profits.
+            </p>
+
+            <h2 className="text-2xl font-bold mt-10 mb-4">
+              What happens if my phone gets lost or stolen?
+            </h2>
+            <p>
+              Don't panic! Because KudiFlow automatically syncs your data to the
+              cloud whenever you are connected to the internet, your records are
+              perfectly safe.
+            </p>
+            <p>
+              Simply get a new phone, download KudiFlow, log in with your Phone
+              Number and Password, and all your inventory, sales, and debtors
+              will reappear instantly.
+            </p>
+
+            <div className="my-10 p-6 bg-amber-50 rounded-2xl border border-amber-100 flex gap-4">
+              <div className="shrink-0 mt-1">
+                <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
+                  <Lightbulb size={24} />
+                </div>
+              </div>
+              <div>
+                <h4 className="text-lg font-bold text-slate-900 m-0 mb-1">
+                  Never Share Your Password
+                </h4>
+                <p className="m-0 text-slate-700">
+                  If you have shop assistants, we will soon release a "Staff
+                  Mode" that allows them to record sales without seeing your
+                  total profits. Until then, keep your password secret.
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+
       default:
         return (
           <div className="prose prose-slate max-w-none">

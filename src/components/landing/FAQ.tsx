@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import type { Variants } from "framer-motion";
 import { Plus, Minus, MessageCircle } from "lucide-react";
 
 const faqs = [
@@ -41,6 +42,25 @@ const faqs = [
   },
 ];
 
+const containerVariants: Variants = {
+  hidden: {},
+  show: {
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2,
+    },
+  },
+};
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 300, damping: 24 },
+  },
+};
+
 export function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
@@ -69,19 +89,21 @@ export function FAQ() {
                 message away.
               </p>
 
-              <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 flex items-start gap-4">
-                <div className="w-12 h-12 bg-kudi-green/10 rounded-full flex items-center justify-center shrink-0">
+              <div className="bg-linear-to-br from-emerald-50/50 to-white rounded-3xl p-6 sm:p-8 border border-emerald-100 shadow-xl shadow-emerald-50/50 flex items-start gap-5 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-kudi-green/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none" />
+                <div className="relative w-14 h-14 bg-white rounded-2xl shadow-sm border border-emerald-50 flex items-center justify-center shrink-0">
+                  <div className="absolute inset-0 bg-kudi-green/20 rounded-2xl blur-md animate-pulse" />
                   <MessageCircle
-                    className="w-6 h-6 text-kudi-green"
+                    className="w-7 h-7 text-kudi-green relative z-10"
                     fill="currentColor"
-                    fillOpacity={0.2}
+                    fillOpacity={0.1}
                   />
                 </div>
-                <div>
-                  <h4 className="font-bold text-slate-900 mb-1">
+                <div className="relative z-10">
+                  <h4 className="font-bold text-slate-900 mb-2 text-lg">
                     Still have questions?
                   </h4>
-                  <p className="text-sm text-slate-500 mb-3 hover:text-slate-600 transition-colors">
+                  <p className="text-sm text-slate-500 mb-4 leading-relaxed group-hover:text-slate-600 transition-colors">
                     Can't find the answer you're looking for? Please chat to our
                     friendly team.
                   </p>
@@ -89,7 +111,7 @@ export function FAQ() {
                     href="https://wa.me/2340000000000"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center text-sm font-bold text-kudi-green hover:text-emerald-700 transition-colors"
+                    className="inline-flex items-center text-sm font-bold text-kudi-green hover:text-emerald-700 transition-colors group-hover:underline underline-offset-4"
                   >
                     Chat with us on WhatsApp &rarr;
                   </a>
@@ -100,19 +122,33 @@ export function FAQ() {
 
           {/* Right Column: The Accordion */}
           <div className="lg:col-span-7">
-            <div className="divide-y divide-slate-200/60 max-w-3xl border-y border-transparent">
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, margin: "-50px" }}
+              className="space-y-4 max-w-3xl"
+            >
               {faqs.map((faq, index) => {
                 const isOpen = openIndex === index;
 
                 return (
-                  <div key={faq.id} className="py-6">
+                  <motion.div
+                    key={faq.id}
+                    variants={itemVariants}
+                    className={`bg-white rounded-2xl border transition-all duration-300 overflow-hidden ${
+                      isOpen
+                        ? "border-kudi-green/30 shadow-xl shadow-kudi-green/5 ring-1 ring-kudi-green/20"
+                        : "border-slate-200/60 shadow-sm hover:border-slate-300 hover:shadow-md"
+                    }`}
+                  >
                     <button
                       onClick={() => toggleFAQ(index)}
-                      className="flex w-full items-start justify-between text-left focus:outline-none group"
+                      className="flex w-full items-start justify-between text-left focus:outline-none group p-6 sm:p-8"
                       aria-expanded={isOpen}
                     >
                       <h3
-                        className={`text-lg sm:text-xl font-bold pr-8 transition-colors duration-300 ${
+                        className={`text-lg font-bold pr-8 transition-colors duration-300 ${
                           isOpen
                             ? "text-kudi-green"
                             : "text-slate-900 group-hover:text-kudi-green/80"
@@ -146,18 +182,17 @@ export function FAQ() {
                           animate={{ height: "auto", opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}
                           transition={{ duration: 0.3, ease: "easeInOut" }}
-                          className="overflow-hidden"
                         >
-                          <p className="pb-2 pt-4 text-base leading-relaxed text-slate-500 pr-12">
+                          <p className="px-6 sm:px-8 pb-6 sm:pb-8 pt-0 text-base leading-relaxed text-slate-500">
                             {faq.answer}
                           </p>
                         </motion.div>
                       )}
                     </AnimatePresence>
-                  </div>
+                  </motion.div>
                 );
               })}
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>

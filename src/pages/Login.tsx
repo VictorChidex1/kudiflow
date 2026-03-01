@@ -34,17 +34,18 @@ export function Login() {
     try {
       await signInWithEmailAndPassword(auth, formData.email, formData.password);
       navigate("/dashboard");
-    } catch (err: any) {
-      console.error("Login error:", err);
+    } catch (err: unknown) {
+      const error = err as Error & { code?: string };
+      console.error("Login error:", error);
       // Map Firebase errors to user-friendly messages
       let message = "Failed to sign in. Please check your credentials.";
       if (
-        err.code === "auth/user-not-found" ||
-        err.code === "auth/wrong-password" ||
-        err.code === "auth/invalid-credential"
+        error.code === "auth/user-not-found" ||
+        error.code === "auth/wrong-password" ||
+        error.code === "auth/invalid-credential"
       ) {
         message = "Invalid email or password.";
-      } else if (err.code === "auth/too-many-requests") {
+      } else if (error.code === "auth/too-many-requests") {
         message = "Too many failed attempts. Try again later.";
       }
       setError(message);
@@ -60,9 +61,10 @@ export function Login() {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
       navigate("/dashboard");
-    } catch (err: any) {
-      console.error("Google login error:", err);
-      setError(err.message || "Failed to sign in with Google.");
+    } catch (err: unknown) {
+      const error = err as Error & { code?: string };
+      console.error("Google login error:", error);
+      setError(error.message || "Failed to sign in with Google.");
     } finally {
       setIsLoading(false);
     }

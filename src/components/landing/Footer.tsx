@@ -163,12 +163,12 @@ export function Footer() {
               </h4>
               <ul className="space-y-4">
                 <li>
-                  <a
-                    href="#"
+                  <Link
+                    to="/about"
                     className="text-slate-500 hover:text-kudi-green lg:hover:-translate-x-1 hover:translate-x-1 inline-block transition-transform duration-300"
                   >
                     About Us
-                  </a>
+                  </Link>
                 </li>
                 <li>
                   <a

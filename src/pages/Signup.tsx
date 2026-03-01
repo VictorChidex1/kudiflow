@@ -55,9 +55,10 @@ export function Signup() {
       // TODO: Save user profile info (like fullName) to Firestore later if needed.
 
       navigate("/dashboard"); // Redirect upon success
-    } catch (err: any) {
-      console.error("Signup error:", err);
-      setError(err.message || "Failed to create an account.");
+    } catch (err: unknown) {
+      const error = err as Error & { code?: string };
+      console.error("Signup error:", error);
+      setError(error.message || "Failed to create an account.");
     } finally {
       setIsLoading(false);
     }
@@ -70,9 +71,10 @@ export function Signup() {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
       navigate("/dashboard");
-    } catch (err: any) {
-      console.error("Google signup error:", err);
-      setError(err.message || "Failed to sign up with Google.");
+    } catch (err: unknown) {
+      const error = err as Error & { code?: string };
+      console.error("Google signup error:", error);
+      setError(error.message || "Failed to sign up with Google.");
     } finally {
       setIsLoading(false);
     }

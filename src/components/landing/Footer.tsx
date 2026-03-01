@@ -1,25 +1,33 @@
 import { Twitter, Instagram, Linkedin, MessageCircle } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-white pt-20 pb-10 border-t border-slate-200/60">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Top Grid Area */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-12 lg:gap-8 mb-16">
-          {/* Brand Column (Spans 2 columns on large screens) */}
-          <div className="lg:col-span-2">
-            <div className="flex items-center gap-2 mb-6">
-              <div className="w-10 h-10 bg-kudi-green rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-kudi-green/20">
-                K
+    <footer className="bg-white pt-20 pb-10 border-t border-slate-200/60 w-full overflow-hidden">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Top Flex Area */}
+        <div className="flex flex-col lg:flex-row lg:justify-between gap-12 lg:gap-8 mb-16">
+          {/* Brand Area */}
+          <div className="lg:max-w-sm">
+            <Link
+              to="/"
+              className="flex items-center group focus:outline-none focus-visible:ring-2 focus-visible:ring-kudi-green focus-visible:ring-offset-2 rounded-lg mb-6 w-fit"
+            >
+              <div className="relative flex h-10 w-10 sm:h-12 sm:w-12 lg:h-16 lg:w-16 items-center justify-center transition-transform duration-300 group-hover:scale-105 group-active:scale-95">
+                <img
+                  src="/assets/logo.webp"
+                  alt="KudiFlow Logo"
+                  className="h-full w-full object-contain drop-shadow-sm"
+                />
               </div>
-              <span className="text-2xl font-bold bg-clip-text text-transparent bg-linear-to-r from-slate-900 to-slate-700 tracking-tight">
-                Kudi<span className="text-kudi-green">Flow</span>
+              <span className="-ml-2 sm:-ml-3 lg:-ml-4 text-xl sm:text-2xl font-extrabold tracking-tight text-slate-800 transition-colors duration-300 group-hover:text-kudi-green">
+                KudiFlow
               </span>
-            </div>
+            </Link>
 
-            <p className="text-slate-500 mb-8 leading-relaxed max-w-sm">
+            <p className="text-slate-500 mb-8 leading-relaxed">
               Empowering Smart Market Vendors across Nigeria to track sales,
               manage inventory, and recover debts effortlessly.
             </p>
@@ -64,130 +72,130 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Spacer Column (Optional, or just let gap-8 handle it) */}
-          <div className="hidden lg:block lg:col-span-1"></div>
+          {/* Links Area */}
+          <div className="flex flex-col sm:flex-row sm:flex-wrap lg:flex-nowrap justify-between lg:justify-end gap-12 lg:gap-24 w-full lg:w-auto">
+            {/* Links Column 1: Product */}
+            <div className="w-full sm:w-auto flex flex-col">
+              <h4 className="font-bold text-slate-900 mb-6 tracking-wide">
+                Product
+              </h4>
+              <ul className="space-y-4">
+                <li>
+                  <a
+                    href="#features"
+                    className="text-slate-500 hover:text-kudi-green hover:translate-x-1 inline-block transition-transform duration-300"
+                  >
+                    Features
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#pricing"
+                    className="text-slate-500 hover:text-kudi-green hover:translate-x-1 inline-block transition-transform duration-300"
+                  >
+                    Pricing
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    className="text-slate-500 hover:text-kudi-green hover:translate-x-1 inline-block transition-transform duration-300"
+                  >
+                    Security
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    className="text-slate-500 hover:text-kudi-green hover:translate-x-1 inline-block transition-transform duration-300"
+                  >
+                    Offline Mode
+                  </a>
+                </li>
+              </ul>
+            </div>
 
-          {/* Links Column 1: Product */}
-          <div className="lg:col-span-1">
-            <h4 className="font-bold text-slate-900 mb-6 tracking-wide">
-              Product
-            </h4>
-            <ul className="space-y-4">
-              <li>
-                <a
-                  href="#features"
-                  className="text-slate-500 hover:text-kudi-green hover:translate-x-1 inline-block transition-all duration-300"
-                >
-                  Features
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#pricing"
-                  className="text-slate-500 hover:text-kudi-green hover:translate-x-1 inline-block transition-all duration-300"
-                >
-                  Pricing
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-slate-500 hover:text-kudi-green hover:translate-x-1 inline-block transition-all duration-300"
-                >
-                  Security
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-slate-500 hover:text-kudi-green hover:translate-x-1 inline-block transition-all duration-300"
-                >
-                  Offline Mode
-                </a>
-              </li>
-            </ul>
-          </div>
+            {/* Links Column 2: Resources */}
+            <div className="w-full sm:w-auto flex flex-col">
+              <h4 className="font-bold text-slate-900 mb-6 tracking-wide">
+                Resources
+              </h4>
+              <ul className="space-y-4">
+                <li>
+                  <a
+                    href="#faqs"
+                    className="text-slate-500 hover:text-kudi-green hover:translate-x-1 inline-block transition-transform duration-300"
+                  >
+                    Help Center / FAQs
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    className="text-slate-500 hover:text-kudi-green hover:translate-x-1 inline-block transition-transform duration-300"
+                  >
+                    Video Tutorials
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    className="text-slate-500 hover:text-kudi-green hover:translate-x-1 inline-block transition-transform duration-300"
+                  >
+                    Blog
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    className="text-slate-500 hover:text-kudi-green hover:translate-x-1 inline-block transition-transform duration-300"
+                  >
+                    Merchant Stories
+                  </a>
+                </li>
+              </ul>
+            </div>
 
-          {/* Links Column 2: Resources */}
-          <div className="lg:col-span-1">
-            <h4 className="font-bold text-slate-900 mb-6 tracking-wide">
-              Resources
-            </h4>
-            <ul className="space-y-4">
-              <li>
-                <a
-                  href="#faqs"
-                  className="text-slate-500 hover:text-kudi-green hover:translate-x-1 inline-block transition-all duration-300"
-                >
-                  Help Center / FAQs
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-slate-500 hover:text-kudi-green hover:translate-x-1 inline-block transition-all duration-300"
-                >
-                  Video Tutorials
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-slate-500 hover:text-kudi-green hover:translate-x-1 inline-block transition-all duration-300"
-                >
-                  Blog
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-slate-500 hover:text-kudi-green hover:translate-x-1 inline-block transition-all duration-300"
-                >
-                  Merchant Stories
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* Links Column 3: Company */}
-          <div className="lg:col-span-1">
-            <h4 className="font-bold text-slate-900 mb-6 tracking-wide">
-              Company
-            </h4>
-            <ul className="space-y-4">
-              <li>
-                <a
-                  href="#"
-                  className="text-slate-500 hover:text-kudi-green hover:translate-x-1 inline-block transition-all duration-300"
-                >
-                  About Us
-                </a>
-              </li>
-              <li>
-                <a
-                  href="https://wa.me/2340000000000"
-                  className="text-slate-500 hover:text-kudi-green hover:translate-x-1 inline-block transition-all duration-300"
-                >
-                  Contact Sales
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-slate-500 hover:text-kudi-green hover:translate-x-1 inline-block transition-all duration-300"
-                >
-                  Privacy Policy
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="text-slate-500 hover:text-kudi-green hover:translate-x-1 inline-block transition-all duration-300"
-                >
-                  Terms of Service
-                </a>
-              </li>
-            </ul>
+            {/* Links Column 3: Company (Right Aligned on Desktop) */}
+            <div className="w-full sm:w-auto flex flex-col lg:items-end lg:text-right">
+              <h4 className="font-bold text-slate-900 mb-6 tracking-wide">
+                Company
+              </h4>
+              <ul className="space-y-4">
+                <li>
+                  <a
+                    href="#"
+                    className="text-slate-500 hover:text-kudi-green lg:hover:-translate-x-1 hover:translate-x-1 inline-block transition-transform duration-300"
+                  >
+                    About Us
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://wa.me/2340000000000"
+                    className="text-slate-500 hover:text-kudi-green lg:hover:-translate-x-1 hover:translate-x-1 inline-block transition-transform duration-300"
+                  >
+                    Contact Sales
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    className="text-slate-500 hover:text-kudi-green lg:hover:-translate-x-1 hover:translate-x-1 inline-block transition-transform duration-300"
+                  >
+                    Privacy Policy
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    className="text-slate-500 hover:text-kudi-green lg:hover:-translate-x-1 hover:translate-x-1 inline-block transition-transform duration-300"
+                  >
+                    Terms of Service
+                  </a>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
 

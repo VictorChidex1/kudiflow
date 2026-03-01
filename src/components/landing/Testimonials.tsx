@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
 import { Star, Quote } from "lucide-react";
 
-// Mock Testimonial Data focused on Nigerian MSMEs
 const testimonials = [
   {
     id: 1,

@@ -4,6 +4,7 @@ import { Features } from "../components/landing/Features";
 import { HowItWorks } from "../components/landing/HowItWorks";
 import { Pricing } from "../components/landing/Pricing";
 import { Testimonials } from "../components/landing/Testimonials";
+import { FAQ } from "../components/landing/FAQ";
 import { ScrollToTop } from "../components/ui/ScrollToTop";
 
 export default function LandingPage() {
@@ -17,6 +18,7 @@ export default function LandingPage() {
         <HowItWorks />
         <Pricing />
         <Testimonials />
+        <FAQ />
       </main>
 
       <ScrollToTop />

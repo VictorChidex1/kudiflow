@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
 import type { Variants } from "framer-motion";
 import { Check, X } from "lucide-react";
 
@@ -18,12 +18,40 @@ const cardVariants: Variants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, ease: "easeOut" },
+    transition: { type: "spring", stiffness: 100, damping: 20 },
   },
+};
+
+const featureListVariants: Variants = {
+  visible: {
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.3,
+    },
+  },
+};
+
+const featureItemVariants: Variants = {
+  hidden: { opacity: 0, x: -10 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.3 } },
 };
 
 export function Pricing() {
   const [isYearly, setIsYearly] = useState(false);
+
+  // Mouse coordinate tracking for the Pro card interactive glow
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  function handleMouseMove({
+    currentTarget,
+    clientX,
+    clientY,
+  }: React.MouseEvent<HTMLDivElement>) {
+    const { left, top } = currentTarget.getBoundingClientRect();
+    mouseX.set(clientX - left);
+    mouseY.set(clientY - top);
+  }
 
   return (
     <section id="pricing" className="py-24 bg-kudi-bg relative overflow-hidden">
@@ -110,7 +138,12 @@ export function Pricing() {
           {/* Starter (Free) Card */}
           <motion.div
             variants={cardVariants}
-            className="bg-white/40 backdrop-blur-3xl rounded-3xl p-8 lg:p-10 border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)] hover:shadow-lg hover:border-white/80 transition-all duration-300 relative flex flex-col"
+            whileHover={{
+              y: -8,
+              scale: 1.01,
+              transition: { type: "spring", stiffness: 400, damping: 25 },
+            }}
+            className="bg-white/40 backdrop-blur-3xl rounded-3xl p-8 lg:p-10 border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] hover:border-white/80 transition-shadow duration-300 relative flex flex-col"
           >
             <div className="mb-8">
               <h3 className="text-2xl font-bold text-kudi-dark">Starter</h3>
@@ -128,17 +161,24 @@ export function Pricing() {
               </span>
             </div>
 
-            <ul className="space-y-4 mb-10 flex-1">
+            <motion.ul
+              variants={featureListVariants}
+              className="space-y-4 mb-10 flex-1"
+            >
               {[
                 "Basic offline sales ledger",
                 "Track up to 50 inventory items",
                 "15 Auto-WhatsApp reminders per month",
                 "7-day data sync history",
               ].map((feature, i) => (
-                <li key={`inc-${i}`} className="flex gap-3 text-gray-600">
+                <motion.li
+                  variants={featureItemVariants}
+                  key={`inc-${i}`}
+                  className="flex gap-3 text-gray-600"
+                >
                   <Check className="h-5 w-5 text-kudi-green shrink-0" />
                   <span>{feature}</span>
-                </li>
+                </motion.li>
               ))}
 
               <li className="my-6 border-t border-gray-100" />
@@ -149,15 +189,16 @@ export function Pricing() {
                 "Export reports to Excel/PDF",
                 "Priority WhatsApp Support",
               ].map((feature, i) => (
-                <li
+                <motion.li
+                  variants={featureItemVariants}
                   key={`exc-${i}`}
                   className="flex gap-3 text-gray-400 opacity-60"
                 >
                   <X className="h-5 w-5 text-gray-300 shrink-0" />
                   <span>{feature}</span>
-                </li>
+                </motion.li>
               ))}
-            </ul>
+            </motion.ul>
 
             <Link
               to="/signup"
@@ -170,10 +211,31 @@ export function Pricing() {
           {/* Pro Card (Hero) */}
           <motion.div
             variants={cardVariants}
-            className="bg-white rounded-3xl p-8 lg:p-10 border-2 border-kudi-green/40 shadow-[0_20px_40px_rgba(16,185,129,0.15)] hover:shadow-[0_25px_50px_rgba(16,185,129,0.25)] relative flex flex-col md:-mt-4 md:mb-4 lg:scale-105 z-10 transition-all duration-500"
+            whileHover={{
+              y: -8,
+              scale: 1.05,
+              transition: { type: "spring", stiffness: 400, damping: 25 },
+            }}
+            onMouseMove={handleMouseMove}
+            className="bg-white rounded-3xl p-8 lg:p-10 border-2 border-kudi-green/40 shadow-[0_20px_40px_rgba(16,185,129,0.15)] hover:shadow-[0_30px_60px_rgba(16,185,129,0.3)] relative flex flex-col md:-mt-4 md:mb-4 lg:scale-105 z-10 transition-shadow duration-500 group"
           >
-            {/* Ambient Glow immediately behind the Pro card */}
-            <div className="absolute inset-0 bg-linear-to-b from-kudi-green/5 to-transparent rounded-3xl -z-10" />
+            {/* Interactive Spotlight Glow (Follows Mouse) */}
+            <motion.div
+              className="pointer-events-none absolute -inset-px rounded-3xl opacity-0 transition duration-300 group-hover:opacity-100"
+              style={{
+                background: useMotionTemplate`
+                  radial-gradient(
+                    350px circle at ${mouseX}px ${mouseY}px,
+                    rgba(16, 185, 129, 0.15),
+                    transparent 80%
+                  )
+                `,
+              }}
+            />
+
+            {/* Ambient Vertical Internal Glow */}
+            <div className="absolute inset-x-0 top-0 h-full bg-linear-to-b from-kudi-green/5 via-transparent to-transparent rounded-3xl -z-10 pointer-events-none" />
+
             <div className="absolute top-[-50px] right-[-50px] w-48 h-48 bg-emerald-400/20 blur-[60px] rounded-full pointer-events-none animate-pulse" />
 
             <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
@@ -207,7 +269,10 @@ export function Pricing() {
               )}
             </div>
 
-            <ul className="space-y-4 mb-10 flex-1">
+            <motion.ul
+              variants={featureListVariants}
+              className="space-y-4 mb-10 flex-1 relative z-10"
+            >
               {[
                 "Everything in Starter, plus:",
                 "Unlimited offline data sync history",
@@ -216,7 +281,11 @@ export function Pricing() {
                 "Export reports to Excel/PDF",
                 "Priority WhatsApp Support",
               ].map((feature, i) => (
-                <li key={i} className="flex gap-3 text-gray-600 font-medium">
+                <motion.li
+                  variants={featureItemVariants}
+                  key={i}
+                  className="flex gap-3 text-gray-600 font-medium"
+                >
                   {i === 0 ? (
                     <div className="w-5" /> // Indent placeholder for the "Everything in Starter" line
                   ) : (
@@ -225,9 +294,9 @@ export function Pricing() {
                   <span className={i === 0 ? "text-kudi-dark" : ""}>
                     {feature}
                   </span>
-                </li>
+                </motion.li>
               ))}
-            </ul>
+            </motion.ul>
 
             <Link
               to="/signup"

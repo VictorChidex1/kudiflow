@@ -4,11 +4,23 @@ import { Footer } from "../components/landing/Footer";
 import { DocsSidebar, type DocCategory } from "../components/docs/DocsSidebar";
 import { DocsContent } from "../components/docs/DocsContent";
 import { Menu, ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 
 export default function DocsPage() {
-  const [activeCategory, setActiveCategory] =
-    useState<DocCategory>("getting-started");
+  const [searchParams] = useSearchParams();
+  const categoryParam = searchParams.get("category") as DocCategory | null;
+
+  const [activeCategory, setActiveCategory] = useState<DocCategory>(
+    categoryParam || "getting-started"
+  );
+
+  // Sync state if the URL query parameter changes while on the page
+  useEffect(() => {
+    if (categoryParam) {
+      // eslint-disable-next-line
+      setActiveCategory(categoryParam);
+    }
+  }, [categoryParam]);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   // Scroll to top when category changes

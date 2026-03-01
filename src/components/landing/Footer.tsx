@@ -97,20 +97,20 @@ export function Footer() {
                   </a>
                 </li>
                 <li>
-                  <a
-                    href="#"
+                  <Link
+                    to="/docs?category=security"
                     className="text-slate-500 hover:text-kudi-green hover:translate-x-1 inline-block transition-transform duration-300"
                   >
                     Security
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#"
+                  <Link
+                    to="/docs?category=offline"
                     className="text-slate-500 hover:text-kudi-green hover:translate-x-1 inline-block transition-transform duration-300"
                   >
                     Offline Mode
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>

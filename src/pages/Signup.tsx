@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
+import SEO from "../components/SEO";
 import { auth } from "../lib/firebase";
 import {
   createUserWithEmailAndPassword,
@@ -82,6 +83,10 @@ export function Signup() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative">
+      <SEO
+        title="Create Account"
+        description="Create your free KudiFlow account. Stop using paper ledgers and start tracking your business securely offline."
+      />
       <div className="absolute top-4 left-4 sm:top-8 sm:left-8">
         <Link
           to="/"

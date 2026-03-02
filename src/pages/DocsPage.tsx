@@ -5,6 +5,7 @@ import { DocsSidebar, type DocCategory } from "../components/docs/DocsSidebar";
 import { DocsContent } from "../components/docs/DocsContent";
 import { Menu, ArrowLeft } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
+import SEO from "../components/SEO";
 
 export default function DocsPage() {
   const [searchParams] = useSearchParams();
@@ -30,6 +31,10 @@ export default function DocsPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col relative overflow-hidden">
+      <SEO
+        title="Help Center & Documentation"
+        description="Learn how to make the most of KudiFlow. Find tutorials, setup guides, and best practices for managing your shop."
+      />
       {/* Ambient Glowing Background */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
         <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-kudi-green/10 rounded-full mix-blend-multiply blur-[120px] animate-blob" />

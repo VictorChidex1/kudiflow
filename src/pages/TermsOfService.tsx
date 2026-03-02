@@ -14,6 +14,7 @@ import {
   Mail,
   FileBadge,
 } from "lucide-react";
+import SEO from "../components/SEO";
 
 // Helper component for triggering animations on scroll
 const ScrollReveal = ({
@@ -89,6 +90,10 @@ export default function TermsOfService() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans selection:bg-kudi-green/30">
+      <SEO
+        title="Terms of Service"
+        description="The ground rules for using KudiFlow. Transparent, fair, and designed to protect both your business and ours."
+      />
       <LandingNavbar />
 
       <main className="grow pt-20">

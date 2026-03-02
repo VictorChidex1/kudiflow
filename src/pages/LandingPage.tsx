@@ -8,10 +8,12 @@ import { FAQ } from "../components/landing/FAQ";
 import { CTA } from "../components/landing/CTA";
 import { Footer } from "../components/landing/Footer";
 import { ScrollToTop } from "../components/ui/ScrollToTop";
+import SEO from "../components/SEO";
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-kudi-bg flex flex-col">
+      <SEO title="Home" />
       <LandingNavbar />
 
       <main className="flex-1 flex flex-col">

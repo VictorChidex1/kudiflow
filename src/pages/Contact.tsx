@@ -18,6 +18,7 @@ import {
   ArrowRight,
   ChevronDown,
 } from "lucide-react";
+import SEO from "../components/SEO";
 
 // The dynamic FAQ accordion component
 const FAQItem = ({
@@ -171,6 +172,10 @@ function ContactPageContent() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans selection:bg-emerald-200 selection:text-emerald-900">
+      <SEO
+        title="Contact Sales & Support"
+        description="Have questions about KudiFlow? Need a demo? Our dedicated support team in Lagos is ready to help you grow your business."
+      />
       <LandingNavbar />
 
       <main className="flex-1 w-full flex flex-col items-center">

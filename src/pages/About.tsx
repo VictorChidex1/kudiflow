@@ -16,6 +16,7 @@ import {
   MessageCircleHeart,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import SEO from "../components/SEO";
 
 export default function About() {
   const coreValues = [
@@ -41,6 +42,10 @@ export default function About() {
 
   return (
     <div className="min-h-screen bg-kudi-bg flex flex-col relative overflow-hidden">
+      <SEO
+        title="About Us"
+        description="Learn how KudiFlow's offline-first technology is empowering African merchants to ditch paper ledgers and track sales securely."
+      />
       {/* Ambient Glowing Background */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
         <div className="absolute top-[-20%] left-[20%] w-[600px] h-[600px] bg-kudi-green/10 rounded-full mix-blend-multiply blur-[120px] animate-blob" />

@@ -15,6 +15,7 @@ import {
   Share2,
   FileText,
 } from "lucide-react";
+import SEO from "../components/SEO";
 
 // Helper component for triggering animations on scroll
 const ScrollReveal = ({
@@ -89,6 +90,10 @@ export default function PrivacyPolicy() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans selection:bg-kudi-green/30">
+      <SEO
+        title="Privacy Policy"
+        description="We treat your financial data with the same security standards as a bank. Read our full privacy and data protection measures."
+      />
       <LandingNavbar />
 
       <main className="grow pt-20">

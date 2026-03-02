@@ -1,7 +1,20 @@
 import { LandingNavbar } from "../components/landing/Navbar";
 import { Footer } from "../components/landing/Footer";
 import { motion } from "framer-motion";
-import { Shield, Zap, WifiOff, Users, ArrowRight, Quote } from "lucide-react";
+import {
+  Shield,
+  Zap,
+  WifiOff,
+  Users,
+  ArrowRight,
+  Quote,
+  Sun,
+  Sunrise,
+  Moon,
+  CheckCircle2,
+  Lock,
+  MessageCircleHeart,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function About() {
@@ -149,7 +162,217 @@ export default function About() {
             </div>
           </section>
 
-          {/* Core Values */}
+          {/* A Day in the Life (The Transformation Journey) */}
+          <section className="w-full bg-white py-24 border-b border-slate-200/60 overflow-hidden">
+            <div className="max-w-[1000px] mx-auto px-6 sm:px-12 lg:px-20">
+              <div className="text-center mb-16">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 border border-emerald-100 mb-6 mx-auto">
+                  <span className="text-sm font-bold text-kudi-green uppercase tracking-wider">
+                    How it works
+                  </span>
+                </div>
+                <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 mb-6">
+                  A Day in the Life of a KudiFlow Vendor
+                </h2>
+                <p className="text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
+                  We didn't build a complex accounting tool. We built a daily
+                  companion that perfectly matches the rhythm of a bustling
+                  African market.
+                </p>
+              </div>
+
+              <div className="relative max-w-3xl mx-auto">
+                {/* Vertical Dashed Line connecting nodes */}
+                <div className="absolute left-[27px] sm:left-[39px] top-6 bottom-16 w-0.5 border-l-2 border-dashed border-emerald-200" />
+
+                <div className="space-y-16">
+                  {/* Phase 1: Morning */}
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true, margin: "-100px" }}
+                    transition={{ duration: 0.6 }}
+                    className="relative flex gap-6 sm:gap-10"
+                  >
+                    {/* The Node */}
+                    <div className="relative z-10 w-14 h-14 sm:w-20 sm:h-20 shrink-0 bg-white border-[3px] border-emerald-100 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.1)]">
+                      <div className="w-10 h-10 sm:w-16 sm:h-16 bg-emerald-50 rounded-full flex items-center justify-center">
+                        <Sunrise className="w-6 h-6 sm:w-8 sm:h-8 text-kudi-green" />
+                      </div>
+                    </div>
+                    {/* The Content */}
+                    <div className="pt-2 sm:pt-4">
+                      <h3 className="text-2xl font-bold text-slate-900 mb-2">
+                        Morning (8:00 AM)
+                      </h3>
+                      <h4 className="text-lg font-semibold text-kudi-green mb-3">
+                        Open shop with confidence.
+                      </h4>
+                      <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
+                        Before the first customer arrives, you check KudiFlow on
+                        your phone in exactly 2 seconds. You instantly know
+                        which items need restocking today and who promised to
+                        pay their debts this morning. No flipping through messy
+                        pages.
+                      </p>
+                    </div>
+                  </motion.div>
+
+                  {/* Phase 2: Afternoon */}
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true, margin: "-100px" }}
+                    transition={{ duration: 0.6, delay: 0.2 }}
+                    className="relative flex gap-6 sm:gap-10"
+                  >
+                    {/* The Node */}
+                    <div className="relative z-10 w-14 h-14 sm:w-20 sm:h-20 shrink-0 bg-white border-[3px] border-emerald-100 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.1)]">
+                      <div className="w-10 h-10 sm:w-16 sm:h-16 bg-emerald-50 rounded-full flex items-center justify-center">
+                        <Sun className="w-6 h-6 sm:w-8 sm:h-8 text-kudi-green" />
+                      </div>
+                    </div>
+                    {/* The Content */}
+                    <div className="pt-2 sm:pt-4">
+                      <h3 className="text-2xl font-bold text-slate-900 mb-2">
+                        Afternoon (1:30 PM)
+                      </h3>
+                      <h4 className="text-lg font-semibold text-kudi-green mb-3">
+                        The market rush.
+                      </h4>
+                      <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
+                        Five customers are shouting your name at once. Your MTN
+                        network completely drops. It doesn't matter. You log 50
+                        different sales offline at lightning speed. The moment
+                        your connection returns later, KudiFlow silently syncs
+                        everything to the cloud.
+                      </p>
+                    </div>
+                  </motion.div>
+
+                  {/* Phase 3: Evening */}
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true, margin: "-100px" }}
+                    transition={{ duration: 0.6, delay: 0.4 }}
+                    className="relative flex gap-6 sm:gap-10"
+                  >
+                    {/* The Node */}
+                    <div className="relative z-10 w-14 h-14 sm:w-20 sm:h-20 shrink-0 bg-white border-[3px] border-emerald-100 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.1)]">
+                      <div className="w-10 h-10 sm:w-16 sm:h-16 bg-emerald-50 rounded-full flex items-center justify-center">
+                        <Moon className="w-6 h-6 sm:w-8 sm:h-8 text-kudi-green" />
+                      </div>
+                    </div>
+                    {/* The Content */}
+                    <div className="pt-2 sm:pt-4">
+                      <h3 className="text-2xl font-bold text-slate-900 mb-2">
+                        Evening (6:00 PM)
+                      </h3>
+                      <h4 className="text-lg font-semibold text-kudi-green mb-3">
+                        Zero mental math.
+                      </h4>
+                      <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
+                        Closing time. Instead of spending 45 minutes punching a
+                        calculator and arguing over a missing ₦2,000, you tap
+                        one button. KudiFlow instantly shows your total sales,
+                        your exact profit for the day, and everyone who
+                        collected goods on credit. You go home early.
+                      </p>
+                    </div>
+                  </motion.div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Our Promise to You (The Vendor Manifesto) */}
+          <section className="w-full bg-slate-900 border-y border-slate-800 py-24 relative overflow-hidden">
+            {/* Ambient Background Glows */}
+            <div className="absolute inset-0 z-0 opacity-20 bg-[radial-gradient(#334155_1px,transparent_1px)] bg-size-[24px_24px]"></div>
+            <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-kudi-green/10 rounded-full blur-[150px] -translate-y-1/2 translate-x-1/2 mix-blend-screen" />
+            <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[120px] translate-y-1/2 -translate-x-1/2 mix-blend-screen" />
+
+            <div className="max-w-[1200px] mx-auto px-6 sm:px-12 lg:px-20 relative z-10">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.6 }}
+                className="text-center mb-16"
+              >
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-800/80 backdrop-blur-md border border-slate-700/50 mb-6 mx-auto shadow-lg">
+                  <span className="text-sm font-bold text-slate-300 uppercase tracking-wider relative z-10">
+                    The Vendor Manifesto
+                  </span>
+                </div>
+                <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+                  Our Promise to You
+                </h2>
+                <p className="text-lg text-slate-400 mt-6 max-w-2xl mx-auto leading-relaxed">
+                  We know that trusting software with your business takes a leap
+                  of faith. That is why we operate on three unbreakable rules.
+                </p>
+              </motion.div>
+
+              <motion.div
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-50px" }}
+                variants={{
+                  hidden: {},
+                  visible: { transition: { staggerChildren: 0.2 } },
+                }}
+                className="grid grid-cols-1 md:grid-cols-3 gap-8"
+              >
+                {[
+                  {
+                    icon: CheckCircle2,
+                    title: "No Hidden Fees",
+                    desc: "What you see on the pricing page is exactly what you pay. We will never lock your own data behind a surprise paywall or charge you random percentages of your sales.",
+                  },
+                  {
+                    icon: Lock,
+                    title: "Total Data Privacy",
+                    desc: "Your suppliers, your customers, and your daily profits are highly confidential. We use bank-level encryption. We do not sell your lists to competitors or third parties. Period.",
+                  },
+                  {
+                    icon: MessageCircleHeart,
+                    title: "Always-On Human Support",
+                    desc: "When you run into an issue in the middle of a busy market, you don't have time to email automated robots. You chat with a real human on our WhatsApp line, and we fix it instantly.",
+                  },
+                ].map((promise, index) => (
+                  <motion.div
+                    key={index}
+                    variants={{
+                      hidden: { opacity: 0, y: 30 },
+                      visible: {
+                        opacity: 1,
+                        y: 0,
+                        transition: { duration: 0.6, ease: "easeOut" },
+                      },
+                    }}
+                    className="group relative bg-slate-800/40 backdrop-blur-lg border border-white/5 rounded-3xl p-8 lg:p-10 shadow-xl shadow-slate-900/50 hover:-translate-y-2 transition-all duration-300 hover:border-emerald-500/30 hover:shadow-[0_0_30px_rgba(16,185,129,0.15)] overflow-hidden"
+                  >
+                    {/* Hover Glow Behind Card Content */}
+                    <div className="absolute inset-0 bg-linear-to-b from-kudi-green/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+
+                    <div className="relative z-10 flex flex-col items-center sm:items-start text-center sm:text-left">
+                      <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 backdrop-blur-md shadow-inner flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300">
+                        <promise.icon className="w-8 h-8 text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                      </div>
+                      <h3 className="text-xl font-bold text-white mb-4 tracking-tight group-hover:text-emerald-300 transition-colors duration-300">
+                        {promise.title}
+                      </h3>
+                      <p className="text-slate-400 leading-relaxed text-sm sm:text-base group-hover:text-slate-300 transition-colors duration-300">
+                        {promise.desc}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))}
+              </motion.div>
+            </div>
+          </section>
           <section className="w-full max-w-[1200px] mx-auto px-6 sm:px-12 lg:px-20 py-24">
             <div className="text-center mb-16">
               <h2 className="text-3xl font-extrabold tracking-tight text-slate-900">
@@ -196,7 +419,10 @@ export default function About() {
                   {/* Heavy glowing backdrop */}
                   <div className="absolute inset-0 bg-kudi-green/40 blur-2xl rounded-full scale-90" />
 
-                  <div className="w-56 h-56 sm:w-64 sm:h-64 rounded-full overflow-hidden border-4 border-slate-800 relative z-10 shadow-[0_0_60px_rgba(16,185,129,0.3)] bg-slate-800">
+                  <div
+                    className="w-56 h-56 sm:w-64 sm:h-64 rounded-full overflow-hidden border-4 border-slate-800 relative z-10 shadow-[0_0_60px_rgba(16,185,129,0.3)]
+                   bg-slate-800"
+                  >
                     <img
                       src="/assets/profile-picture.webp"
                       alt="Agbaho Chidera Victor - KudiFlow CEO"

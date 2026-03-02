@@ -171,12 +171,12 @@ export function Footer() {
                   </Link>
                 </li>
                 <li>
-                  <a
-                    href="https://wa.me/2340000000000"
+                  <Link
+                    to="/contact"
                     className="text-slate-500 hover:text-kudi-green lg:hover:-translate-x-1 hover:translate-x-1 inline-block transition-transform duration-300"
                   >
                     Contact Sales
-                  </a>
+                  </Link>
                 </li>
                 <li>
                   <a

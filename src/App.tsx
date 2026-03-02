@@ -5,6 +5,7 @@ import { Signup } from "./pages/Signup";
 import DocsPage from "./pages/DocsPage";
 import ComingSoon from "./pages/ComingSoon";
 import About from "./pages/About";
+import Contact from "./pages/Contact";
 function App() {
   return (
     <BrowserRouter>
@@ -15,6 +16,7 @@ function App() {
         <Route path="/docs" element={<DocsPage />} />
         <Route path="/coming-soon" element={<ComingSoon />} />
         <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
         {/* We will add /dashboard/* later */}
       </Routes>
     </BrowserRouter>

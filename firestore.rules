@@ -1,0 +1,37 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Default Rule: Reject all operations globally (Zero-Trust)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Contact Form Anti-Spam Governance Configuration
+    match /contact_messages/{msgId} {
+      
+      // Rule 1: Anyone can create a message (web form), but nobody can read, update, or delete.
+      allow read, update, delete: if false;
+      
+      // Rule 2: Strict Schema Validation for creation
+      allow create: if 
+        // A) Required Fields Check: It must exactly match these keys
+        request.resource.data.keys().hasAll(['fullName', 'contact', 'storeName', 'message', 'createdAt', 'status', 'recaptchaToken']) &&
+        request.resource.data.keys().hasOnly(['fullName', 'contact', 'storeName', 'message', 'createdAt', 'status', 'recaptchaToken']) &&
+        
+        // B) Data Type & Length Validation (Combats massive string injection/bots)
+        request.resource.data.fullName is string && request.resource.data.fullName.size() <= 100 &&
+        request.resource.data.contact is string && request.resource.data.contact.size() <= 100 &&
+        request.resource.data.storeName is string && request.resource.data.storeName.size() <= 100 &&
+        request.resource.data.message is string && request.resource.data.message.size() <= 500 &&
+        request.resource.data.recaptchaToken is string &&
+        
+        // C) Backend System Fields
+        request.resource.data.status == 'new' && 
+        request.resource.data.createdAt == request.time; 
+        // (Forces exactly the server timestamp, prevents malicious timestamp manipulation)
+    }
+
+  }
+}

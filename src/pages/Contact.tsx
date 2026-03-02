@@ -2,6 +2,10 @@ import { useState } from "react";
 import { LandingNavbar } from "../components/landing/Navbar";
 import { Footer } from "../components/landing/Footer";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  GoogleReCaptchaProvider,
+  useGoogleReCaptcha,
+} from "react-google-recaptcha-v3";
 import { db } from "../lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import {
@@ -15,6 +19,30 @@ import {
 } from "lucide-react";
 
 export default function Contact() {
+  const recaptchaKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY as string;
+
+  if (!recaptchaKey) {
+    console.warn(
+      "Missing VITE_RECAPTCHA_SITE_KEY. Contact form reCAPTCHA is disabled."
+    );
+  }
+
+  return (
+    <GoogleReCaptchaProvider
+      reCaptchaKey={recaptchaKey || "dummy_key_to_prevent_crash_when_missing"}
+      scriptProps={{
+        async: true,
+        defer: true,
+        appendTo: "body",
+      }}
+    >
+      <ContactPageContent />
+    </GoogleReCaptchaProvider>
+  );
+}
+
+function ContactPageContent() {
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [formData, setFormData] = useState({
@@ -26,14 +54,24 @@ export default function Contact() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!executeRecaptcha) {
+      console.warn("Execute recaptcha not yet available");
+    }
+
     setIsSubmitting(true);
 
     try {
-      // Save data to Firestore 'contact_messages' collection
+      let recaptchaToken = "token_unavailable";
+      if (executeRecaptcha) {
+        recaptchaToken = await executeRecaptcha("contact_form_submit");
+      }
+
       await addDoc(collection(db, "contact_messages"), {
         ...formData,
+        recaptchaToken,
         createdAt: serverTimestamp(),
-        status: "new", // for potential admin dashboard filtering
+        status: "new",
       });
 
       setIsSuccess(true);
@@ -212,6 +250,7 @@ export default function Contact() {
                         value={formData.fullName}
                         onChange={handleInputChange}
                         required
+                        maxLength={100}
                         className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-base rounded-xl focus:ring-2 focus:ring-kudi-green focus:border-kudi-green block px-4 py-3.5 transition-shadow"
                         placeholder="John Doe"
                       />
@@ -229,6 +268,7 @@ export default function Contact() {
                         value={formData.contact}
                         onChange={handleInputChange}
                         required
+                        maxLength={100}
                         className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-base rounded-xl focus:ring-2 focus:ring-kudi-green focus:border-kudi-green block px-4 py-3.5 transition-shadow"
                         placeholder="+234 800 000 0000"
                       />
@@ -250,24 +290,37 @@ export default function Contact() {
                       id="storeName"
                       value={formData.storeName}
                       onChange={handleInputChange}
+                      maxLength={100}
                       className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-base rounded-xl focus:ring-2 focus:ring-kudi-green focus:border-kudi-green block px-4 py-3.5 transition-shadow"
                       placeholder="e.g. Iya Basira Provisions"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <label
-                      htmlFor="message"
-                      className="block text-sm font-bold text-slate-700"
-                    >
-                      How can we help?
-                    </label>
+                    <div className="flex items-center justify-between mb-2">
+                      <label
+                        htmlFor="message"
+                        className="block text-sm font-bold text-slate-700"
+                      >
+                        How can we help?
+                      </label>
+                      <span
+                        className={`text-xs font-bold ${
+                          formData.message.length > 650
+                            ? "text-rose-500"
+                            : "text-slate-400"
+                        }`}
+                      >
+                        {formData.message.length} / 700
+                      </span>
+                    </div>
                     <textarea
                       id="message"
                       value={formData.message}
                       onChange={handleInputChange}
                       rows={4}
                       required
+                      maxLength={500}
                       className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-base rounded-xl focus:ring-2 focus:ring-kudi-green focus:border-kudi-green block px-4 py-3.5 transition-shadow resize-none"
                       placeholder="Tell us what you need..."
                     ></textarea>

@@ -9,6 +9,7 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
+import { ScrollToTop } from "./components/ui/ScrollToTop";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
           <Route path="/terms-of-service" element={<TermsOfService />} />
           {/* We will add /dashboard/* later */}
         </Routes>
+        <ScrollToTop />
       </BrowserRouter>
     </HelmetProvider>
   );

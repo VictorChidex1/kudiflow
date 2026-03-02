@@ -179,12 +179,12 @@ export function Footer() {
                   </Link>
                 </li>
                 <li>
-                  <a
-                    href="#"
+                  <Link
+                    to="/privacy-policy"
                     className="text-slate-500 hover:text-kudi-green lg:hover:-translate-x-1 hover:translate-x-1 inline-block transition-transform duration-300"
                   >
                     Privacy Policy
-                  </a>
+                  </Link>
                 </li>
                 <li>
                   <a

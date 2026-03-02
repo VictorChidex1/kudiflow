@@ -14,7 +14,7 @@ export default function SEO({
   description = "KudiFlow - The Offline-First Shop Manager. Stop using paper ledgers and start tracking your sales, inventory, and debtors faster than ever, even without an internet connection.",
   name = "KudiFlow",
   type = "website",
-  image = "https://kudiflow.vercel.app/assets/hero.webp",
+  image = "https://kudiflow.vercel.app/assets/logo.webp",
   url = "https://kudiflow.vercel.app/",
 }: SEOProps) {
   return (

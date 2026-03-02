@@ -16,7 +16,80 @@ import {
   HelpCircle,
   CheckCircle2,
   ArrowRight,
+  ChevronDown,
 } from "lucide-react";
+
+// The dynamic FAQ accordion component
+const FAQItem = ({
+  question,
+  answer,
+}: {
+  question: string;
+  answer: string;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="border border-slate-700/50 rounded-2xl bg-slate-800/30 overflow-hidden backdrop-blur-sm transition-all hover:bg-slate-800/50">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full text-left px-6 py-5 flex items-center justify-between gap-4 focus:outline-hidden"
+      >
+        <h4 className="text-lg font-bold text-slate-100">{question}</h4>
+        <div
+          className={`w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center shrink-0 transition-transform duration-300 border border-slate-700 ${
+            isOpen ? "rotate-180 bg-emerald-500/20 border-emerald-500/30" : ""
+          }`}
+        >
+          <ChevronDown
+            className={`w-4 h-4 transition-colors ${
+              isOpen ? "text-emerald-400" : "text-slate-400"
+            }`}
+          />
+        </div>
+      </button>
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="overflow-hidden"
+          >
+            <div className="px-6 pb-6 pt-0 text-slate-400 leading-relaxed font-medium">
+              {answer}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+// FAQ Data Source
+const faqs = [
+  {
+    question: "Is my store data completely secure?",
+    answer:
+      "Yes. We use enterprise-grade encryption for all your data. Your customer lists and sales numbers are completely hidden from everyone, including us.",
+  },
+  {
+    question: "Can I use KudiFlow without internet?",
+    answer:
+      "Absolutely. Record sales, add inventory, and manage debts perfectly completely offline. The app silently syncs to the cloud the moment your connection returns.",
+  },
+  {
+    question: "How much does KudiFlow cost?",
+    answer:
+      "We have a forever-free plan meant for small shops. For larger stores needing advanced team management, our Pro plan is very affordable with no hidden fees.",
+  },
+  {
+    question: "Can you help me set up my shop?",
+    answer:
+      "Yes! Send us a WhatsApp message using the button above. Real humans on our team are happy to guide you through your first inventory upload.",
+  },
+];
 
 export default function Contact() {
   const recaptchaKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY as string;
@@ -355,72 +428,53 @@ function ContactPageContent() {
           </div>
         </section>
 
-        {/* FAQ Deflector Section */}
-        <section className="w-full max-w-[1000px] mx-auto px-6 sm:px-12 lg:px-20">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.6 }}
-            className="bg-white rounded-3xl border border-slate-200 p-8 sm:p-12 shadow-sm"
-          >
-            <div className="flex items-center gap-4 mb-10">
-              <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center shrink-0">
-                <HelpCircle className="w-6 h-6 text-kudi-green" />
-              </div>
-              <div>
-                <h3 className="text-2xl font-bold text-slate-900">
-                  Before you ask...
-                </h3>
-                <p className="text-slate-500 font-medium">
-                  Quick answers to common questions
-                </p>
-              </div>
-            </div>
+        {/* FAQ Deflector Section (Premium Dark Mode) */}
+        <section className="w-full relative mt-16 lg:mt-24 pt-24 pb-32">
+          {/* Dark Glass Background Matching About Page */}
+          <div className="absolute inset-x-0 bottom-0 h-full bg-slate-900 z-0 overflow-hidden">
+            {/* Subtle ambient glows */}
+            <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-kudi-green/10 rounded-full blur-[120px] mix-blend-screen pointer-events-none" />
+            <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-emerald-500/10 rounded-full blur-[100px] mix-blend-screen pointer-events-none" />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-              <div>
-                <h4 className="text-lg font-bold text-slate-900 mb-2">
-                  Is my store data completely secure?
-                </h4>
-                <p className="text-slate-600 leading-relaxed">
-                  Yes. We use enterprise-grade encryption for all your data.
-                  Your customer lists and sales numbers are completely hidden
-                  from everyone, including us.
-                </p>
+            {/* Diagonal accent slash */}
+            <div className="absolute top-0 inset-x-0 h-px bg-linear-to-r from-transparent via-emerald-500/20 to-transparent"></div>
+          </div>
+
+          <div className="relative z-10 w-full max-w-[900px] mx-auto px-6 sm:px-12 lg:px-20">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.6 }}
+              className="mb-12 text-center"
+            >
+              <div className="w-16 h-16 bg-slate-800/80 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-900/20 border border-slate-700/50 backdrop-blur-md">
+                <HelpCircle className="w-8 h-8 text-emerald-400" />
               </div>
-              <div>
-                <h4 className="text-lg font-bold text-slate-900 mb-2">
-                  Can I use KudiFlow without internet?
-                </h4>
-                <p className="text-slate-600 leading-relaxed">
-                  Absolutely. Record sales, add inventory, and manage debts
-                  perfectly completely offline. The app silently syncs to the
-                  cloud the moment your connection returns.
-                </p>
-              </div>
-              <div>
-                <h4 className="text-lg font-bold text-slate-900 mb-2">
-                  How much does KudiFlow cost?
-                </h4>
-                <p className="text-slate-600 leading-relaxed">
-                  We have a forever-free plan meant for small shops. For larger
-                  stores needing advanced team management, our Pro plan is very
-                  affordable with no hidden fees.
-                </p>
-              </div>
-              <div>
-                <h4 className="text-lg font-bold text-slate-900 mb-2">
-                  Can you help me set up my shop?
-                </h4>
-                <p className="text-slate-600 leading-relaxed">
-                  Yes! Send us a WhatsApp message using the button above. Real
-                  humans on our team are happy to guide you through your first
-                  inventory upload.
-                </p>
-              </div>
-            </div>
-          </motion.div>
+              <h3 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+                Before you ask...
+              </h3>
+              <p className="text-xl text-slate-400 font-medium max-w-2xl mx-auto">
+                Quick answers to the most common questions from our vendors.
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="space-y-4"
+            >
+              {faqs.map((faq, index) => (
+                <FAQItem
+                  key={index}
+                  question={faq.question}
+                  answer={faq.answer}
+                />
+              ))}
+            </motion.div>
+          </div>
         </section>
       </main>
 

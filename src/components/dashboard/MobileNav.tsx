@@ -30,6 +30,11 @@ export function MobileNav() {
       path: "/dashboard/debtors",
     },
     {
+      name: "History",
+      icon: <Receipt className="w-5 h-5 mb-1" />,
+      path: "/dashboard/transactions",
+    },
+    {
       name: "Settings",
       icon: <Settings className="w-5 h-5 mb-1" />,
       path: "/dashboard/settings",

@@ -122,10 +122,10 @@ export default function Overview() {
           <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center">
             <h3 className="font-bold text-slate-800">Recent Transactions</h3>
             <button
-              onClick={() => navigate("/dashboard/sales")}
-              className="text-sm font-semibold text-emerald-600 hover:text-emerald-700"
+              onClick={() => navigate("/dashboard/transactions")}
+              className="text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
             >
-              View Sales Ledger
+              View All Transactions
             </button>
           </div>
           <div className="p-0">
@@ -177,9 +177,13 @@ export default function Overview() {
                           : "📝"}
                       </div>
                       <div>
-                        <p className="font-semibold text-slate-900">
-                          {sale.items.length}{" "}
-                          {sale.items.length === 1 ? "Item" : "Items"} Sold
+                        <p className="font-semibold text-slate-900 line-clamp-1">
+                          {sale.items
+                            .map(
+                              (item) => `${item.quantity} ${item.productName}`
+                            )
+                            .join(", ")}{" "}
+                          Sold
                           {sale.customerName && (
                             <span className="text-slate-500 font-normal ml-1">
                               to {sale.customerName}

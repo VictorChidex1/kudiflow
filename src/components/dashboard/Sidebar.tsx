@@ -44,6 +44,11 @@ export function Sidebar() {
       icon: <Users className="w-5 h-5" />,
       path: "/dashboard/debtors",
     },
+    {
+      name: "Transactions",
+      icon: <Receipt className="w-5 h-5" />,
+      path: "/dashboard/transactions",
+    },
   ];
 
   return (

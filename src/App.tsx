@@ -18,6 +18,7 @@ import { DashboardLayout } from "./components/dashboard/DashboardLayout";
 import DashboardOverview from "./pages/dashboard/Overview";
 import Inventory from "./pages/dashboard/Inventory";
 import SalesLedger from "./pages/dashboard/SalesLedger";
+import Transactions from "./pages/dashboard/Transactions";
 
 function App() {
   return (
@@ -57,7 +58,8 @@ function App() {
             <Route index element={<DashboardOverview />} />
             <Route path="inventory" element={<Inventory />} />
             <Route path="sales" element={<SalesLedger />} />
-            {/* Phase 2/3 routes will go here: /sales, /debtors */}
+            <Route path="transactions" element={<Transactions />} />
+            {/* Phase 3 routes will go here: /debtors */}
           </Route>
         </Routes>
         <ScrollToTop />

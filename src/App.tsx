@@ -15,8 +15,9 @@ import { ScrollToTop } from "./components/ui/ScrollToTop";
 // Phase 1: Dashboard Imports
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { DashboardLayout } from "./components/dashboard/DashboardLayout";
-import Overview from "./pages/dashboard/Overview";
+import DashboardOverview from "./pages/dashboard/Overview";
 import Inventory from "./pages/dashboard/Inventory";
+import SalesLedger from "./pages/dashboard/SalesLedger";
 
 function App() {
   return (
@@ -53,8 +54,9 @@ function App() {
               </ProtectedRoute>
             }
           >
-            <Route index element={<Overview />} />
+            <Route index element={<DashboardOverview />} />
             <Route path="inventory" element={<Inventory />} />
+            <Route path="sales" element={<SalesLedger />} />
             {/* Phase 2/3 routes will go here: /sales, /debtors */}
           </Route>
         </Routes>

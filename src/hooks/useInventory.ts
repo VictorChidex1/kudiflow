@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import {
   collection,
   query,
-  where,
   onSnapshot,
   addDoc,
   updateDoc,
@@ -29,10 +28,7 @@ export function useInventory() {
     // Query all products for this user.
     // We intentionally omit orderBy("createdAt") here because pending serverTimestamps
     // drop off local snapshots causing the UI to not update instantly. We sort in memory instead.
-    const q = query(
-      collection(db, "inventory"),
-      where("userId", "==", user.uid)
-    );
+    const q = query(collection(db, `users/${user.uid}/inventory`));
 
     const unsubscribe = onSnapshot(
       q,
@@ -85,7 +81,7 @@ export function useInventory() {
 
       // Fire-and-forget so offline users get an instant success feedback.
       // Firebase persistentLocalCache automatically queues this to sync with the server later.
-      addDoc(collection(db, "inventory"), {
+      addDoc(collection(db, `users/${user.uid}/inventory`), {
         ...productData,
         userId: user.uid,
         createdAt: serverTimestamp(),
@@ -102,7 +98,10 @@ export function useInventory() {
 
   const updateProduct = async (id: string, updates: Partial<Product>) => {
     try {
-      const docRef = doc(db, "inventory", id);
+      const user = auth.currentUser;
+      if (!user) throw new Error("Must be logged in");
+
+      const docRef = doc(db, `users/${user.uid}/inventory`, id);
 
       updateDoc(docRef, updates).catch((err) =>
         console.error("Sync error (update product):", err)
@@ -119,7 +118,10 @@ export function useInventory() {
 
   const deleteProduct = async (id: string) => {
     try {
-      const docRef = doc(db, "inventory", id);
+      const user = auth.currentUser;
+      if (!user) throw new Error("Must be logged in");
+
+      const docRef = doc(db, `users/${user.uid}/inventory`, id);
 
       deleteDoc(docRef).catch((err) =>
         console.error("Sync error (delete product):", err)

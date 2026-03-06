@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import {
   collection,
   query,
-  where,
   onSnapshot,
   doc,
   serverTimestamp,
@@ -26,9 +25,9 @@ export function useSales() {
       return;
     }
 
-    // Query all sales for this user.
+    // Query all sales for this user from their specific subcollection.
     // Omit orderBy("createdAt") to prevent pending local cache documents from disappearing.
-    const q = query(collection(db, "sales"), where("userId", "==", user.uid));
+    const q = query(collection(db, `users/${user.uid}/sales`));
 
     const unsubscribe = onSnapshot(
       q,
@@ -80,8 +79,8 @@ export function useSales() {
       // Firebase queues the entire batch to retry later.
       const batch = writeBatch(db);
 
-      // 1. Create the new Sale Document Reference
-      const newSaleRef = doc(collection(db, "sales"));
+      // 1. Create the new Sale Document Reference inside the user's sales subcollection
+      const newSaleRef = doc(collection(db, `users/${user.uid}/sales`));
 
       batch.set(newSaleRef, {
         ...saleData,
@@ -92,7 +91,11 @@ export function useSales() {
       // 2. Iterate through the Cart Items and queue stock deductions
       for (const item of saleData.items) {
         if (!item.productId) continue;
-        const productRef = doc(db, "inventory", item.productId);
+        const productRef = doc(
+          db,
+          `users/${user.uid}/inventory`,
+          item.productId
+        );
 
         // Atomically decrement the stock level by the exact quantity sold.
         // This is safe even offline via persistentLocalCache

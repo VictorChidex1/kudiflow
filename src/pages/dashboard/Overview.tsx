@@ -177,7 +177,7 @@ export default function Overview() {
                           : "📝"}
                       </div>
                       <div>
-                        <p className="font-semibold text-slate-900 line-clamp-1">
+                        <p className="font-semibold text-slate-900 pr-2 leading-tight">
                           {sale.items
                             .map(
                               (item) => `${item.quantity} ${item.productName}`

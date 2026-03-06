@@ -57,11 +57,11 @@ export function useInventory() {
         setProducts(inventoryData);
         setIsLoading(false);
 
-        // Optional: We can check if data came from cache to notify the user
         if (snapshot.metadata.fromCache && inventoryData.length > 0) {
-          // We only notify if it's explicitly a disconnect, but snapshot usually handles it seamlessly
+          // Intentionally left empty for future offline indicator logic
         }
       },
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (err: any) => {
         console.error("Inventory sync error:", err);
@@ -83,19 +83,15 @@ export function useInventory() {
       const user = auth.currentUser;
       if (!user) throw new Error("Must be logged in");
 
-      const docPromise = addDoc(collection(db, "inventory"), {
+      // Fire-and-forget so offline users get an instant success feedback.
+      // Firebase persistentLocalCache automatically queues this to sync with the server later.
+      addDoc(collection(db, "inventory"), {
         ...productData,
         userId: user.uid,
         createdAt: serverTimestamp(),
-      });
+      }).catch((err) => console.error("Sync error (add product):", err));
 
-      toast.promise(docPromise, {
-        loading: "Adding product...",
-        success: "Product added successfully!",
-        error: "Failed to add product.",
-      });
-
-      await docPromise;
+      toast.success("Product added successfully!");
       return { success: true };
     } catch (err: unknown) {
       const error = err as Error;
@@ -107,15 +103,12 @@ export function useInventory() {
   const updateProduct = async (id: string, updates: Partial<Product>) => {
     try {
       const docRef = doc(db, "inventory", id);
-      const updatePromise = updateDoc(docRef, updates);
 
-      toast.promise(updatePromise, {
-        loading: "Updating product...",
-        success: "Product updated successfully!",
-        error: "Failed to update product.",
-      });
+      updateDoc(docRef, updates).catch((err) =>
+        console.error("Sync error (update product):", err)
+      );
 
-      await updatePromise;
+      toast.success("Product updated successfully!");
       return { success: true };
     } catch (err: unknown) {
       const error = err as Error;
@@ -127,15 +120,12 @@ export function useInventory() {
   const deleteProduct = async (id: string) => {
     try {
       const docRef = doc(db, "inventory", id);
-      const deletePromise = deleteDoc(docRef);
 
-      toast.promise(deletePromise, {
-        loading: "Deleting product...",
-        success: "Product deleted!",
-        error: "Failed to delete product.",
-      });
+      deleteDoc(docRef).catch((err) =>
+        console.error("Sync error (delete product):", err)
+      );
 
-      await deletePromise;
+      toast.success("Product deleted successfully!");
       return { success: true };
     } catch (err: unknown) {
       const error = err as Error;

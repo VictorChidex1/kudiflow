@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import SEO from "../components/SEO";
-import { auth } from "../lib/firebase";
+import { auth, db } from "../lib/firebase";
+import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import {
   createUserWithEmailAndPassword,
   signInWithPopup,
@@ -19,6 +20,8 @@ export function Signup() {
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
+    shopName: "",
+    phone: "",
     password: "",
     confirmPassword: "",
   });
@@ -47,13 +50,24 @@ export function Signup() {
     setIsLoading(true);
     try {
       // 1. Create User
-      await createUserWithEmailAndPassword(
+      const userCredential = await createUserWithEmailAndPassword(
         auth,
         formData.email,
         formData.password
       );
+      const user = userCredential.user;
 
-      // TODO: Save user profile info (like fullName) to Firestore later if needed.
+      // 2. Save complete profile to Firestore
+      const userRef = doc(db, "users", user.uid);
+      await setDoc(userRef, {
+        uid: user.uid,
+        email: user.email,
+        fullName: formData.fullName,
+        shopName: formData.shopName,
+        phone: formData.phone,
+        createdAt: serverTimestamp(),
+        authProvider: "email",
+      });
 
       navigate("/dashboard"); // Redirect upon success
     } catch (err: unknown) {
@@ -70,7 +84,26 @@ export function Signup() {
     setError(null);
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      // Check if user document already exists
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        // First time Google signup - create profile
+        await setDoc(userRef, {
+          uid: user.uid,
+          email: user.email,
+          fullName: user.displayName || "Google User",
+          shopName: "", // Empty for them to fill in dashboard later
+          phone: user.phoneNumber || "",
+          createdAt: serverTimestamp(),
+          authProvider: "google",
+        });
+      }
+
       navigate("/dashboard");
     } catch (err: unknown) {
       const error = err as Error & { code?: string };
@@ -199,6 +232,48 @@ export function Signup() {
                   onChange={handleChange}
                   className="appearance-none block w-full px-4 py-3 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-kudi-green focus:border-kudi-green sm:text-sm transition-colors"
                   placeholder="e.g. John Doe"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="shopName"
+                className="block text-sm font-medium text-slate-700"
+              >
+                Shop/Business Name
+              </label>
+              <div className="mt-1">
+                <input
+                  id="shopName"
+                  name="shopName"
+                  type="text"
+                  required
+                  value={formData.shopName}
+                  onChange={handleChange}
+                  className="appearance-none block w-full px-4 py-3 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-kudi-green focus:border-kudi-green sm:text-sm transition-colors"
+                  placeholder="e.g. Chidex Technologies"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="phone"
+                className="block text-sm font-medium text-slate-700"
+              >
+                Phone Number
+              </label>
+              <div className="mt-1">
+                <input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  required
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className="appearance-none block w-full px-4 py-3 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-kudi-green focus:border-kudi-green sm:text-sm transition-colors"
+                  placeholder="e.g. +234 800 000 0000"
                 />
               </div>
             </div>

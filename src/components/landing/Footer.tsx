@@ -34,7 +34,9 @@ export function Footer() {
 
             <div className="flex gap-4">
               <a
-                href="#"
+                href="https://www.instagram.com/iamking_chidex/?hl=en"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400 hover:bg-kudi-green/10 hover:border-kudi-green/20 hover:text-kudi-green transition-all duration-300"
               >
                 <Twitter
@@ -44,13 +46,17 @@ export function Footer() {
                 />
               </a>
               <a
-                href="#"
+                href="https://www.instagram.com/iamking_chidex/?hl=en"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400 hover:bg-kudi-green/10 hover:border-kudi-green/20 hover:text-kudi-green transition-all duration-300"
               >
                 <Instagram className="w-5 h-5" />
               </a>
               <a
-                href="#"
+                href="https://www.instagram.com/iamking_chidex/?hl=en"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400 hover:bg-kudi-green/10 hover:border-kudi-green/20 hover:text-kudi-green transition-all duration-300"
               >
                 <Linkedin
@@ -60,7 +66,9 @@ export function Footer() {
                 />
               </a>
               <a
-                href="#"
+                href="https://www.instagram.com/iamking_chidex/?hl=en"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400 hover:bg-emerald-50 hover:border-emerald-200 hover:text-emerald-500 transition-all duration-300"
               >
                 <MessageCircle

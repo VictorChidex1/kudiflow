@@ -33,5 +33,80 @@ service cloud.firestore {
         // (Forces exactly the server timestamp, prevents malicious timestamp manipulation)
     }
 
+    // Users Collection Governance (Profile Data)
+    match /users/{userId} {
+      allow read, update, delete: if request.auth != null && request.auth.uid == userId;
+      
+      allow create: if request.auth != null && request.auth.uid == userId &&
+        request.resource.data.keys().hasAll(['uid', 'email', 'fullName', 'shopName', 'phone', 'createdAt', 'authProvider']) &&
+        request.resource.data.uid is string && request.resource.data.uid == userId &&
+        request.resource.data.email is string &&
+        request.resource.data.fullName is string && request.resource.data.fullName.size() <= 100 &&
+        request.resource.data.shopName is string && request.resource.data.shopName.size() <= 100 &&
+        request.resource.data.phone is string && request.resource.data.phone.size() <= 50 &&
+        request.resource.data.authProvider in ['email', 'google'] &&
+        request.resource.data.createdAt == request.time;
+    }
+
+    // Phase 2: Inventory Manager Governance
+    match /inventory/{itemId} {
+      // Security: Multi-Tenant Iron Wall. You can only touch your own products.
+      allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      
+      // Strict Schema Validation for Product Creation
+      allow create: if request.auth != null && 
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.keys().hasAll(['userId', 'productName', 'sellingPrice', 'costPrice', 'stockLevel', 'createdAt']) &&
+        request.resource.data.productName is string && request.resource.data.productName.size() <= 150 &&
+        request.resource.data.sellingPrice is number && request.resource.data.sellingPrice >= 0 &&
+        request.resource.data.costPrice is number && request.resource.data.costPrice >= 0 &&
+        request.resource.data.stockLevel is number && request.resource.data.stockLevel >= 0 &&
+        request.resource.data.createdAt == request.time;
+    }
+
+    // Phase 2: Sales Ledger Governance
+    match /sales/{saleId} {
+      // Security: Multi-Tenant Iron Wall
+      allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+
+      // Strict Schema Validation for Sales Recording
+      allow create: if request.auth != null &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.keys().hasAll(['userId', 'items', 'totalAmount', 'status', 'debtorId', 'createdAt']) &&
+        request.resource.data.totalAmount is number && request.resource.data.totalAmount >= 0 &&
+        request.resource.data.status in ['paid', 'credit'] &&
+        request.resource.data.createdAt == request.time;
+    }
+
+    // Phase 2: Debtors/Customer Manager Governance
+    match /debtors/{debtorId} {
+      // Security: Multi-Tenant Iron Wall
+      allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+
+      // Strict Schema Validation for Customer Profiles
+      allow create: if request.auth != null &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.keys().hasAll(['userId', 'name', 'phone', 'totalOwed', 'createdAt']) &&
+        request.resource.data.name is string && request.resource.data.name.size() <= 100 &&
+        request.resource.data.phone is string && request.resource.data.phone.size() <= 50 &&
+        request.resource.data.totalOwed is number && request.resource.data.totalOwed >= 0 &&
+        request.resource.data.createdAt == request.time;
+    }
+    
+    // Create a reusable function to check if the user is an admin
+    function isAdmin() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Lock down the admin dashboard data
+    match /admin_data/{document=**} {
+      allow read, write: if request.auth != null && isAdmin();
+    }
+    
+    // Regular users can only read/write their own stuff
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
   }
 }

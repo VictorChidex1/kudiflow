@@ -1,14 +1,19 @@
 import SEO from "../../components/SEO";
 import { auth } from "../../lib/firebase";
 import { useSales } from "../../hooks/useSales";
+import { useInventory } from "../../hooks/useInventory";
+import { ReceiptModal } from "../../components/dashboard/ReceiptModal";
 import { useNavigate } from "react-router-dom";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { Sale } from "../../types/sales";
 
 export default function Overview() {
   const user = auth.currentUser;
   const navigate = useNavigate();
   const { sales, isLoading: isLoadingSales } = useSales();
+  const { products, isLoading: isLoadingInventory } = useInventory();
+
+  const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
 
   // Calculate Today's Sales directly from the real-time hook
   const todaysSalesTotal = useMemo(() => {
@@ -44,6 +49,14 @@ export default function Overview() {
       .filter((sale) => sale.paymentStatus !== "paid")
       .reduce((sum, sale) => sum + (sale.totalAmount - sale.amountPaid), 0);
   }, [sales]);
+
+  // Calculate Inventory Value
+  const inventoryValue = useMemo(() => {
+    return products.reduce(
+      (sum, item) => sum + item.costPrice * item.stockLevel,
+      0
+    );
+  }, [products]);
 
   return (
     <>
@@ -96,7 +109,11 @@ export default function Overview() {
             <span className="text-slate-500 font-medium mb-2 text-sm">
               Inventory Value
             </span>
-            <span className="text-3xl font-bold text-slate-900">₦0.00</span>
+            <span className="text-3xl font-bold text-slate-900">
+              {isLoadingInventory
+                ? "..."
+                : `₦${inventoryValue.toLocaleString()}`}
+            </span>
           </div>
         </div>
 
@@ -138,7 +155,8 @@ export default function Overview() {
                 {sales.slice(0, 5).map((sale: Sale, idx) => (
                   <div
                     key={sale.id || idx}
-                    className="px-6 py-4 flex items-center justify-between hover:bg-slate-50 transition-colors"
+                    onClick={() => setSelectedSale(sale)}
+                    className="px-6 py-4 flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer"
                   >
                     <div className="flex items-center gap-4">
                       <div
@@ -193,6 +211,13 @@ export default function Overview() {
           </div>
         </div>
       </div>
+
+      {selectedSale && (
+        <ReceiptModal
+          sale={selectedSale}
+          onClose={() => setSelectedSale(null)}
+        />
+      )}
     </>
   );
 }

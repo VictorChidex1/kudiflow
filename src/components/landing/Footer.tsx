@@ -90,7 +90,7 @@ export function Footer() {
               <ul className="space-y-4">
                 <li>
                   <a
-                    href="#features"
+                    href="/#features"
                     className="text-slate-500 hover:text-kudi-green hover:translate-x-1 inline-block transition-transform duration-300"
                   >
                     Features
@@ -98,7 +98,7 @@ export function Footer() {
                 </li>
                 <li>
                   <a
-                    href="#pricing"
+                    href="/#pricing"
                     className="text-slate-500 hover:text-kudi-green hover:translate-x-1 inline-block transition-transform duration-300"
                   >
                     Pricing
@@ -131,7 +131,7 @@ export function Footer() {
               <ul className="space-y-4">
                 <li>
                   <a
-                    href="#faqs"
+                    href="/#faqs"
                     className="text-slate-500 hover:text-kudi-green hover:translate-x-1 inline-block transition-transform duration-300"
                   >
                     Help Center / FAQs

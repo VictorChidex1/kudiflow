@@ -11,6 +11,7 @@ import Contact from "./pages/Contact";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import { ScrollToTop } from "./components/ui/ScrollToTop";
+import { RouteScrollToTop } from "./components/ui/RouteScrollToTop";
 
 // Phase 1: Dashboard Imports
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
@@ -24,6 +25,7 @@ function App() {
   return (
     <HelmetProvider>
       <BrowserRouter>
+        <RouteScrollToTop />
         <Toaster
           position="top-right"
           toastOptions={{

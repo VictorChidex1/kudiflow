@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Bell, ChevronDown, User, LogOut, Settings } from "lucide-react";
+import { Bell, ChevronDown, User, LogOut, Settings, Home } from "lucide-react";
 import { auth } from "../../lib/firebase";
 import { signOut } from "firebase/auth";
 
@@ -65,11 +65,22 @@ export function TopHeader() {
 
       {/* Right Axis: Notifications & Profile */}
       <div className="flex items-center gap-4 sm:gap-6">
-        {/* Notification Bell */}
-        <button className="relative p-2 text-slate-400 hover:text-slate-600 transition-colors rounded-full hover:bg-slate-100">
-          <Bell className="w-5 h-5" />
-          <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border-2 border-white"></span>
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Landing Page Return Button */}
+          <Link
+            to="/"
+            className="p-2 text-slate-400 hover:text-emerald-600 transition-colors rounded-full hover:bg-emerald-50 group"
+            title="Return to Landing Page"
+          >
+            <Home className="w-5 h-5 group-hover:scale-110 transition-transform" />
+          </Link>
+
+          {/* Notification Bell */}
+          <button className="relative p-2 text-slate-400 hover:text-slate-600 transition-colors rounded-full hover:bg-slate-100">
+            <Bell className="w-5 h-5" />
+            <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border-2 border-white"></span>
+          </button>
+        </div>
 
         <div className="w-px h-6 bg-slate-200 hidden sm:block"></div>
 

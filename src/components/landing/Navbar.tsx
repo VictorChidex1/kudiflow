@@ -2,13 +2,25 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { auth } from "../../lib/firebase";
+import { onAuthStateChanged, type User } from "firebase/auth";
 
 export function LandingNavbar() {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeHash, setActiveHash] = useState("");
+  const [user, setUser] = useState<User | null>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
   const navRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setIsAuthLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -168,27 +180,42 @@ export function LandingNavbar() {
 
           {/* Desktop Right Side: Auth Buttons (Hidden on Mobile) */}
           <div className="hidden lg:flex items-center gap-6">
-            <Link
-              to="/login"
-              className={`text-sm font-semibold transition-colors duration-200 px-2 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 rounded-md
-                ${
-                  location.pathname === "/login"
-                    ? "text-kudi-green"
-                    : "text-slate-500 hover:text-slate-900"
-                }
-              `}
-            >
-              Log In
-            </Link>
-            <Link
-              to="/signup"
-              className="group relative inline-flex items-center justify-center overflow-hidden rounded-full bg-kudi-green px-6 py-3 text-sm font-semibold text-white shadow-md shadow-kudi-green/20 transition-all duration-300 hover:translate-y-[-1px] hover:shadow-lg hover:shadow-kudi-green/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-kudi-green focus-visible:ring-offset-2 active:translate-y-[1px]"
-            >
-              <span className="relative z-10 flex items-center gap-2">
-                Create Free Shop
-              </span>
-              <div className="absolute inset-0 z-0 h-full w-full bg-white/0 transition-colors duration-300 group-hover:bg-white/10" />
-            </Link>
+            {!isAuthLoading &&
+              (user ? (
+                <Link
+                  to="/dashboard"
+                  className="group relative inline-flex items-center justify-center overflow-hidden rounded-full bg-slate-900 px-6 py-2.5 text-sm font-semibold text-white shadow-md shadow-slate-900/20 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-slate-900/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2 active:scale-95"
+                >
+                  <span className="relative z-10 flex items-center gap-2">
+                    Go to Dashboard
+                  </span>
+                  <div className="absolute inset-0 z-0 h-full w-full bg-white/0 transition-colors duration-300 group-hover:bg-white/10" />
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    className={`text-sm font-semibold transition-colors duration-200 px-2 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 rounded-md
+                      ${
+                        location.pathname === "/login"
+                          ? "text-kudi-green"
+                          : "text-slate-500 hover:text-slate-900"
+                      }
+                    `}
+                  >
+                    Log In
+                  </Link>
+                  <Link
+                    to="/signup"
+                    className="group relative inline-flex items-center justify-center overflow-hidden rounded-full bg-kudi-green px-6 py-3 text-sm font-semibold text-white shadow-md shadow-kudi-green/20 transition-all duration-300 hover:-translate-y-px hover:shadow-lg hover:shadow-kudi-green/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-kudi-green focus-visible:ring-offset-2 active:translate-y-px"
+                  >
+                    <span className="relative z-10 flex items-center gap-2">
+                      Create Free Shop
+                    </span>
+                    <div className="absolute inset-0 z-0 h-full w-full bg-white/0 transition-colors duration-300 group-hover:bg-white/10" />
+                  </Link>
+                </>
+              ))}
           </div>
 
           {/* Mobile Hamburger Toggle Button (Hidden on Desktop) */}
@@ -278,33 +305,52 @@ export function LandingNavbar() {
 
               {/* Mobile Auth Block Buttons */}
               <div className="flex flex-col space-y-4 px-2">
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5, duration: 0.3 }}
-                >
-                  <Link
-                    to="/signup"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="w-full flex justify-center py-4 px-4 border border-transparent rounded-2xl shadow-lg shadow-kudi-green/20 text-lg font-bold text-white bg-kudi-green hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-kudi-green transition-all transform active:scale-[0.98]"
-                  >
-                    Create Free Shop
-                  </Link>
-                </motion.div>
+                {!isAuthLoading &&
+                  (user ? (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.5, duration: 0.3 }}
+                    >
+                      <Link
+                        to="/dashboard"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="w-full flex justify-center py-4 px-4 border border-transparent rounded-2xl shadow-lg shadow-slate-900/20 text-lg font-bold text-white bg-slate-900 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 transition-all transform active:scale-[0.98]"
+                      >
+                        Go to Dashboard
+                      </Link>
+                    </motion.div>
+                  ) : (
+                    <>
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.5, duration: 0.3 }}
+                      >
+                        <Link
+                          to="/signup"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="w-full flex justify-center py-4 px-4 border border-transparent rounded-2xl shadow-lg shadow-kudi-green/20 text-lg font-bold text-white bg-kudi-green hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-kudi-green transition-all transform active:scale-[0.98]"
+                        >
+                          Create Free Shop
+                        </Link>
+                      </motion.div>
 
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.6, duration: 0.3 }}
-                >
-                  <Link
-                    to="/login"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="w-full flex justify-center py-4 px-4 border border-slate-300 rounded-2xl shadow-sm bg-white text-lg font-bold text-slate-800 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-kudi-green transition-all transform active:scale-[0.98]"
-                  >
-                    Sign In to Account
-                  </Link>
-                </motion.div>
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.6, duration: 0.3 }}
+                      >
+                        <Link
+                          to="/login"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="w-full flex justify-center py-4 px-4 border border-slate-300 rounded-2xl shadow-sm bg-white text-lg font-bold text-slate-800 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-kudi-green transition-all transform active:scale-[0.98]"
+                        >
+                          Sign In to Account
+                        </Link>
+                      </motion.div>
+                    </>
+                  ))}
               </div>
             </div>
           </motion.div>

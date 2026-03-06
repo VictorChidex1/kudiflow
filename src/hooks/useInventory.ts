@@ -55,6 +55,7 @@ export function useInventory() {
           // We only notify if it's explicitly a disconnect, but snapshot usually handles it seamlessly
         }
       },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (err: any) => {
         console.error("Inventory sync error:", err);
         // Only show offline toast if it's an actual network failure (error code usually strictly "unavailable")

@@ -9,7 +9,6 @@ import {
   deleteDoc,
   doc,
   serverTimestamp,
-  orderBy,
 } from "firebase/firestore";
 import { db, auth } from "../lib/firebase";
 import type { Product, NewProduct } from "../types/inventory";
@@ -27,25 +26,33 @@ export function useInventory() {
       return;
     }
 
-    // Query all products for this user, ordered by newest first
+    // Query all products for this user.
+    // We intentionally omit orderBy("createdAt") here because pending serverTimestamps
+    // drop off local snapshots causing the UI to not update instantly. We sort in memory instead.
     const q = query(
       collection(db, "inventory"),
-      where("userId", "==", user.uid),
-      orderBy("createdAt", "desc")
+      where("userId", "==", user.uid)
     );
 
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
-        // Because we enabled persistentLocalCache in firebase.ts,
         // this fires instantly from cache even if offline.
-        const inventoryData: Product[] = snapshot.docs.map(
+        // We use serverTimestamps: 'estimate' so locally added docs have a predictive timestamp to sort by
+        let inventoryData: Product[] = snapshot.docs.map(
           (doc) =>
             ({
               id: doc.id,
-              ...doc.data(),
+              ...doc.data({ serverTimestamps: "estimate" }),
             } as Product)
         );
+
+        // Sort manually by timestamp strictly descending
+        inventoryData = inventoryData.sort((a, b) => {
+          const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+          const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+          return timeB - timeA;
+        });
 
         setProducts(inventoryData);
         setIsLoading(false);

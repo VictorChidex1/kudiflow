@@ -212,10 +212,10 @@ export default function SalesLedger() {
                   key={product.id}
                   onClick={() => handleAddToCart(product)}
                   disabled={product.stockLevel <= 0}
-                  className={`flex flex-col text-left p-4 rounded-xl border transition-all ${
+                  className={`flex flex-col text-left p-4 rounded-xl border transition-all duration-300 ease-out ${
                     product.stockLevel <= 0
-                      ? "opacity-50 border-slate-100 bg-slate-50 cursor-not-allowed"
-                      : "border-slate-100 bg-white hover:border-kudi-green hover:shadow-md cursor-pointer active:scale-95 text-slate-900 group"
+                      ? "opacity-50 border-slate-100 bg-slate-50 cursor-not-allowed grayscale"
+                      : "border-slate-100 bg-white hover:border-kudi-green hover:shadow-lg hover:-translate-y-1 cursor-pointer active:scale-95 active:shadow-sm text-slate-900 group"
                   }`}
                 >
                   <div className="font-semibold mb-1 group-hover:text-kudi-green transition-colors line-clamp-2">
@@ -257,48 +257,56 @@ export default function SalesLedger() {
         {/* Cart Items List */}
         <div className="flex-1 overflow-y-auto p-4">
           {cart.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-slate-400 space-y-4">
-              <ShoppingCart className="w-12 h-12 opacity-20" />
-              <p>Cart is empty</p>
+            <div className="h-full flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-500">
+              <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-4 border-2 border-dashed border-slate-200">
+                <ShoppingCart className="w-10 h-10 text-slate-300" />
+              </div>
+              <h3 className="font-bold text-slate-700 mb-1">
+                Your Cart is Empty
+              </h3>
+              <p className="text-sm text-slate-400">
+                Select items from your inventory to begin a new sale.
+              </p>
             </div>
           ) : (
             <div className="space-y-4">
               {cart.map((item) => (
                 <div
                   key={item.productId}
-                  className="flex flex-col gap-2 p-3 bg-slate-50 rounded-xl"
+                  className="flex flex-col gap-2 p-3 bg-white border border-slate-100 shadow-sm rounded-xl relative overflow-hidden group animate-in slide-in-from-right-4 duration-300"
                 >
-                  <div className="flex justify-between items-start">
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-kudi-green"></div>
+                  <div className="flex justify-between items-start pl-2">
                     <span className="font-semibold text-slate-900 text-sm line-clamp-2 pr-2">
                       {item.productName}
                     </span>
                     <button
                       onClick={() => handleRemoveItem(item.productId)}
-                      className="text-slate-400 hover:text-rose-500 p-1"
+                      className="text-slate-300 hover:bg-rose-50 rounded-md hover:text-rose-500 p-1.5 transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 bg-white border border-slate-200 rounded-lg p-1">
+                  <div className="flex items-center justify-between pl-2">
+                    <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-lg p-1">
                       <button
                         onClick={() => handleUpdateQuantity(item.productId, -1)}
-                        className="w-6 h-6 flex items-center justify-center rounded-md hover:bg-slate-100 active:bg-slate-200 transition-colors"
+                        className="w-7 h-7 flex items-center justify-center rounded-md bg-white shadow-sm border border-slate-100 hover:bg-slate-50 active:scale-95 transition-all"
                       >
                         <Minus className="w-3 h-3 text-slate-600" />
                       </button>
-                      <span className="text-sm font-medium w-4 text-center">
+                      <span className="text-sm font-bold w-4 text-center text-slate-700">
                         {item.quantity}
                       </span>
                       <button
                         onClick={() => handleUpdateQuantity(item.productId, 1)}
-                        className="w-6 h-6 flex items-center justify-center rounded-md hover:bg-slate-100 active:bg-slate-200 transition-colors"
+                        className="w-7 h-7 flex items-center justify-center rounded-md bg-white shadow-sm border border-slate-100 hover:bg-slate-50 active:scale-95 transition-all"
                       >
                         <Plus className="w-3 h-3 text-slate-600" />
                       </button>
                     </div>
-                    <span className="font-semibold text-slate-700">
+                    <span className="font-bold text-slate-800">
                       ₦{item.subtotal.toLocaleString()}
                     </span>
                   </div>
@@ -344,16 +352,19 @@ export default function SalesLedger() {
         </div>
       </div>
 
-      {/* Checkout Modal */}
+      {/* Checkout Modal (Glassmorphism) */}
       {isCheckoutOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden transform transition-all shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="bg-white/95 backdrop-blur-sm shadow-2xl border border-white/20 rounded-2xl w-full max-w-md overflow-hidden transform transition-all animate-in zoom-in-95 duration-200">
             <div className="p-6">
-              <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+              <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-3">
+                <span className="bg-kudi-green/10 text-kudi-green p-2 rounded-xl">
+                  <CreditCard className="w-5 h-5" />
+                </span>
                 Complete Sale
               </h2>
 
-              <form onSubmit={submitSale} className="space-y-5">
+              <form onSubmit={submitSale} className="space-y-6">
                 {/* Payment Method Selector */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -379,11 +390,35 @@ export default function SalesLedger() {
                   </div>
                 </div>
 
-                {/* Amount Paid Input */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Amount Paid (₦)
-                  </label>
+                {/* Amount Paid Section with Quick Chips */}
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                  <div className="flex justify-between items-center mb-3">
+                    <label className="block text-sm font-semibold text-slate-700">
+                      Amount Paid (₦)
+                    </label>
+                  </div>
+
+                  {/* Quick Chips */}
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {[1000, 5000, 10000, 50000].map((amt) => (
+                      <button
+                        key={amt}
+                        type="button"
+                        onClick={() => setAmountPaid(amt)}
+                        className="px-3 py-1.5 bg-white border border-slate-200 hover:border-kudi-green hover:text-kudi-green text-slate-600 text-xs font-bold rounded-lg transition-colors shadow-sm"
+                      >
+                        +{amt / 1000}k
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => setAmountPaid(totalAmount)}
+                      className="px-3 py-1.5 bg-kudi-green/10 border border-kudi-green/20 hover:bg-kudi-green hover:text-white text-kudi-green text-xs font-bold rounded-lg transition-colors shadow-sm ml-auto"
+                    >
+                      Exact (₦{totalAmount.toLocaleString()})
+                    </button>
+                  </div>
+
                   <input
                     type="text"
                     required
@@ -391,7 +426,8 @@ export default function SalesLedger() {
                     onChange={(e) =>
                       handleNumberInput(setAmountPaid, e.target.value)
                     }
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-kudi-green focus:border-transparent outline-none transition-all font-semibold text-lg"
+                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-kudi-green focus:border-transparent outline-none transition-all font-bold text-xl text-slate-900 shadow-inner"
+                    placeholder="0"
                   />
                   {amountPaid < totalAmount && (
                     <p className="text-xs text-amber-600 mt-1 font-medium">

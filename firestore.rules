@@ -64,17 +64,27 @@ service cloud.firestore {
         request.resource.data.createdAt == request.time;
     }
 
-    // Phase 2: Sales Ledger Governance
+    // Phase 2: Sales Ledger Governance (Append-Only Immutable Ledger)
     match /sales/{saleId} {
-      // Security: Multi-Tenant Iron Wall
-      allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      // Security: Multi-Tenant Iron Wall.
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      
+      // Immutability: Sales cannot be silently altered or deleted. Must do a void/refund transaction visually.
+      allow update, delete: if false;
 
       // Strict Schema Validation for Sales Recording
       allow create: if request.auth != null &&
         request.resource.data.userId == request.auth.uid &&
-        request.resource.data.keys().hasAll(['userId', 'items', 'totalAmount', 'status', 'debtorId', 'createdAt']) &&
+        request.resource.data.keys().hasAll(['userId', 'items', 'subtotal', 'discount', 'totalAmount', 'amountPaid', 'paymentMethod', 'paymentStatus', 'createdAt']) &&
+        request.resource.data.items is list &&
+        request.resource.data.subtotal is number && request.resource.data.subtotal >= 0 &&
+        request.resource.data.discount is number && request.resource.data.discount >= 0 &&
         request.resource.data.totalAmount is number && request.resource.data.totalAmount >= 0 &&
-        request.resource.data.status in ['paid', 'credit'] &&
+        request.resource.data.amountPaid is number && request.resource.data.amountPaid >= 0 &&
+        request.resource.data.paymentMethod in ['cash', 'transfer', 'pos', 'credit'] &&
+        request.resource.data.paymentStatus in ['paid', 'partial', 'unpaid'] &&
+        // If it's a credit sale, a customer name MUST be provided
+        (request.resource.data.paymentMethod != 'credit' || (request.resource.data.keys().hasAny(['customerName']) && request.resource.data.customerName is string && request.resource.data.customerName.size() > 0)) &&
         request.resource.data.createdAt == request.time;
     }
 

@@ -6,6 +6,8 @@ import {
   Trash2,
   ShoppingCart,
   CreditCard,
+  Printer,
+  CheckCircle2,
 } from "lucide-react";
 import { useInventory } from "../../hooks/useInventory";
 import { useSales } from "../../hooks/useSales";
@@ -32,6 +34,11 @@ export default function SalesLedger() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
+
+  // Receipt State
+  const [completedSaleDetails, setCompletedSaleDetails] =
+    useState<NewSale | null>(null);
+  const [saleDate] = useState(new Date());
 
   const filteredProducts = useMemo(
     () =>
@@ -163,24 +170,27 @@ export default function SalesLedger() {
     const result = await processSale(newSale);
 
     if (result && result.success) {
-      // Because we use an optimistic UI approach with fire-and-forget in useSales
-      // the toast is handled inside the hook.
-
-      // Reset POS state
-      setCart([]);
-      setDiscount(0);
+      // Trigger Receipt Mode instead of immediate reset
       setIsCheckoutOpen(false);
-      setCustomerName("");
-      setCustomerPhone("");
-      setAmountPaid(0);
-      setPaymentMethod("cash");
+      setCompletedSaleDetails(newSale);
     }
   };
 
+  const handleFinishSale = () => {
+    // Reset all POS state
+    setCart([]);
+    setDiscount(0);
+    setCustomerName("");
+    setCustomerPhone("");
+    setAmountPaid(0);
+    setPaymentMethod("cash");
+    setCompletedSaleDetails(null);
+  };
+
   return (
-    <div className="flex flex-col lg:flex-row lg:h-[calc(100vh-80px)] lg:overflow-hidden bg-slate-50 gap-4 lg:gap-6 p-4 lg:p-6">
-      {/* Left Panel: Products Selection */}
-      <div className="flex-1 flex flex-col bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden min-h-[60vh] lg:min-h-0">
+    <div className="relative flex flex-col lg:flex-row lg:h-[calc(100vh-80px)] lg:overflow-hidden bg-slate-50 gap-4 lg:gap-6 p-4 lg:p-6 print:bg-white print:p-0">
+      {/* Left Panel: Products Selection - Hidden on Print */}
+      <div className="flex-1 flex flex-col bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden min-h-[60vh] lg:min-h-0 print:hidden">
         {/* Search Bar */}
         <div className="p-4 border-b border-slate-100 bg-white z-10">
           <div className="relative">
@@ -242,8 +252,8 @@ export default function SalesLedger() {
         </div>
       </div>
 
-      {/* Right Panel: The Cart view */}
-      <div className="w-full lg:w-[400px] flex flex-col bg-white rounded-2xl shadow-sm border border-slate-100 shrink-0 overflow-hidden h-fit lg:h-full">
+      {/* Right Panel: The Cart view - Hidden on Print */}
+      <div className="w-full lg:w-[400px] flex flex-col bg-white rounded-2xl shadow-sm border border-slate-100 shrink-0 overflow-hidden h-fit lg:h-full print:hidden">
         <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
           <h2 className="font-bold text-lg text-slate-900 flex items-center gap-2">
             <ShoppingCart className="w-5 h-5 text-kudi-green" />
@@ -473,7 +483,6 @@ export default function SalesLedger() {
                   </div>
                 </div>
 
-                {/* Action Buttons */}
                 <div className="flex gap-3 pt-4">
                   <button
                     type="button"
@@ -490,6 +499,136 @@ export default function SalesLedger() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modern Print Receipt Modal */}
+      {completedSaleDetails && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 print:relative print:z-0 print:bg-white print:p-0 print:flex-none print:items-start font-mono animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden print:shadow-none print:w-full print:rounded-none flex flex-col max-h-[90vh]">
+            {/* The actual Printable Receipt Area */}
+            <div className="p-6 bg-white flex-1 overflow-y-auto print:overflow-visible print:p-0">
+              <div className="text-center mb-6">
+                <div className="mx-auto w-12 h-12 bg-kudi-green/10 text-kudi-green rounded-full flex items-center justify-center mb-3 print:hidden">
+                  <CheckCircle2 className="w-6 h-6" />
+                </div>
+                <h1 className="text-xl font-bold text-slate-900 uppercase tracking-widest">
+                  KudiFlow Store
+                </h1>
+                <p className="text-xs text-slate-500 mt-1">
+                  Receipt for your purchase
+                </p>
+                <p className="text-xs text-slate-500 mt-1">
+                  {saleDate.toLocaleString()}
+                </p>
+              </div>
+
+              <div className="border-t-2 border-dashed border-slate-200 mb-4 pt-4">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-slate-500 border-b border-slate-100">
+                      <th className="text-left font-medium pb-2">Item</th>
+                      <th className="text-center font-medium pb-2">Qty</th>
+                      <th className="text-right font-medium pb-2">Price</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {completedSaleDetails.items.map((item, idx) => (
+                      <tr key={idx} className="border-b border-slate-50">
+                        <td className="py-2 text-slate-900 pr-2">
+                          {item.productName}
+                        </td>
+                        <td className="py-2 text-center text-slate-600">
+                          x{item.quantity}
+                        </td>
+                        <td className="py-2 text-right text-slate-900 font-medium">
+                          ₦{item.subtotal.toLocaleString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="space-y-1.5 text-sm mb-6">
+                <div className="flex justify-between text-slate-500">
+                  <span>Subtotal</span>
+                  <span>₦{completedSaleDetails.subtotal.toLocaleString()}</span>
+                </div>
+                {completedSaleDetails.discount > 0 && (
+                  <div className="flex justify-between text-rose-500">
+                    <span>Discount</span>
+                    <span>
+                      -₦{completedSaleDetails.discount.toLocaleString()}
+                    </span>
+                  </div>
+                )}
+                <div className="flex justify-between font-bold text-lg text-slate-900 pt-2 border-t border-slate-100">
+                  <span>Total Amount</span>
+                  <span>
+                    ₦{completedSaleDetails.totalAmount.toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex justify-between text-slate-600 pt-2">
+                  <span>Amount Paid</span>
+                  <span>
+                    ₦{completedSaleDetails.amountPaid.toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex justify-between text-slate-600">
+                  <span>Payment Method</span>
+                  <span className="capitalize font-medium">
+                    {completedSaleDetails.paymentMethod}
+                  </span>
+                </div>
+                <div className="flex justify-between text-slate-600">
+                  <span>Status</span>
+                  <span className="uppercase font-bold text-[10px] px-2 py-0.5 bg-slate-100 rounded-md">
+                    {completedSaleDetails.paymentStatus}
+                  </span>
+                </div>
+
+                {completedSaleDetails.customerName && (
+                  <div className="mt-4 pt-4 border-t border-dashed border-slate-200">
+                    <div className="text-xs text-slate-500">Customer</div>
+                    <div className="font-medium text-slate-900">
+                      {completedSaleDetails.customerName}
+                    </div>
+                    {completedSaleDetails.customerPhone && (
+                      <div className="text-xs text-slate-500">
+                        {completedSaleDetails.customerPhone}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="text-center text-xs text-slate-500 pb-2">
+                Thank you for choosing us!
+                <div className="mt-1 font-semibold">
+                  Powered by KudiFlow Engine
+                </div>
+              </div>
+            </div>
+
+            {/* Print Modal Actions - Hidden on actual print */}
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex gap-3 print:hidden">
+              <button
+                onClick={() => window.print()}
+                className="flex-1 py-3 bg-slate-900 text-white rounded-xl font-bold flex flex-col items-center justify-center hover:bg-slate-800 transition-colors"
+              >
+                <span className="flex items-center gap-2">
+                  <Printer className="w-4 h-4" /> Print Receipt
+                </span>
+              </button>
+              <button
+                onClick={handleFinishSale}
+                className="flex-1 py-3 bg-kudi-green text-white rounded-xl font-bold flex flex-col items-center justify-center hover:bg-kudi-green/90 transition-colors"
+              >
+                New Sale
+              </button>
             </div>
           </div>
         </div>

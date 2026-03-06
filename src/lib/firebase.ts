@@ -1,5 +1,9 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import {
+  getAuth,
+  setPersistence,
+  browserLocalPersistence,
+} from "firebase/auth";
 import {
   initializeFirestore,
   persistentLocalCache,
@@ -20,14 +24,18 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Auth
+// Initialize Auth and explicitly enforce long-term persistence
 export const auth = getAuth(app);
+setPersistence(auth, browserLocalPersistence).catch((err) =>
+  console.error("Auth persistence setup failed:", err)
+);
 
 // Initialize Firestore with offline persistence
 export const db = initializeFirestore(app, {
   localCache: persistentLocalCache({
     tabManager: persistentMultipleTabManager(),
   }),
+  ignoreUndefinedProperties: true, // Crucial for preventing crashes when optional optional fields (like customerName) are omitted
 });
 
 // Initialize Analytics (only in browser environment)

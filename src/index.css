@@ -72,3 +72,11 @@
     transform: translateX(-50%);
   }
 }
+
+@media print {
+  aside,
+  nav,
+  header {
+    display: none !important;
+  }
+}

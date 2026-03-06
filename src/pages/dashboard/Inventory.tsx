@@ -60,6 +60,13 @@ export default function Inventory() {
     setIsModalOpen(false);
   };
 
+  const handleNumberInput = (field: keyof NewProduct, value: string) => {
+    // Remove all non-numeric characters (commas, letters, etc)
+    const numericString = value.replace(/[^0-9]/g, "");
+    const numericValue = numericString ? parseInt(numericString, 10) : 0;
+    setFormData({ ...formData, [field]: numericValue });
+  };
+
   const handleDelete = async (id: string) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
       await deleteProduct(id);
@@ -231,16 +238,15 @@ export default function Inventory() {
                     Selling Price (₦)
                   </label>
                   <input
-                    type="number"
+                    type="text"
                     required
-                    min="0"
-                    step="1"
-                    value={formData.sellingPrice || ""}
+                    value={
+                      formData.sellingPrice
+                        ? formData.sellingPrice.toLocaleString()
+                        : ""
+                    }
                     onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        sellingPrice: Number(e.target.value),
-                      })
+                      handleNumberInput("sellingPrice", e.target.value)
                     }
                     className="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-kudi-green focus:border-transparent outline-none transition-all"
                   />
@@ -250,16 +256,15 @@ export default function Inventory() {
                     Cost Price (₦)
                   </label>
                   <input
-                    type="number"
+                    type="text"
                     required
-                    min="0"
-                    step="1"
-                    value={formData.costPrice || ""}
+                    value={
+                      formData.costPrice
+                        ? formData.costPrice.toLocaleString()
+                        : ""
+                    }
                     onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        costPrice: Number(e.target.value),
-                      })
+                      handleNumberInput("costPrice", e.target.value)
                     }
                     className="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-kudi-green focus:border-transparent outline-none transition-all"
                   />
@@ -271,16 +276,15 @@ export default function Inventory() {
                   Initial Stock Level
                 </label>
                 <input
-                  type="number"
+                  type="text"
                   required
-                  min="0"
-                  step="1"
-                  value={formData.stockLevel || ""}
+                  value={
+                    formData.stockLevel
+                      ? formData.stockLevel.toLocaleString()
+                      : ""
+                  }
                   onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      stockLevel: Number(e.target.value),
-                    })
+                    handleNumberInput("stockLevel", e.target.value)
                   }
                   className="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-kudi-green focus:border-transparent outline-none transition-all"
                 />

@@ -20,6 +20,7 @@ import DashboardOverview from "./pages/dashboard/Overview";
 import Inventory from "./pages/dashboard/Inventory";
 import SalesLedger from "./pages/dashboard/SalesLedger";
 import Transactions from "./pages/dashboard/Transactions";
+import AdminPanel from "./pages/dashboard/AdminPanel";
 
 function App() {
   return (
@@ -61,6 +62,7 @@ function App() {
             <Route path="inventory" element={<Inventory />} />
             <Route path="sales" element={<SalesLedger />} />
             <Route path="transactions" element={<Transactions />} />
+            <Route path="admin" element={<AdminPanel />} />
             {/* Phase 3 routes will go here: /debtors */}
           </Route>
         </Routes>

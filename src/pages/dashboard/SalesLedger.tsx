@@ -178,9 +178,9 @@ export default function SalesLedger() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-80px)] overflow-hidden bg-slate-50 gap-6 p-6">
+    <div className="flex flex-col lg:flex-row lg:h-[calc(100vh-80px)] lg:overflow-hidden bg-slate-50 gap-4 lg:gap-6 p-4 lg:p-6">
       {/* Left Panel: Products Selection */}
-      <div className="flex-1 flex flex-col bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+      <div className="flex-1 flex flex-col bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden min-h-[60vh] lg:min-h-0">
         {/* Search Bar */}
         <div className="p-4 border-b border-slate-100 bg-white z-10">
           <div className="relative">
@@ -243,7 +243,7 @@ export default function SalesLedger() {
       </div>
 
       {/* Right Panel: The Cart view */}
-      <div className="w-[400px] flex flex-col bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden shrink-0">
+      <div className="w-full lg:w-[400px] flex flex-col bg-white rounded-2xl shadow-sm border border-slate-100 shrink-0 overflow-hidden h-fit lg:h-full">
         <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
           <h2 className="font-bold text-lg text-slate-900 flex items-center gap-2">
             <ShoppingCart className="w-5 h-5 text-kudi-green" />

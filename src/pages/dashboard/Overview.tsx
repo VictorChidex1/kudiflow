@@ -5,6 +5,7 @@ import { useInventory } from "../../hooks/useInventory";
 import { ReceiptModal } from "../../components/dashboard/ReceiptModal";
 import { useNavigate } from "react-router-dom";
 import { useMemo, useState } from "react";
+import { User } from "lucide-react";
 import type { Sale } from "../../types/sales";
 
 export default function Overview() {
@@ -156,11 +157,11 @@ export default function Overview() {
                   <div
                     key={sale.id || idx}
                     onClick={() => setSelectedSale(sale)}
-                    className="px-6 py-4 flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer"
+                    className="p-5 flex flex-col sm:flex-row justify-between gap-4 hover:bg-slate-50/80 active:bg-slate-100 active:scale-[0.99] transition-all duration-200 cursor-pointer group"
                   >
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-start gap-4 min-w-0">
                       <div
-                        className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
+                        className={`w-11 h-11 shrink-0 rounded-full flex items-center justify-center text-lg shadow-sm border ${
                           sale.paymentStatus === "paid"
                             ? "bg-emerald-100 text-emerald-700"
                             : sale.paymentStatus === "partial"
@@ -176,37 +177,50 @@ export default function Overview() {
                           ? "🏦"
                           : "📝"}
                       </div>
-                      <div>
-                        <p className="font-semibold text-slate-900 pr-2 leading-tight">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-slate-900 leading-tight break-words pr-2">
                           {sale.items
                             .map(
                               (item) => `${item.quantity} ${item.productName}`
                             )
                             .join(", ")}{" "}
-                          Sold
-                          {sale.customerName && (
-                            <span className="text-slate-500 font-normal ml-1">
-                              to {sale.customerName}
-                            </span>
-                          )}
+                          <span className="text-slate-500 font-normal">
+                            Sold
+                          </span>
                         </p>
-                        <p className="text-xs text-slate-500 capitalize">
-                          {sale.paymentMethod} • {sale.paymentStatus}
+                        {sale.customerName && (
+                          <div className="flex items-center gap-1.5 mt-1.5">
+                            <User className="w-3 h-3 text-slate-400 shrink-0" />
+                            <p className="text-sm font-medium text-slate-500 truncate">
+                              Sold to{" "}
+                              <span className="text-slate-700 font-semibold">
+                                {sale.customerName}
+                              </span>
+                            </p>
+                          </div>
+                        )}
+                        <p className="text-xs text-slate-500 font-medium flex items-center gap-2 mt-2 capitalize tracking-wide">
+                          <span className="px-2.5 py-0.5 rounded-md bg-slate-50 border border-slate-200 font-bold uppercase">
+                            {sale.paymentMethod}
+                          </span>
+                          <span
+                            className={`font-black uppercase tracking-widest text-[9px] px-2 py-0.5 rounded border ${
+                              sale.paymentStatus === "paid"
+                                ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                                : sale.paymentStatus === "partial"
+                                ? "bg-amber-50 border-amber-200 text-amber-700"
+                                : "bg-rose-50 border-rose-200 text-rose-700"
+                            }`}
+                          >
+                            {sale.paymentStatus}
+                          </span>
                         </p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-bold text-slate-900">
+                    <div className="text-left sm:text-right pl-15 sm:pl-0 shrink-0 self-start sm:self-center mt-2 sm:mt-0">
+                      <p className="font-extrabold text-lg text-slate-900 tracking-tight">
                         ₦{sale.totalAmount.toLocaleString()}
                       </p>
-                      {sale.paymentStatus !== "paid" && (
-                        <p className="text-xs text-rose-500 font-medium">
-                          Balance: ₦
-                          {(
-                            sale.totalAmount - sale.amountPaid
-                          ).toLocaleString()}
-                        </p>
-                      )}
                     </div>
                   </div>
                 ))}

@@ -10,6 +10,7 @@ import { db } from "../../lib/firebase";
 import { useAdmin } from "../../hooks/useAdmin";
 import { useSettings } from "../../hooks/useSettings";
 import { useDataWipe } from "../../hooks/useDataWipe";
+import { useProfile } from "../../hooks/useProfile";
 import {
   ShieldAlert,
   Loader2,
@@ -21,10 +22,17 @@ import {
   Wallet,
   AlertTriangle,
   Save,
+  ChevronDown,
+  Check,
+  LifeBuoy,
+  User,
+  Phone,
+  Mail,
 } from "lucide-react";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
+import { AdminUserInspector } from "../../components/dashboard/AdminUserInspector";
 
 interface UserDoc {
   id: string;
@@ -49,16 +57,33 @@ export default function Settings() {
   const { isAdmin } = useAdmin();
   const { settings, updateSettings, isLoading: isSettingsLoading } = useSettings();
   const { wipeInventory, wipeSales, wipeDebtors } = useDataWipe();
+  const { profile, updateProfile, isLoading: isProfileLoading } = useProfile();
 
   // Super Admin Data States
   const [users, setUsers] = useState<UserDoc[]>([]);
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [isSuperAdminDataLoading, setIsSuperAdminDataLoading] = useState(false);
+  const [inspectedUser, setInspectedUser] = useState<UserDoc | null>(null);
 
   // Settings Forms States
   const [bName, setBName] = useState("");
   const [currency, setCurrency] = useState<"₦" | "$" | "£" | "€">("₦");
-  const [isSaving, setIsSaving] = useState(false);
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
+
+  // Profile Form States
+  const [fName, setFName] = useState("");
+  const [telephone, setTelephone] = useState("");
+  const [sName, setSName] = useState("");
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+
+  // Currency Dropdown State
+  const [isCurrencyDropdownOpen, setIsCurrencyDropdownOpen] = useState(false);
+  const CURRENCIES = [
+    { value: "₦", label: "Nigerian Naira (₦)" },
+    { value: "$", label: "US Dollar ($)" },
+    { value: "£", label: "British Pound (£)" },
+    { value: "€", label: "Euro (€)" },
+  ];
 
   // Danger Zone States
   const [wipeTarget, setWipeTarget] = useState<"inventory" | "sales" | "debtors" | null>(null);
@@ -75,28 +100,54 @@ export default function Settings() {
   }, [settings]);
 
   useEffect(() => {
+    if (profile) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setFName(profile.fullName || "");
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setTelephone(profile.phone || "");
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSName(profile.shopName || "");
+    }
+  }, [profile]);
+
+  useEffect(() => {
     if (!isAdmin) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsSuperAdminDataLoading(true);
 
     const usersQuery = query(collection(db, "users"), orderBy("createdAt", "desc"));
-    const unsubUsers = onSnapshot(usersQuery, (snapshot) => {
-      const usersData = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data({ serverTimestamps: "estimate" }),
-      })) as UserDoc[];
-      setUsers(usersData);
-    });
+    const unsubUsers = onSnapshot(
+      usersQuery,
+      (snapshot) => {
+        const usersData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data({ serverTimestamps: "estimate" }),
+        })) as UserDoc[];
+        setUsers(usersData);
+      },
+      (err) => {
+        console.error("SuperAdmin Users Error:", err);
+        toast.error("Failed to load Super Admin logs (Check Firestore rules)");
+        setIsSuperAdminDataLoading(false);
+      }
+    );
 
     const msgsQuery = query(collection(db, "contact_messages"), orderBy("createdAt", "desc"));
-    const unsubMsgs = onSnapshot(msgsQuery, (snapshot) => {
-      const msgsData = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data({ serverTimestamps: "estimate" }),
-      })) as ContactMessage[];
-      setMessages(msgsData);
-      setIsSuperAdminDataLoading(false);
-    });
+    const unsubMsgs = onSnapshot(
+      msgsQuery,
+      (snapshot) => {
+        const msgsData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data({ serverTimestamps: "estimate" }),
+        })) as ContactMessage[];
+        setMessages(msgsData);
+        setIsSuperAdminDataLoading(false);
+      },
+      (err) => {
+        console.error("SuperAdmin Messages Error:", err);
+        setIsSuperAdminDataLoading(false);
+      }
+    );
 
     return () => {
       unsubUsers();
@@ -107,9 +158,17 @@ export default function Settings() {
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!bName.trim()) return toast.error("Business name is required");
-    setIsSaving(true);
+    setIsSavingSettings(true);
     await updateSettings({ businessName: bName, currencySymbol: currency });
-    setIsSaving(false);
+    setIsSavingSettings(false);
+  };
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!fName.trim()) return toast.error("Full name is required");
+    setIsSavingProfile(true);
+    await updateProfile({ fullName: fName, phone: telephone, shopName: sName });
+    setIsSavingProfile(false);
   };
 
   const executeWipe = async () => {
@@ -128,7 +187,7 @@ export default function Settings() {
     setWipeConfirmText("");
   };
 
-  if (isSettingsLoading) {
+  if (isSettingsLoading || isProfileLoading) {
     return (
       <div className="flex-1 p-8 flex flex-col items-center justify-center h-full">
         <Loader2 className="w-10 h-10 animate-spin text-emerald-500 mb-4" />
@@ -162,17 +221,103 @@ export default function Settings() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
           
-          {/* Section 1 & 2: Store Preferences */}
-          <div className="space-y-6">
+          {/* Left Column: Forms */}
+          <div className="space-y-6 lg:space-y-8">
+            
+            {/* Section 1: Business Profile */}
             <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200">
               <div className="flex items-center gap-3 mb-6">
-                <Store className="w-5 h-5 text-emerald-500" />
-                <h2 className="text-xl font-bold text-slate-800">Business Setup</h2>
+                <User className="w-5 h-5 text-emerald-500" />
+                <h2 className="text-xl font-bold text-slate-800">Personal Profile</h2>
+              </div>
+              
+              <form onSubmit={handleSaveProfile} className="space-y-5">
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1.5">Full Name</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                      <User className="w-5 h-5 text-slate-400" />
+                    </div>
+                    <input
+                      type="text"
+                      value={fName}
+                      onChange={(e) => setFName(e.target.value)}
+                      className="w-full pl-10 bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 block p-3.5 transition-all outline-none font-medium"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1.5">Shop Name</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                      <Store className="w-5 h-5 text-slate-400" />
+                    </div>
+                    <input
+                      type="text"
+                      value={sName}
+                      onChange={(e) => setSName(e.target.value)}
+                      className="w-full pl-10 bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 block p-3.5 transition-all outline-none font-medium"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1.5">Phone Number</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                      <Phone className="w-5 h-5 text-slate-400" />
+                    </div>
+                    <input
+                      type="tel"
+                      value={telephone}
+                      onChange={(e) => setTelephone(e.target.value)}
+                      placeholder="+234 800 000 0000"
+                      className="w-full pl-10 bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 block p-3.5 transition-all outline-none font-medium"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1.5">Login Email</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                      <Mail className="w-5 h-5 text-slate-400" />
+                    </div>
+                    <input
+                      type="email"
+                      value={profile?.email || ""}
+                      readOnly
+                      disabled
+                      className="w-full pl-10 bg-slate-100 border border-slate-200 text-slate-500 text-sm rounded-xl block p-3.5 font-medium cursor-not-allowed"
+                    />
+                  </div>
+                  <p className="text-[10px] text-slate-400 mt-1 font-medium">To change your email, please contact customer support.</p>
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    disabled={isSavingProfile}
+                    className="w-full bg-emerald-600 text-white font-bold rounded-xl px-6 py-3.5 flex items-center justify-center gap-2 hover:bg-emerald-700 transition-colors disabled:opacity-70 active:scale-95 shadow-lg shadow-emerald-600/20"
+                  >
+                    {isSavingProfile ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+                    Save Profile
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Section 2: Store Preferences */}
+            <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200">
+              <div className="flex items-center gap-3 mb-6">
+                <SettingsIcon className="w-5 h-5 text-emerald-500" />
+                <h2 className="text-xl font-bold text-slate-800">App Preferences</h2>
               </div>
               
               <form onSubmit={handleSaveSettings} className="space-y-5">
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-1.5">Business Name</label>
+                  <label className="block text-sm font-bold text-slate-700 mb-1.5">Receipt Business Name</label>
                   <input
                     type="text"
                     value={bName}
@@ -183,28 +328,59 @@ export default function Settings() {
                 
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-1.5">Default Currency</label>
-                  <div className="flex items-center gap-2">
-                    <Wallet className="w-5 h-5 text-slate-400" />
-                    <select
-                      value={currency}
-                      onChange={(e) => setCurrency(e.target.value as "₦" | "$" | "£" | "€")}
-                      className="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 block p-3.5 transition-all outline-none font-medium appearance-none"
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setIsCurrencyDropdownOpen(!isCurrencyDropdownOpen)}
+                      className="w-full flex items-center justify-between bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 p-3.5 transition-all outline-none font-medium text-left"
                     >
-                      <option value="₦">Nigerian Naira (₦)</option>
-                      <option value="$">US Dollar ($)</option>
-                      <option value="£">British Pound (£)</option>
-                      <option value="€">Euro (€)</option>
-                    </select>
+                      <div className="flex items-center gap-2">
+                        <Wallet className="w-5 h-5 text-slate-400" />
+                        <span>{CURRENCIES.find(c => c.value === currency)?.label || currency}</span>
+                      </div>
+                      <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform duration-200 ${isCurrencyDropdownOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                    
+                    <AnimatePresence>
+                      {isCurrencyDropdownOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ duration: 0.15 }}
+                          className="absolute z-20 top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden"
+                        >
+                          {CURRENCIES.map((c) => (
+                            <button
+                              key={c.value}
+                              type="button"
+                              onClick={() => {
+                                setCurrency(c.value as "₦" | "$" | "£" | "€");
+                                setIsCurrencyDropdownOpen(false);
+                              }}
+                              className={`w-full text-left px-4 py-3 flex items-center justify-between hover:bg-slate-50 transition-colors ${
+                                currency === c.value 
+                                  ? 'bg-emerald-50 text-emerald-700 font-bold' 
+                                  : 'text-slate-700 font-medium'
+                              }`}
+                            >
+                              {c.label}
+                              {currency === c.value && <Check className="w-4 h-4 text-emerald-600" />}
+                            </button>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </div>
 
                 <div className="pt-2">
                   <button
                     type="submit"
-                    disabled={isSaving}
-                    className="w-full sm:w-auto bg-slate-900 text-white font-bold rounded-xl px-6 py-3.5 flex items-center justify-center gap-2 hover:bg-slate-800 transition-colors disabled:opacity-70"
+                    disabled={isSavingSettings}
+                    className="w-full bg-slate-900 text-white font-bold rounded-xl px-6 py-3.5 flex items-center justify-center gap-2 hover:bg-slate-800 transition-colors disabled:opacity-70 active:scale-95"
                   >
-                    {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+                    {isSavingSettings ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
                     Save Preferences
                   </button>
                 </div>
@@ -212,8 +388,41 @@ export default function Settings() {
             </div>
           </div>
 
-          {/* Section 3: The Danger Zone */}
-          <div className="space-y-6">
+          {/* Right Column */}
+          <div className="space-y-6 lg:space-y-8">
+            
+            {/* Section 3: Support Center */}
+            <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                  <LifeBuoy className="w-5 h-5 text-blue-600" />
+                </div>
+                <h2 className="text-xl font-bold text-slate-800">Support Center</h2>
+              </div>
+              <p className="text-sm text-slate-500 mb-6 leading-relaxed">
+                Need help with your store or encountering a bug? Reach out directly to our dedicated technical support team. We reply within 24 hours.
+              </p>
+              <div className="space-y-3">
+                <a
+                  href="https://wa.me/2348000000000" // Replace with actual WhatsApp number
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center justify-center gap-2 bg-[#25D366]/10 border border-[#25D366]/20 text-[#25D366] font-bold rounded-xl px-6 py-3.5 hover:bg-[#25D366]/20 transition-colors"
+                >
+                  <MessageSquare className="w-5 h-5" />
+                  Contact us via WhatsApp
+                </a>
+                <a
+                  href="mailto:support@kudiflow.com"
+                  className="w-full flex items-center justify-center gap-2 bg-blue-50 border border-blue-100 text-blue-600 font-bold rounded-xl px-6 py-3.5 hover:bg-blue-100 hover:text-blue-700 transition-colors"
+                >
+                  <Mail className="w-5 h-5" />
+                  Contact us via Email
+                </a>
+              </div>
+            </div>
+
+             {/* Section 4: The Danger Zone */}
              <div className="bg-rose-50/50 rounded-3xl p-6 sm:p-8 shadow-sm border border-rose-100">
                <div className="flex items-center gap-3 mb-4">
                  <ShieldAlert className="w-6 h-6 text-rose-500" />
@@ -279,10 +488,14 @@ export default function Settings() {
                   <div className="overflow-y-auto flex-1 p-0">
                     <ul className="divide-y divide-slate-100">
                       {users.map((u) => (
-                        <li key={u.id} className="p-5 hover:bg-slate-50 transition-colors">
+                        <li 
+                          key={u.id} 
+                          className="p-5 hover:bg-slate-50 transition-colors cursor-pointer group"
+                          onClick={() => setInspectedUser(u)}
+                        >
                           <div className="flex justify-between items-start gap-3">
                             <div className="min-w-0">
-                              <p className="text-sm font-bold text-slate-900 flex items-center gap-2 truncate">
+                              <p className="text-sm font-bold text-slate-900 flex items-center gap-2 truncate group-hover:text-emerald-700 transition-colors">
                                 {u.fullName}
                                 {u.isAdmin && (
                                   <span className="shrink-0 px-2 py-0.5 rounded-md bg-rose-100 text-rose-700 text-[10px] uppercase font-black tracking-wider">
@@ -415,6 +628,16 @@ export default function Settings() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* God-Mode Inspector Modal Overlay */}
+      {inspectedUser && (
+        <AdminUserInspector
+          userId={inspectedUser.id}
+          userName={inspectedUser.fullName}
+          shopName={inspectedUser.shopName}
+          onClose={() => setInspectedUser(null)}
+        />
+      )}
 
     </div>
   );

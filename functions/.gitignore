@@ -1,2 +1,7 @@
 node_modules/
 *.local
+
+# Environment files — contain API secrets, never commit these
+.env
+.env.*
+!.env.example

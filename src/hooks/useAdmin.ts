@@ -17,8 +17,13 @@ export function useAdmin() {
 
       try {
         const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (userDoc.exists() && userDoc.data().isAdmin === true) {
-          setIsAdmin(true);
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+          if (data.isAdmin === true || data.role === "admin") {
+            setIsAdmin(true);
+          } else {
+            setIsAdmin(false);
+          }
         } else {
           setIsAdmin(false);
         }

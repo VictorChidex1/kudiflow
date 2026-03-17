@@ -8,6 +8,8 @@ import {
   writeBatch,
   increment,
   Timestamp,
+  getDocs,
+  where,
 } from "firebase/firestore";
 import { db, auth } from "../lib/firebase";
 import type { Sale, NewSale } from "../types/sales";
@@ -87,6 +89,35 @@ export function useSales() {
         userId: user.uid,
         createdAt: serverTimestamp(),
       });
+
+      // 1.5. Detect & Automate Debtor logging
+      const debtAmount = saleData.totalAmount - saleData.amountPaid;
+      if (debtAmount > 0 && saleData.customerName) {
+        const debtorsRef = collection(db, `users/${user.uid}/debtors`);
+        const debtorQuery = query(
+          debtorsRef,
+          where("name", "==", saleData.customerName)
+        );
+        const querySnapshot = await getDocs(debtorQuery);
+
+        if (!querySnapshot.empty) {
+          // Update existing debtor profile
+          batch.update(querySnapshot.docs[0].ref, {
+            balanceOwed: increment(debtAmount),
+            updatedAt: serverTimestamp(),
+          });
+        } else {
+          // Create new debtor profile
+          const newDebtorRef = doc(debtorsRef);
+          batch.set(newDebtorRef, {
+            name: saleData.customerName,
+            phone: saleData.customerPhone || "",
+            balanceOwed: debtAmount,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+          });
+        }
+      }
 
       // 2. Iterate through the Cart Items and queue stock deductions
       for (const item of saleData.items) {

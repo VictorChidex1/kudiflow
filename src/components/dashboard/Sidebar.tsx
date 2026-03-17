@@ -6,16 +6,13 @@ import {
   Users,
   Settings,
   LogOut,
-  ShieldAlert,
 } from "lucide-react";
 import { auth } from "../../lib/firebase";
 import { signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
-import { useAdmin } from "../../hooks/useAdmin";
 
 export function Sidebar() {
   const navigate = useNavigate();
-  const { isAdmin } = useAdmin();
 
   const handleLogout = async () => {
     try {
@@ -54,13 +51,7 @@ export function Sidebar() {
     },
   ];
 
-  if (isAdmin) {
-    navItems.push({
-      name: "Admin Panel",
-      icon: <ShieldAlert className="w-5 h-5" />,
-      path: "/dashboard/admin",
-    });
-  }
+  // Note: Admin God-Mode features will now be securely conditionally rendered inside the universal Settings page.
 
   return (
     <aside className="hidden lg:flex flex-col w-64 h-screen bg-slate-900 border-r border-slate-800 sticky top-0 shrink-0">

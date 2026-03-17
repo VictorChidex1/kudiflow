@@ -144,12 +144,21 @@ export default function SalesLedger() {
     e.preventDefault();
     if (cart.length === 0) return;
 
-    let status: PaymentStatus = "unpaid";
-    if (amountPaid >= totalAmount) status = "paid";
-    else if (amountPaid > 0) status = "partial";
+    let finalAmountPaid = amountPaid;
+    // Safety check: if they selected "credit" but amountPaid is still full amount, they probably meant 0
+    if (paymentMethod === "credit" && finalAmountPaid === totalAmount) {
+      finalAmountPaid = 0;
+    }
 
-    if (paymentMethod === "credit" && !customerName.trim()) {
-      toast.error("Customer Name is required for credit sales.");
+    let status: PaymentStatus = "unpaid";
+    if (finalAmountPaid >= totalAmount) status = "paid";
+    else if (finalAmountPaid > 0) status = "partial";
+
+    if (
+      (paymentMethod === "credit" || finalAmountPaid < totalAmount) &&
+      !customerName.trim()
+    ) {
+      toast.error("Customer Name is required for credit or partial sales.");
       return;
     }
 
@@ -158,7 +167,7 @@ export default function SalesLedger() {
       subtotal,
       discount,
       totalAmount,
-      amountPaid,
+      amountPaid: finalAmountPaid,
       paymentMethod,
       paymentStatus: status,
       customerName: customerName.trim() || undefined,
@@ -385,7 +394,17 @@ export default function SalesLedger() {
                       <button
                         key={method}
                         type="button"
-                        onClick={() => setPaymentMethod(method)}
+                        onClick={() => {
+                          setPaymentMethod(method);
+                          if (method === "credit") {
+                            setAmountPaid(0);
+                          } else if (
+                            paymentMethod === "credit" &&
+                            amountPaid === 0
+                          ) {
+                            setAmountPaid(totalAmount);
+                          }
+                        }}
                         className={`py-2 rounded-xl border text-sm font-semibold capitalize transition-all ${
                           paymentMethod === method
                             ? "bg-kudi-green/10 border-kudi-green text-kudi-green"

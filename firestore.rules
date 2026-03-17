@@ -118,5 +118,17 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
+    // 1. Strict Multi-Tenant Security
+    // Users can ONLY access their own specific subcollection folder.
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    // 2. Landing Page Contact Form
+    // Anyone can write a message, but only YOU (Admin Console) can read them.
+    match /contact_messages/{messageId} {
+      allow create: if true;
+      allow read, update, delete: if false; 
+    }
+
   }
 }

@@ -74,7 +74,8 @@ exports.sendWelcomeEmail = onDocumentCreated(
                       <p style="margin:0;font-size:28px;font-weight:900;color:#ffffff;letter-spacing:-0.5px;">
                         Kudi<span style="color:#10b981;">Flow</span>
                       </p>
-                      <p style="margin:8px 0 0;font-size:13px;color:#94a3b8;font-weight:500;">Your offline-first business OS</p>
+                      <p style="margin:8px 0 0;font-size:13px;color:#94a3b8;font-weight:500;">The Offline-First
+App for Smart Vendors</p>
                     </td>
                   </tr>
 

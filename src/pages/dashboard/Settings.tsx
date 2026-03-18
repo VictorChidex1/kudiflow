@@ -6,11 +6,12 @@ import {
   onSnapshot,
   Timestamp,
 } from "firebase/firestore";
-import { db } from "../../lib/firebase";
+import { db, auth } from "../../lib/firebase";
 import { useAdmin } from "../../hooks/useAdmin";
 import { useSettings } from "../../hooks/useSettings";
 import { useDataWipe } from "../../hooks/useDataWipe";
 import { useProfile } from "../../hooks/useProfile";
+import { useDeleteAccount } from "../../hooks/useDeleteAccount";
 import {
   ShieldAlert,
   Loader2,
@@ -21,6 +22,7 @@ import {
   Store,
   Wallet,
   AlertTriangle,
+  Trash2,
   Save,
   ChevronDown,
   Check,
@@ -58,6 +60,7 @@ export default function Settings() {
   const { settings, updateSettings, isLoading: isSettingsLoading } = useSettings();
   const { wipeInventory, wipeSales, wipeDebtors } = useDataWipe();
   const { profile, updateProfile, isLoading: isProfileLoading } = useProfile();
+  const { deleteAccount, isDeleting: isDeletingAccount } = useDeleteAccount();
 
   // Super Admin Data States
   const [users, setUsers] = useState<UserDoc[]>([]);
@@ -89,6 +92,12 @@ export default function Settings() {
   const [wipeTarget, setWipeTarget] = useState<"inventory" | "sales" | "debtors" | null>(null);
   const [wipeConfirmText, setWipeConfirmText] = useState("");
   const [isWiping, setIsWiping] = useState(false);
+
+  // Delete Account States
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [deletePassword, setDeletePassword] = useState("");
+  const isEmailUser = auth.currentUser?.providerData[0]?.providerId === "password";
 
   useEffect(() => {
     if (settings) {
@@ -454,6 +463,18 @@ export default function Settings() {
                    <span className="font-bold text-slate-700 group-hover:text-rose-700 transition-colors">Reset Debtors Ledger</span>
                    <AlertTriangle className="w-5 h-5 text-rose-400" />
                  </button>
+                  
+                  {/* Divider */}
+                  <div className="border-t border-rose-200 my-1" />
+                  
+                  {/* Delete Account — most destructive action */}
+                  <button
+                    onClick={() => setShowDeleteModal(true)}
+                    className="w-full flex items-center justify-between p-4 bg-rose-600 border border-rose-700 rounded-2xl text-left hover:bg-rose-700 transition-all group"
+                  >
+                    <span className="font-bold text-white">Delete My Account Permanently</span>
+                    <Trash2 className="w-5 h-5 text-rose-200" />
+                  </button>
                </div>
              </div>
           </div>
@@ -620,6 +641,97 @@ export default function Settings() {
                       <Loader2 className="w-5 h-5 animate-spin" />
                     ) : (
                       "Delete Data"
+                    )}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete Account Modal */}
+      <AnimatePresence>
+        {showDeleteModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-slate-200"
+            >
+              <div className="p-6 sm:p-8">
+                {/* Icon */}
+                <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mb-6 mx-auto">
+                  <Trash2 className="w-8 h-8 text-rose-600" />
+                </div>
+
+                <h2 className="text-2xl font-black text-slate-800 text-center mb-2">
+                  Delete Your Account?
+                </h2>
+                <p className="text-slate-500 text-center mb-6 text-sm leading-relaxed">
+                  This will <span className="font-bold text-rose-600">permanently erase</span> your
+                  profile, all sales history, inventory, and debtor records.
+                  This action <span className="font-bold text-slate-800">cannot be undone</span>.
+                  Type <span className="font-mono bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded font-bold">DELETE</span> to confirm.
+                </p>
+
+                {/* Confirmation text */}
+                <input
+                  type="text"
+                  placeholder="Type DELETE to confirm"
+                  value={deleteConfirmText}
+                  onChange={(e) => setDeleteConfirmText(e.target.value)}
+                  className="w-full text-center bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 block p-3.5 outline-none font-bold uppercase mb-3"
+                />
+
+                {/* Password field — only for email/password users */}
+                {isEmailUser && (
+                  <input
+                    type="password"
+                    placeholder="Enter your password to confirm"
+                    value={deletePassword}
+                    onChange={(e) => setDeletePassword(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 block p-3.5 outline-none mb-6"
+                  />
+                )}
+                {!isEmailUser && <div className="mb-6" />}
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      setShowDeleteModal(false);
+                      setDeleteConfirmText("");
+                      setDeletePassword("");
+                    }}
+                    className="flex-1 bg-slate-100 text-slate-700 font-bold py-3.5 rounded-xl hover:bg-slate-200 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={async () => {
+                      if (deleteConfirmText !== "DELETE") {
+                        return;
+                      }
+                      await deleteAccount(isEmailUser ? deletePassword : undefined);
+                      setShowDeleteModal(false);
+                    }}
+                    disabled={
+                      isDeletingAccount ||
+                      deleteConfirmText !== "DELETE" ||
+                      (isEmailUser && !deletePassword.trim())
+                    }
+                    className="flex-1 bg-rose-600 text-white font-bold py-3.5 rounded-xl hover:bg-rose-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {isDeletingAccount ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      "Delete Forever"
                     )}
                   </button>
                 </div>

@@ -6,6 +6,7 @@ import { auth, db } from "../lib/firebase";
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import {
   createUserWithEmailAndPassword,
+  sendEmailVerification,
   signInWithPopup,
   GoogleAuthProvider,
 } from "firebase/auth";
@@ -68,6 +69,9 @@ export function Signup() {
         createdAt: serverTimestamp(),
         authProvider: "email",
       });
+
+      // 3. Send email verification link
+      await sendEmailVerification(user);
 
       navigate("/dashboard"); // Redirect upon success
     } catch (err: unknown) {

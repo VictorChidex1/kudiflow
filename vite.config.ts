@@ -4,31 +4,32 @@ import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import { createRequire } from "module";
 
-// vite-plugin-prerender ships a broken ESM bundle (uses `require` inside .mjs).
-// We use createRequire to explicitly load its CJS build instead.
+// vite-plugin-prerender uses Puppeteer (headless Chrome) which cannot run
+// in Vercel's sandboxed build environment. Only load it outside of Vercel CI.
+const isVercel = !!process.env.VERCEL;
 const require = createRequire(import.meta.url);
-const vitePrerender = require("vite-plugin-prerender");
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
-    vitePrerender({
-      // The directory where your built assets live
-      staticDir: path.join(__dirname, "dist"),
-      // All public-facing marketing routes (no auth, no dashboard)
-      routes: [
-        "/",
-        "/about",
-        "/contact",
-        "/docs",
-        "/privacy-policy",
-        "/terms-of-service",
-        "/coming-soon",
-      ],
-    }),
+    // Only prerender locally and on Firebase deploy (not on Vercel)
+    ...(!isVercel
+      ? [
+          require("vite-plugin-prerender")({
+            staticDir: path.join(__dirname, "dist"),
+            routes: [
+              "/",
+              "/about",
+              "/contact",
+              "/docs",
+              "/privacy-policy",
+              "/terms-of-service",
+              "/coming-soon",
+            ],
+          }),
+        ]
+      : []),
   ],
 });
-
-

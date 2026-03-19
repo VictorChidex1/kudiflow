@@ -13,6 +13,8 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
+import BlogLanding from "./pages/BlogLanding";
+import BlogPost from "./pages/BlogPost";
 import { ScrollToTop } from "./components/ui/ScrollToTop";
 import { RouteScrollToTop } from "./components/ui/RouteScrollToTop";
 
@@ -25,6 +27,7 @@ import SalesLedger from "./pages/dashboard/SalesLedger";
 import Transactions from "./pages/dashboard/Transactions";
 import Settings from "./pages/dashboard/Settings";
 import Debtors from "./pages/dashboard/Debtors";
+import BlogCMS from "./pages/dashboard/BlogCMS";
 
 function App() {
   return (
@@ -49,6 +52,8 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/blog" element={<BlogLanding />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/docs" element={<DocsPage />} />
           <Route path="/coming-soon" element={<ComingSoon />} />
           <Route path="/about" element={<About />} />
@@ -70,6 +75,7 @@ function App() {
             <Route path="sales" element={<SalesLedger />} />
             <Route path="transactions" element={<Transactions />} />
             <Route path="settings" element={<Settings />} />
+            <Route path="settings/cms" element={<BlogCMS />} />
             <Route path="debtors" element={<Debtors />} />
           </Route>
         </Routes>

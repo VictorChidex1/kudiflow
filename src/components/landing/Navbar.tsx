@@ -112,6 +112,7 @@ export function LandingNavbar() {
     { name: "Features", href: "/#features" },
     { name: "Pricing", href: "/#pricing" },
     { name: "Testimonials", href: "/#testimonials" },
+    { name: "Blog", href: "/blog" },
     { name: "Docs", href: "/docs" },
   ];
 

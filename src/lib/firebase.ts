@@ -10,6 +10,7 @@ import {
   persistentMultipleTabManager,
 } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
+import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -41,3 +42,6 @@ export const db = initializeFirestore(app, {
 // Initialize Analytics (only in browser environment)
 export const analytics =
   typeof window !== "undefined" ? getAnalytics(app) : null;
+
+// Initialize Storage
+export const storage = getStorage(app);

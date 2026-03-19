@@ -29,9 +29,11 @@ import {
   LifeBuoy,
   User,
   Phone,
+  FileText,
   Mail,
 } from "lucide-react";
 import { format } from "date-fns";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import { AdminUserInspector } from "../../components/dashboard/AdminUserInspector";
@@ -484,9 +486,18 @@ export default function Settings() {
         {/* Section 4: Super Admin God-Mode Views (Conditional) */}
         {isAdmin && (
           <div className="mt-8 pt-6 border-t border-slate-200">
-            <div className="flex items-center gap-3 mb-6">
-              <ShieldAlert className="w-6 h-6 text-emerald-600" />
-              <h2 className="text-2xl font-black text-slate-800 tracking-tight">Super Admin Logs</h2>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <ShieldAlert className="w-6 h-6 text-emerald-600" />
+                <h2 className="text-2xl font-black text-slate-800 tracking-tight">Super Admin Command Center</h2>
+              </div>
+              <Link
+                to="/dashboard/settings/cms"
+                className="flex items-center gap-2 bg-slate-900 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-[0_4px_14px_0_rgba(15,23,42,0.39)] hover:shadow-[0_6px_20px_rgba(15,23,42,0.23)] hover:bg-slate-800 transition-all group"
+              >
+                <FileText className="w-4 h-4 group-hover:-translate-y-0.5 transition-transform" />
+                Open Content CMS
+              </Link>
             </div>
             
             {isSuperAdminDataLoading ? (

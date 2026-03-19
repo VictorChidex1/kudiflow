@@ -147,7 +147,7 @@ export function Footer() {
                 </li>
                 <li>
                   <Link
-                    to="/coming-soon"
+                    to="/blog"
                     className="text-slate-500 hover:text-kudi-green hover:translate-x-1 inline-block transition-transform duration-300"
                   >
                     Blog

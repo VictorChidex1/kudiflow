@@ -27,6 +27,7 @@ export default defineConfig({
               "/privacy-policy",
               "/terms-of-service",
               "/coming-soon",
+              "/blog",
             ],
           }),
         ]

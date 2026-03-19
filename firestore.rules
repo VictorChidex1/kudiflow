@@ -91,6 +91,7 @@ service cloud.firestore {
     // LEGACY ROOT-LEVEL COLLECTIONS (backward compatibility)
     // =====================================================================
     match /inventory/{itemId} {
+      // Security: Multi-Tenant Iron Wall. You can only touch your own products.
       allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
     }
@@ -109,6 +110,17 @@ service cloud.firestore {
     // God-Mode admin dashboard data
     match /admin_data/{document=**} {
       allow read, write: if isAdmin();
+    }
+
+    // =====================================================================
+    // GLOBAL BLOGS COLLECTION (CMS)
+    // =====================================================================
+    match /blogs/{blogId} {
+      // Anyone can read blogs (for the public blog hub)
+      allow read: if true;
+      
+      // Only Super Admins can write, update, or delete blog posts
+      allow write: if isAdmin();
     }
   }
 }

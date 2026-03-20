@@ -11,6 +11,7 @@ import {
 } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
 import { getStorage } from "firebase/storage";
+import { getFunctions } from "firebase/functions";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -45,3 +46,6 @@ export const analytics =
 
 // Initialize Storage
 export const storage = getStorage(app);
+
+// Initialize Cloud Functions
+export const functions = getFunctions(app);

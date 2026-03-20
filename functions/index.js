@@ -9,8 +9,15 @@ require("dotenv").config();
  * See a full list of supported triggers at https://firebase.google.com/docs/functions
  */
 
+const admin = require("firebase-admin");
+admin.initializeApp();
+
 const { setGlobalOptions } = require("firebase-functions");
-const { onRequest } = require("firebase-functions/https");
+const {
+  onRequest,
+  onCall,
+  HttpsError,
+} = require("firebase-functions/v2/https");
 const logger = require("firebase-functions/logger");
 
 // For cost control, you can set the maximum number of containers that can be
@@ -157,3 +164,110 @@ App for Smart Vendors</p>
     }
   }
 );
+
+// --- SECURE CONTACT FORM PIPELINE ---
+exports.submitContactForm = onCall(async (request) => {
+  const data = request.data;
+  const { fullName, contact, storeName, message, recaptchaToken } = data;
+
+  // 1. Rigorous Data Validation
+  if (!fullName || typeof fullName !== "string" || fullName.length > 100) {
+    throw new HttpsError("invalid-argument", "Valid full name is required.");
+  }
+  if (!contact || typeof contact !== "string" || contact.length > 100) {
+    throw new HttpsError("invalid-argument", "Valid contact info is required.");
+  }
+  if (
+    !message ||
+    typeof message !== "string" ||
+    message.trim().length === 0 ||
+    message.length > 500
+  ) {
+    throw new HttpsError(
+      "invalid-argument",
+      "Valid message is required (max 500 characters)."
+    );
+  }
+  if (!recaptchaToken || typeof recaptchaToken !== "string") {
+    throw new HttpsError(
+      "unauthenticated",
+      "reCAPTCHA verification token is missing."
+    );
+  }
+
+  // 2. Secret Configuration
+  const secretKey = process.env.RECAPTCHA_SECRET_KEY;
+  if (!secretKey) {
+    logger.error(
+      "RECAPTCHA_SECRET_KEY is completely missing from the backend environment. Cannot verify tokens."
+    );
+    throw new HttpsError(
+      "internal",
+      "The server is not configured to verify reCAPTCHA tokens."
+    );
+  }
+
+  // 3. Google reCAPTCHA API Server-to-Server Verification
+  logger.info(
+    `Validating reCAPTCHA token for contact submission from ${fullName}`
+  );
+  try {
+    const verificationResponse = await fetch(
+      "https://www.google.com/recaptcha/api/siteverify",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          secret: secretKey,
+          response: recaptchaToken,
+        }).toString(),
+      }
+    );
+
+    const verificationData = await verificationResponse.json();
+
+    if (!verificationData.success) {
+      logger.warn(
+        `reCAPTCHA totally rejected! Reason: ${verificationData["error-codes"]}`
+      );
+      throw new HttpsError(
+        "permission-denied",
+        "Google reCAPTCHA determined this request originated from a bot."
+      );
+    }
+
+    if (verificationData.score !== undefined && verificationData.score < 0.4) {
+      logger.warn(`reCAPTCHA score too low! Score: ${verificationData.score}`);
+      throw new HttpsError(
+        "permission-denied",
+        "Traffic block: ReCAPTCHA score indicates high bot probability."
+      );
+    }
+
+    const db = admin.firestore();
+    const docRef = await db.collection("contact_messages").add({
+      fullName,
+      contact,
+      storeName: storeName ? String(storeName).substring(0, 100) : "",
+      message,
+      status: "new",
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    logger.info(
+      `Successfully injected secure contact message from ${fullName}`,
+      { docId: docRef.id }
+    );
+
+    // 5. Send Successful Response to Frontend
+    return { success: true, messageId: docRef.id };
+  } catch (error) {
+    logger.error("Error processing submitContactForm:", error);
+    if (error instanceof HttpsError) throw error; // Re-throw strictly typed errors
+    // Generic obfuscation block for random fetch/parsing crashes
+    throw new HttpsError(
+      "internal",
+      "A critical error occurred while attempting to submit the form."
+    );
+  }
+});

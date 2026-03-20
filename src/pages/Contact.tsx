@@ -6,8 +6,8 @@ import {
   GoogleReCaptchaProvider,
   useGoogleReCaptcha,
 } from "react-google-recaptcha-v3";
-import { db } from "../lib/firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { functions } from "../lib/firebase";
+import { httpsCallable } from "firebase/functions";
 import {
   MessageCircle,
   Mail,
@@ -141,12 +141,14 @@ function ContactPageContent() {
         recaptchaToken = await executeRecaptcha("contact_form_submit");
       }
 
-      await addDoc(collection(db, "contact_messages"), {
+      const submitContactForm = httpsCallable(functions, "submitContactForm");
+      
+      const response = await submitContactForm({
         ...formData,
         recaptchaToken,
-        createdAt: serverTimestamp(),
-        status: "new",
       });
+
+      console.log("Contact form submitted securely via Cloud Function:", response.data);
 
       setIsSuccess(true);
       setFormData({ fullName: "", contact: "", storeName: "", message: "" });

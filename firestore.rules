@@ -33,8 +33,10 @@ service cloud.firestore {
       // Super Admins can read ALL user profiles (for the God-Mode inspector)
       allow read: if isOwner(userId) || isAdmin();
       
-      // Only the owner can update or delete their own profile
-      allow update: if isOwner(userId);
+      // Strict Schema Validation for Profile Updates (Prevents Privilege Escalation)
+      allow update: if isOwner(userId) &&
+        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'uid', 'createdAt']));
+      
       allow delete: if isOwner(userId);
       
       // Strict Schema Validation for initial profile creation
@@ -53,14 +55,33 @@ service cloud.firestore {
     // USER SUBCOLLECTIONS (Inventory, Sales, Debtors, Settings, Repayments...)
     // =====================================================================
     
-    // Single-level subcollections: users/{userId}/sales/{docId}
-    match /users/{userId}/{subcollection}/{docId} {
-      // Owner has full access. Super Admins have READ-ONLY access to ALL subcollections.
+    // ---------------------------------------------------------------------
+    // EXPLICIT SUBCOLLECTION SCHEMA VALIDATIONS (Prevents Logic Flaws)
+    // ---------------------------------------------------------------------
+
+    match /users/{userId}/inventory/{itemId} {
       allow read: if isOwner(userId) || isAdmin();
-      allow write: if isOwner(userId);
+      // Ensure users cannot corrupt their own inventory with negative stock or bad data types
+      allow write: if isOwner(userId) &&
+        (request.resource.data.stockLevel == null || (request.resource.data.stockLevel is number && request.resource.data.stockLevel >= 0)) &&
+        (request.resource.data.price == null || (request.resource.data.price is number && request.resource.data.price >= 0));
+    }
+
+    match /users/{userId}/sales/{saleId} {
+      allow read: if isOwner(userId) || isAdmin();
+      // Ensure negative sales cannot be processed
+      allow write: if isOwner(userId) &&
+        (request.resource.data.totalAmount == null || (request.resource.data.totalAmount is number && request.resource.data.totalAmount >= 0));
+    }
+
+    match /users/{userId}/debtors/{debtorId} {
+      allow read: if isOwner(userId) || isAdmin();
+      // Ensure balance owed cannot be arbitrarily negative to spoof refunds
+      allow write: if isOwner(userId) &&
+        (request.resource.data.balanceOwed == null || (request.resource.data.balanceOwed is number && request.resource.data.balanceOwed >= 0));
     }
     
-    // Deep nested subcollections: users/{userId}/debtors/{debtorId}/repayments/{repaymentId}
+    // Deep nested subcollections fallback (e.g., repayments)
     match /users/{userId}/{subcollection}/{docId}/{nested=**} {
       allow read: if isOwner(userId) || isAdmin();
       allow write: if isOwner(userId);
@@ -72,19 +93,10 @@ service cloud.firestore {
     match /contact_messages/{msgId} {
       // Super Admins can read all contact messages in the God-Mode panel
       allow read: if isAdmin();
-      allow update, delete: if false;
       
-      // Strict Schema Validation for creation (web contact form)
-      allow create: if 
-        request.resource.data.keys().hasAll(['fullName', 'contact', 'storeName', 'message', 'createdAt', 'status', 'recaptchaToken']) &&
-        request.resource.data.keys().hasOnly(['fullName', 'contact', 'storeName', 'message', 'createdAt', 'status', 'recaptchaToken']) &&
-        request.resource.data.fullName is string && request.resource.data.fullName.size() <= 100 &&
-        request.resource.data.contact is string && request.resource.data.contact.size() <= 100 &&
-        request.resource.data.storeName is string && request.resource.data.storeName.size() <= 100 &&
-        request.resource.data.message is string && request.resource.data.message.size() <= 500 &&
-        request.resource.data.recaptchaToken is string &&
-        request.resource.data.status == 'new' && 
-        request.resource.data.createdAt == request.time;
+      // We completely shut down client-side writes!
+      // All creation MUST route through the V2 Callable Cloud Function "submitContactForm"
+      allow write: if false;
     }
 
     // =====================================================================

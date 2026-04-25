@@ -20,7 +20,7 @@ export function WhatsAppReminderButton({
     }
 
     // 1. Format the phone number string securely
-    let cleanPhone = debtorPhone.replace(/\D/g, ""); // Remove non-numeric characters like spaces/dashes
+    let cleanPhone = debtorPhone.replace(/\D/g, "");
 
     if (cleanPhone.startsWith("0")) {
       // e.g. 08012345678 becomes 2348012345678

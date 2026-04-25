@@ -7,6 +7,32 @@ import { useNavigate } from "react-router-dom";
 import { useMemo, useState } from "react";
 import { User } from "lucide-react";
 import type { Sale } from "../../types/sales";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const CustomTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white p-3 border border-slate-200 rounded-xl shadow-lg backdrop-blur-md">
+        <p className="text-sm text-slate-500 font-medium mb-1">
+          {payload[0].payload.date}
+        </p>
+        <p className="font-bold text-emerald-600 text-lg">
+          ₦{payload[0].value.toLocaleString()}
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
 
 export default function Overview() {
   const user = auth.currentUser;
@@ -58,6 +84,47 @@ export default function Overview() {
       0
     );
   }, [products]);
+
+  // Calculate 7-day rolling revenue data for the chart
+  const weeklyChartData = useMemo(() => {
+    const data = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      d.setHours(0, 0, 0, 0);
+
+      const nextDay = new Date(d);
+      nextDay.setDate(nextDay.getDate() + 1);
+
+      const dailySales = sales.filter((sale) => {
+        let saleDate = new Date(0);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if (sale.createdAt && typeof (sale.createdAt as any).toDate === "function") {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          saleDate = (sale.createdAt as any).toDate();
+        } else if (sale.createdAt && typeof sale.createdAt === "number") {
+          saleDate = new Date(sale.createdAt);
+        } else if (sale.createdAt instanceof Date) {
+          saleDate = sale.createdAt;
+        }
+        return (
+          saleDate >= d && saleDate < nextDay && sale.paymentStatus !== "unpaid"
+        );
+      });
+
+      const dailyTotal = dailySales.reduce(
+        (sum, sale) => sum + sale.amountPaid,
+        0
+      );
+
+      data.push({
+        name: d.toLocaleDateString("en-US", { weekday: "short" }),
+        Revenue: dailyTotal,
+        date: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      });
+    }
+    return data;
+  }, [sales]);
 
   return (
     <>
@@ -115,6 +182,73 @@ export default function Overview() {
                 ? "..."
                 : `₦${inventoryValue.toLocaleString()}`}
             </span>
+          </div>
+        </div>
+
+        {/* Advanced 7-Day Revenue Analytics Chart */}
+        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm mt-2">
+          <div className="flex items-center justify-between mb-8">
+            <h3 className="font-bold text-slate-800 text-lg">7-Day Revenue Trend</h3>
+          </div>
+          <div className="h-[280px] w-full">
+            {isLoadingSales ? (
+              <div className="flex items-center justify-center h-full">
+                <div className="w-8 h-8 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin"></div>
+              </div>
+            ) : weeklyChartData.every((d) => d.Revenue === 0) ? (
+              <div className="flex flex-col items-center justify-center h-full text-slate-400">
+                <span className="text-4xl mb-3 grayscale opacity-50 text-emerald-500">📈</span>
+                <p className="font-semibold text-sm">No revenue data for the past 7 days</p>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart
+                  data={weeklyChartData}
+                  margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                >
+                  <defs>
+                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis
+                    dataKey="name"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: "#94a3b8", fontSize: 13, fontWeight: 600 }}
+                    dy={10}
+                  />
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: "#94a3b8", fontSize: 12, fontWeight: 500 }}
+                    tickFormatter={(value) =>
+                      `₦${value >= 1000 ? value / 1000 + "k" : value}`
+                    }
+                  />
+                  <Tooltip
+                    content={<CustomTooltip />}
+                    cursor={{ stroke: "#10b981", strokeWidth: 1, strokeDasharray: "4 4" }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="Revenue"
+                    stroke="#10b981"
+                    strokeWidth={3.5}
+                    fillOpacity={1}
+                    fill="url(#colorRevenue)"
+                    activeDot={{
+                      r: 6,
+                      fill: "#10b981",
+                      stroke: "#fff",
+                      strokeWidth: 3,
+                    }}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
 

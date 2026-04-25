@@ -37,10 +37,9 @@ export const db = initializeFirestore(app, {
   localCache: persistentLocalCache({
     tabManager: persistentMultipleTabManager(),
   }),
-  ignoreUndefinedProperties: true, // Crucial for preventing crashes when optional optional fields (like customerName) are omitted
+  ignoreUndefinedProperties: true,
 });
 
-// Initialize Analytics (only in browser environment)
 export const analytics =
   typeof window !== "undefined" ? getAnalytics(app) : null;
 

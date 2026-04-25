@@ -12,6 +12,8 @@ import { useDebtors, useRepaymentHistory } from "../../hooks/useDebtors";
 import type { Debtor } from "../../types/debtors";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
+import { auth } from "../../lib/firebase";
+import { WhatsAppReminderButton } from "../../components/debtors/WhatsAppReminderButton";
 
 export default function Debtors() {
   const { debtors, isLoading, addDebtor, logRepayment } = useDebtors();
@@ -289,12 +291,20 @@ export default function Debtors() {
                 <Clock className="w-4 h-4 text-emerald-500" /> Payment History
               </h3>
               {selectedDebtor.balanceOwed > 0 && (
-                <button
-                  onClick={() => setIsRepayModalOpen(true)}
-                  className="flex items-center justify-center gap-2 bg-emerald-500 text-white px-5 py-2.5 w-full sm:w-auto rounded-xl font-bold text-sm hover:bg-emerald-600 transition-all shadow-md shadow-emerald-500/20 active:scale-95"
-                >
-                  <HandCoins className="w-4 h-4" /> Log Repayment
-                </button>
+                <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                  <WhatsAppReminderButton
+                    debtorName={selectedDebtor.name}
+                    debtorPhone={selectedDebtor.phone}
+                    balanceOwed={selectedDebtor.balanceOwed}
+                    shopName={auth.currentUser?.displayName || undefined}
+                  />
+                  <button
+                    onClick={() => setIsRepayModalOpen(true)}
+                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-emerald-500 text-white px-5 py-2.5 w-full sm:w-auto rounded-xl font-bold text-sm hover:bg-emerald-600 transition-all shadow-md shadow-emerald-500/20 active:scale-95"
+                  >
+                    <HandCoins className="w-4 h-4" /> Log Repayment
+                  </button>
+                </div>
               )}
             </div>
 

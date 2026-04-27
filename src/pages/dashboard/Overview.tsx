@@ -5,8 +5,9 @@ import { useInventory } from "../../hooks/useInventory";
 import { ReceiptModal } from "../../components/dashboard/ReceiptModal";
 import { useNavigate } from "react-router-dom";
 import { useMemo, useState } from "react";
-import { User } from "lucide-react";
+import { User, Banknote, CreditCard, ArrowRightLeft, FileText, Clock } from "lucide-react";
 import type { Sale } from "../../types/sales";
+import { formatDistanceToNow } from "date-fns";
 import {
   AreaChart,
   Area,
@@ -287,77 +288,97 @@ export default function Overview() {
               </div>
             ) : (
               <div className="divide-y divide-slate-100">
-                {sales.slice(0, 5).map((sale: Sale, idx) => (
-                  <div
-                    key={sale.id || idx}
-                    onClick={() => setSelectedSale(sale)}
-                    className="p-5 flex flex-col sm:flex-row justify-between gap-4 hover:bg-slate-50/80 active:bg-slate-100 active:scale-[0.99] transition-all duration-200 cursor-pointer group"
-                  >
-                    <div className="flex items-start gap-4 min-w-0">
-                      <div
-                        className={`w-11 h-11 shrink-0 rounded-full flex items-center justify-center text-lg shadow-sm border ${
-                          sale.paymentStatus === "paid"
-                            ? "bg-emerald-100 text-emerald-700"
-                            : sale.paymentStatus === "partial"
-                            ? "bg-amber-100 text-amber-700"
-                            : "bg-rose-100 text-rose-700"
-                        }`}
-                      >
-                        {sale.paymentMethod === "cash"
-                          ? "💵"
-                          : sale.paymentMethod === "pos"
-                          ? "💳"
-                          : sale.paymentMethod === "transfer"
-                          ? "🏦"
-                          : "📝"}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-slate-900 leading-tight break-words pr-2">
-                          {sale.items
-                            .map(
-                              (item) => `${item.quantity} ${item.productName}`
-                            )
-                            .join(", ")}{" "}
-                          <span className="text-slate-500 font-normal">
-                            Sold
-                          </span>
-                        </p>
-                        {sale.customerName && (
-                          <div className="flex items-center gap-1.5 mt-1.5">
-                            <User className="w-3 h-3 text-slate-400 shrink-0" />
-                            <p className="text-sm font-medium text-slate-500 truncate">
-                              Sold to{" "}
-                              <span className="text-slate-700 font-semibold">
-                                {sale.customerName}
-                              </span>
-                            </p>
+                {sales.slice(0, 5).map((sale: Sale, idx) => {
+                  let parsedDate = null;
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  if (sale.createdAt && typeof (sale.createdAt as any).toDate === "function") {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    parsedDate = (sale.createdAt as any).toDate();
+                  } else if (sale.createdAt && typeof sale.createdAt === "number") {
+                    parsedDate = new Date(sale.createdAt);
+                  } else if (sale.createdAt instanceof Date) {
+                    parsedDate = sale.createdAt;
+                  }
+
+                  const timeString = parsedDate
+                    ? formatDistanceToNow(parsedDate, { addSuffix: true })
+                    : "Recently";
+
+                  // Truncation logic
+                  const primaryItem = sale.items[0];
+                  let itemSummaryText = `${primaryItem?.quantity || 0}x ${primaryItem?.productName || "Unknown Item"}`;
+                  if (sale.items.length > 1) {
+                    itemSummaryText += ` & ${sale.items.length - 1} more item${
+                      sale.items.length - 1 > 1 ? "s" : ""
+                    }`;
+                  }
+
+                  return (
+                    <div
+                      key={sale.id || idx}
+                      onClick={() => setSelectedSale(sale)}
+                      className="p-5 flex flex-col sm:flex-row justify-between gap-4 hover:bg-slate-50/80 active:bg-slate-100 active:scale-[0.99] transition-all duration-200 cursor-pointer group"
+                    >
+                      <div className="flex items-start gap-4 min-w-0">
+                        <div
+                          className={`w-11 h-11 shrink-0 rounded-full flex items-center justify-center text-lg shadow-sm border ${
+                            sale.paymentStatus === "paid"
+                              ? "bg-emerald-100 text-emerald-700 border-emerald-200"
+                              : sale.paymentStatus === "partial"
+                              ? "bg-amber-100 text-amber-700 border-amber-200"
+                              : "bg-rose-100 text-rose-700 border-rose-200"
+                          }`}
+                        >
+                          {sale.paymentMethod === "cash" && <Banknote className="w-5 h-5" />}
+                          {sale.paymentMethod === "pos" && <CreditCard className="w-5 h-5" />}
+                          {sale.paymentMethod === "transfer" && <ArrowRightLeft className="w-5 h-5" />}
+                          {sale.paymentMethod === "credit" && <FileText className="w-5 h-5" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-slate-900 leading-tight break-words pr-2">
+                            {itemSummaryText}
+                          </p>
+                          {sale.customerName && (
+                            <div className="flex items-center gap-1.5 mt-1.5">
+                              <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                              <p className="text-sm font-medium text-slate-500 truncate">
+                                Sold to <span className="text-slate-700 font-semibold">{sale.customerName}</span>
+                              </p>
+                            </div>
+                          )}
+                          <div className="flex flex-wrap items-center gap-2 mt-2">
+                            <span className="text-xs text-slate-500 tracking-wide px-2.5 py-0.5 rounded-md bg-slate-50 border border-slate-200 font-bold uppercase">
+                              {sale.paymentMethod}
+                            </span>
+                            <span
+                              className={`font-black uppercase tracking-widest text-[9px] px-2 py-0.5 rounded border ${
+                                sale.paymentStatus === "paid"
+                                  ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                                  : sale.paymentStatus === "partial"
+                                  ? "bg-amber-50 border-amber-200 text-amber-700"
+                                  : "bg-rose-50 border-rose-200 text-rose-700"
+                              }`}
+                            >
+                              {sale.paymentStatus}
+                            </span>
+                            <span className="text-xs text-slate-400 font-medium flex items-center gap-1">
+                              <Clock className="w-3 h-3" /> {timeString}
+                            </span>
                           </div>
-                        )}
-                        <p className="text-xs text-slate-500 font-medium flex items-center gap-2 mt-2 capitalize tracking-wide">
-                          <span className="px-2.5 py-0.5 rounded-md bg-slate-50 border border-slate-200 font-bold uppercase">
-                            {sale.paymentMethod}
-                          </span>
-                          <span
-                            className={`font-black uppercase tracking-widest text-[9px] px-2 py-0.5 rounded border ${
-                              sale.paymentStatus === "paid"
-                                ? "bg-emerald-50 border-emerald-200 text-emerald-700"
-                                : sale.paymentStatus === "partial"
-                                ? "bg-amber-50 border-amber-200 text-amber-700"
-                                : "bg-rose-50 border-rose-200 text-rose-700"
-                            }`}
-                          >
-                            {sale.paymentStatus}
-                          </span>
+                        </div>
+                      </div>
+                      <div className="text-left sm:text-right pl-15 sm:pl-0 shrink-0 self-start sm:self-center mt-2 sm:mt-0">
+                        <p
+                          className={`font-extrabold text-lg tracking-tight ${
+                            sale.paymentStatus === "unpaid" ? "text-rose-600" : "text-slate-900"
+                          }`}
+                        >
+                          ₦{sale.totalAmount.toLocaleString()}
                         </p>
                       </div>
                     </div>
-                    <div className="text-left sm:text-right pl-15 sm:pl-0 shrink-0 self-start sm:self-center mt-2 sm:mt-0">
-                      <p className="font-extrabold text-lg text-slate-900 tracking-tight">
-                        ₦{sale.totalAmount.toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

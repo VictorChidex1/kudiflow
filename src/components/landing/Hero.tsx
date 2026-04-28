@@ -193,23 +193,13 @@ export function Hero() {
                 This CSS Mask dissolves the Left and Bottom edges of the image on Desktop, 
                 and just the Bottom/Top edges on Mobile, ensuring it melts into the white completely. 
               */}
-              <div className="relative w-full h-full overflow-hidden rounded-[2rem] lg:rounded-[3rem] shadow-2xl shadow-emerald-900/10 border-4 border-white/50">
+              <div className="relative w-full h-full overflow-hidden rounded-4xl lg:rounded-[3rem] shadow-2xl shadow-emerald-900/10 border-4 border-white/50">
                 <img
                   src="/assets/main-hero-image.webp"
                   alt="KudiFlow Marketplace Dashboard"
                   className="absolute inset-0 w-full h-full object-cover object-center transform transition-transform duration-2000 group-hover:scale-[1.03] ease-out will-change-transform"
                   loading="eager"
                 />
-
-                {/* Advanced Responsive Masking Fade */}
-                {/* Desktop: Dissolve the Left Edge into the Text Column */}
-                <div className="hidden lg:block absolute inset-y-0 left-0 w-1/3 bg-linear-to-r from-white via-white/80 to-transparent pointer-events-none" />
-
-                {/* Mobile: Dissolve the Top Edge into the Stacked Text */}
-                <div className="lg:hidden absolute inset-x-0 top-0 h-1/3 bg-linear-to-b from-white via-white/80 to-transparent pointer-events-none" />
-
-                {/* Universal Bottom Fade */}
-                <div className="absolute inset-x-0 bottom-0 h-1/3 bg-linear-to-t from-white via-white/80 to-transparent pointer-events-none" />
               </div>
 
               {/* Dramatic Under-glow behind the image */}

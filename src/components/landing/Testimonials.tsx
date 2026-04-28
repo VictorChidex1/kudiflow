@@ -29,7 +29,7 @@ const testimonials = [
   },
   {
     id: 4,
-    name: "Tunde Olatunji",
+    name: "Audrey James",
     role: "Boutique Owner, Abuja",
     image: "https://randomuser.me/api/portraits/men/75.jpg",
     quote:
@@ -37,7 +37,7 @@ const testimonials = [
   },
   {
     id: 5,
-    name: "Fatima Yusuf",
+    name: "Ikejiofor Okwichukwu",
     role: "Wholesale Distributor, Onitsha",
     image: "https://randomuser.me/api/portraits/women/92.jpg",
     quote:

@@ -43,212 +43,236 @@ const imageVariant: Variants = {
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden bg-white pt-12 sm:pt-16 pb-20">
-      {/* Background Decorative Glow (Like Multi app's dark purple, but we use green/gold for light mode) */}
+    <section className="relative overflow-hidden bg-white pt-12 sm:pt-20 pb-20">
+      {/* Subtle glowing orbs for the white background */}
       <div className="absolute top-0 inset-x-0 w-full h-[600px] opacity-40 pointer-events-none overflow-hidden">
         <div className="absolute -top-1/4 left-1/4 w-[600px] h-[600px] bg-emerald-200/50 rounded-full mix-blend-multiply blur-[120px] animate-blob" />
         <div className="absolute top-1/4 right-1/4 w-[600px] h-[600px] bg-amber-100/50 rounded-full mix-blend-multiply blur-[120px] animate-blob animation-delay-2000" />
       </div>
 
-      <div className="container relative mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="container relative z-20 mx-auto px-4 sm:px-6 lg:px-8 mt-8 lg:mt-16">
         <motion.div
           variants={containerVariant}
           initial="hidden"
           animate="show"
-          className="flex flex-col items-center text-center"
+          className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center"
         >
-          {/* Trust Badge Pushed Up Tight */}
-          <motion.div
-            variants={itemVariant}
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200/60 shadow-sm mb-6"
-          >
-            <span className="flex h-2 w-2 rounded-full bg-kudi-green animate-pulse"></span>
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-600">
-              Built for Emerging Markets
-            </span>
-          </motion.div>
-
-          {/* Massive Multi-App Style Headline */}
-          <motion.h1
-            variants={itemVariant}
-            className="max-w-4xl text-[2.75rem] leading-[1.05] tracking-tight font-extrabold text-slate-900 sm:text-7xl lg:text-[5.5rem] mb-6"
-          >
-            The{" "}
-            <span className="text-kudi-green relative whitespace-nowrap">
-              Offline-First
-            </span>
-            <br className="hidden sm:block" /> App for Smart Vendors.
-          </motion.h1>
-
-          {/* Refined Subtitle */}
-          <motion.p
-            variants={itemVariant}
-            className="max-w-2xl text-lg sm:text-xl lg:text-2xl text-slate-500 mb-8 leading-relaxed font-medium"
-          >
-            Ditch the messy paper ledgers. Track daily sales, manage inventory,
-            and seamlessly collect debts via WhatsApp—
-            <strong className="text-slate-800">all without data.</strong>
-          </motion.p>
-
-          {/* Trust Core: Avatar Social Proof Cluster */}
-          <motion.div
-            variants={itemVariant}
-            className="flex flex-col sm:flex-row items-center justify-center gap-5 mb-10 w-full relative z-20"
-          >
-            <div className="flex -space-x-3">
-              <div className="w-12 h-12 rounded-full border-[3px] border-white bg-slate-200 overflow-hidden shadow-sm shadow-slate-900/10">
-                <img
-                  src="https://randomuser.me/api/portraits/men/70.jpg"
-                  alt="Nigerian MSME Owner"
-                />
-              </div>
-              <div className="w-12 h-12 rounded-full border-[3px] border-white bg-slate-200 overflow-hidden shadow-sm shadow-slate-900/10">
-                <img
-                  src="https://randomuser.me/api/portraits/women/16.jpg"
-                  alt="Nigerian MSME Owner"
-                />
-              </div>
-              <div className="w-12 h-12 rounded-full border-[3px] border-white bg-slate-200 overflow-hidden shadow-sm shadow-slate-900/10">
-                <img
-                  src="https://randomuser.me/api/portraits/men/53.jpg"
-                  alt="Nigerian MSME Owner"
-                />
-              </div>
-              <div className="w-12 h-12 rounded-full border-[3px] border-white bg-slate-200 overflow-hidden shadow-sm shadow-slate-900/10">
-                <img
-                  src="https://randomuser.me/api/portraits/women/54.jpg"
-                  alt="Nigerian MSME Owner"
-                />
-              </div>
-              <div className="w-12 h-12 rounded-full border-[3px] border-white bg-emerald-100 flex items-center justify-center text-xs font-extrabold text-emerald-700 shadow-sm shadow-emerald-900/10">
-                10k+
-              </div>
-            </div>
-
-            <div className="flex flex-col items-center sm:items-start text-sm">
-              <div className="flex gap-1 text-amber-500 mb-1">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 fill-current border-none" />
-                ))}
-              </div>
-              <span className="font-semibold text-slate-600">
-                Join our community{" "}
-                <span className="text-kudi-green">of smart Market Vendors</span>
-              </span>
-            </div>
-          </motion.div>
-
-          {/* Minimal, Sleek CTA Buttons */}
-          <motion.div
-            variants={itemVariant}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto mb-8 relative z-20"
-          >
-            <Link
-              to="/signup"
-              className="group relative inline-flex w-full sm:w-[220px] items-center justify-center gap-2 overflow-hidden rounded-full bg-emerald-600 px-8 py-4 text-base font-semibold text-white shadow-xl shadow-slate-900/20 transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
+          {/* Left Side: Typography and CTA */}
+          <div className="lg:col-span-6 flex flex-col items-center lg:items-start text-center lg:text-left">
+            {/* Trust Badge Pushed Up Tight */}
+            <motion.div
+              variants={itemVariant}
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200/60 shadow-sm mb-6"
             >
-              <span className="relative z-10 transition-colors group-hover:text-emerald-300">
-                Start Your Free Shop
+              <span className="flex h-2 w-2 rounded-full bg-kudi-green animate-pulse"></span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-600">
+                Built for Emerging Markets
               </span>
-              <ArrowRight
-                className="relative z-10 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-emerald-300"
-                strokeWidth={2.5}
-              />
-            </Link>
+            </motion.div>
 
-            <Link
-              to="/login"
-              className="inline-flex w-full sm:w-[220px] items-center justify-center gap-2 rounded-full bg-white px-8 py-4 text-base font-semibold text-slate-700 shadow-sm border border-slate-200 transition-all duration-300 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+            {/* Massive Multi-App Style Headline */}
+            <motion.h1
+              variants={itemVariant}
+              className="max-w-4xl text-[2.75rem] leading-[1.05] tracking-tight font-extrabold text-slate-900 sm:text-6xl lg:text-[4.5rem] mb-6"
             >
-              Sign In to Account
-            </Link>
-          </motion.div>
+              The{" "}
+              <span className="text-kudi-green relative whitespace-nowrap">
+                Offline-First
+              </span>
+              <br className="hidden lg:block" /> App for Smart Vendors.
+            </motion.h1>
 
-          {/* Platform Availability Badges */}
+            {/* Refined Subtitle */}
+            <motion.p
+              variants={itemVariant}
+              className="max-w-xl text-lg sm:text-xl text-slate-500 mb-8 leading-relaxed font-medium mx-auto lg:mx-0"
+            >
+              Ditch messy ledgers. Track daily sales, manage inventory, and
+              seamlessly collect debts—
+              <strong className="text-slate-800">all without data.</strong>
+            </motion.p>
+
+            {/* Trust Core: Avatar Social Proof Cluster */}
+            <motion.div
+              variants={itemVariant}
+              className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-5 mb-10 w-full relative z-20"
+            >
+              <div className="flex -space-x-3">
+                <div className="w-12 h-12 rounded-full border-[3px] border-white bg-slate-200 overflow-hidden shadow-sm shadow-slate-900/10">
+                  <img
+                    src="https://randomuser.me/api/portraits/men/70.jpg"
+                    alt="Nigerian MSME Owner"
+                  />
+                </div>
+                <div className="w-12 h-12 rounded-full border-[3px] border-white bg-slate-200 overflow-hidden shadow-sm shadow-slate-900/10">
+                  <img
+                    src="https://randomuser.me/api/portraits/women/16.jpg"
+                    alt="Nigerian MSME Owner"
+                  />
+                </div>
+                <div className="w-12 h-12 rounded-full border-[3px] border-white bg-slate-200 overflow-hidden shadow-sm shadow-slate-900/10">
+                  <img
+                    src="https://randomuser.me/api/portraits/men/53.jpg"
+                    alt="Nigerian MSME Owner"
+                  />
+                </div>
+                <div className="w-12 h-12 rounded-full border-[3px] border-white bg-slate-200 overflow-hidden shadow-sm shadow-slate-900/10">
+                  <img
+                    src="https://randomuser.me/api/portraits/women/54.jpg"
+                    alt="Nigerian MSME Owner"
+                  />
+                </div>
+                <div className="w-12 h-12 rounded-full border-[3px] border-white bg-emerald-100 flex items-center justify-center text-xs font-extrabold text-emerald-700 shadow-sm shadow-emerald-900/10">
+                  10k+
+                </div>
+              </div>
+
+              <div className="flex flex-col items-center lg:items-start text-sm">
+                <div className="flex gap-1 text-amber-500 mb-1">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className="w-4 h-4 fill-current border-none"
+                    />
+                  ))}
+                </div>
+                <span className="font-semibold text-slate-600">
+                  Join our community{" "}
+                  <span className="text-kudi-green hidden sm:inline">
+                    of smart Vendors
+                  </span>
+                </span>
+              </div>
+            </motion.div>
+
+            {/* Minimal, Sleek CTA Buttons */}
+            <motion.div
+              variants={itemVariant}
+              className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 w-full sm:w-auto mb-8 relative z-20"
+            >
+              <Link
+                to="/signup"
+                className="group relative inline-flex w-full sm:w-[220px] items-center justify-center gap-2 overflow-hidden rounded-full bg-emerald-600 px-8 py-4 text-base font-semibold text-white shadow-xl shadow-slate-900/20 transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
+              >
+                <span className="relative z-10 transition-colors group-hover:text-emerald-300">
+                  Start Your Free Shop
+                </span>
+                <ArrowRight
+                  className="relative z-10 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-emerald-300"
+                  strokeWidth={2.5}
+                />
+              </Link>
+
+              <Link
+                to="/login"
+                className="inline-flex w-full sm:w-[220px] items-center justify-center gap-2 rounded-full bg-white px-8 py-4 text-base font-semibold text-slate-700 shadow-sm border border-slate-200 transition-all duration-300 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+              >
+                Sign In to Account
+              </Link>
+            </motion.div>
+
+            {/* Platform Availability Badges */}
+            <motion.div
+              variants={itemVariant}
+              className="flex items-center justify-center lg:justify-start gap-4 text-sm font-semibold text-slate-400 relative z-20"
+            >
+              <span className="flex items-center gap-2 transition-colors hover:text-slate-600 cursor-default px-4 py-2 bg-white/80 rounded-full border border-slate-200 shadow-sm">
+                <Globe className="w-4 h-4 text-emerald-500" />
+                Works smoothly on any smartphone or computer
+              </span>
+            </motion.div>
+          </div>
+
+          {/* Right Side: Epic Masked Image Reveal */}
+          <div className="lg:col-span-6 w-full mt-10 lg:mt-0">
+            <motion.div
+              variants={imageVariant}
+              className="relative w-full h-[400px] sm:h-[550px] lg:h-[700px] group"
+            >
+              {/* 
+                This CSS Mask dissolves the Left and Bottom edges of the image on Desktop, 
+                and just the Bottom/Top edges on Mobile, ensuring it melts into the white completely. 
+              */}
+              <div className="relative w-full h-full overflow-hidden rounded-[2rem] lg:rounded-[3rem] shadow-2xl shadow-emerald-900/10 border-4 border-white/50">
+                <img
+                  src="/assets/main-hero-image.webp"
+                  alt="KudiFlow Marketplace Dashboard"
+                  className="absolute inset-0 w-full h-full object-cover object-center transform transition-transform duration-2000 group-hover:scale-[1.03] ease-out will-change-transform"
+                  loading="eager"
+                />
+
+                {/* Advanced Responsive Masking Fade */}
+                {/* Desktop: Dissolve the Left Edge into the Text Column */}
+                <div className="hidden lg:block absolute inset-y-0 left-0 w-1/3 bg-linear-to-r from-white via-white/80 to-transparent pointer-events-none" />
+
+                {/* Mobile: Dissolve the Top Edge into the Stacked Text */}
+                <div className="lg:hidden absolute inset-x-0 top-0 h-1/3 bg-linear-to-b from-white via-white/80 to-transparent pointer-events-none" />
+
+                {/* Universal Bottom Fade */}
+                <div className="absolute inset-x-0 bottom-0 h-1/3 bg-linear-to-t from-white via-white/80 to-transparent pointer-events-none" />
+              </div>
+
+              {/* Dramatic Under-glow behind the image */}
+              <div className="absolute inset-0 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] h-[90%] bg-emerald-400/20 blur-[80px] -z-10" />
+            </motion.div>
+          </div>
+        </motion.div>
+
+        {/* Feature Highlights Row (Shifted out of the grid to span full width below) */}
+        <motion.div
+          variants={containerVariant}
+          initial="hidden"
+          animate="show"
+          className="mt-16 sm:mt-24 lg:mt-32 grid grid-cols-1 gap-8 sm:grid-cols-3 w-full max-w-5xl mx-auto border-t border-slate-100 pt-16 relative z-20"
+        >
           <motion.div
             variants={itemVariant}
-            className="flex items-center justify-center gap-6 text-sm font-semibold text-slate-400 mb-16 lg:mb-24 relative z-20"
+            className="flex flex-col items-center sm:items-start text-center sm:text-left gap-4 group"
           >
-            <span className="flex items-center gap-2 transition-colors hover:text-slate-600 cursor-default">
-              <Globe className="w-5 h-5" />
-              Works smoothly on any smartphone or computer
-            </span>
-          </motion.div>
-
-          {/* Massive Bleeding Dashboard Reveal Image (Multi-App Style) */}
-          <motion.div
-            variants={imageVariant}
-            className="relative mx-auto w-full max-w-[1400px] group"
-          >
-            <div className="relative w-full overflow-hidden rounded-[24px] sm:rounded-[36px] lg:rounded-[48px] border border-slate-200/60 shadow-2xl shadow-emerald-900/10 bg-slate-50">
-              {/* Fake Window Header (like Multi but cleaner for Android/Web) */}
-              <div className="absolute top-0 inset-x-0 h-10 bg-white/50 backdrop-blur-md border-b border-white/20 z-20 flex items-center px-4 md:px-6 gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                <div className="w-2.5 h-2.5 rounded-full bg-slate-300" />
-                <div className="w-2.5 h-2.5 rounded-full bg-slate-300" />
-                <div className="w-2.5 h-2.5 rounded-full bg-slate-300" />
-              </div>
-
-              <img
-                src="/assets/hero.webp"
-                alt="KudiFlow Dashboard Hero"
-                className="w-full h-auto object-cover transform transition-transform duration-[2000ms] group-hover:scale-[1.02] ease-out will-change-transform"
-                loading="lazy"
-                decoding="async"
-              />
-
-              {/* Bottom fade-out shadow inside the hardware screen */}
-              <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent opacity-0 mix-blend-multiply transition-opacity duration-[2000ms] group-hover:opacity-30 pointer-events-none" />
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 transition-transform duration-300 group-hover:scale-110">
+              <WifiOff className="h-6 w-6" strokeWidth={2.5} />
             </div>
-
-            {/* Dramatic Under-glow behind the hardware */}
-            <div className="absolute inset-0 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] h-[90%] bg-emerald-400/20 blur-[100px] -z-10" />
+            <div className="space-y-1">
+              <h3 className="text-lg font-bold text-slate-900">
+                100% Offline Capable
+              </h3>
+              <p className="text-sm text-slate-500 font-medium">
+                Works flawlessly without data.
+              </p>
+            </div>
           </motion.div>
 
-          {/* Feature Highlights Row (tightened top margin) */}
           <motion.div
             variants={itemVariant}
-            className="mt-12 sm:mt-16 lg:mt-20 grid grid-cols-1 gap-8 sm:grid-cols-3 w-full max-w-5xl mx-auto pt-10"
+            className="flex flex-col items-center sm:items-start text-center sm:text-left gap-4 group"
           >
-            <div className="flex flex-col items-center gap-4 group">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 transition-transform duration-300 group-hover:scale-110">
-                <WifiOff className="h-6 w-6" strokeWidth={2.5} />
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-lg font-bold text-slate-900">
-                  100% Offline Capable
-                </h3>
-                <p className="text-sm text-slate-500 font-medium">
-                  Works flawlessly without data.
-                </p>
-              </div>
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-500 border border-amber-100 transition-transform duration-300 group-hover:scale-110">
+              <Zap className="h-6 w-6" strokeWidth={2.5} />
             </div>
-
-            <div className="flex flex-col items-center gap-4 group">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-500 border border-amber-100 transition-transform duration-300 group-hover:scale-110">
-                <Zap className="h-6 w-6" strokeWidth={2.5} />
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-lg font-bold text-slate-900">
-                  3-Second Ledger
-                </h3>
-                <p className="text-sm text-slate-500 font-medium">
-                  Record sales instantly.
-                </p>
-              </div>
+            <div className="space-y-1">
+              <h3 className="text-lg font-bold text-slate-900">
+                3-Second Ledger
+              </h3>
+              <p className="text-sm text-slate-500 font-medium">
+                Record sales instantly.
+              </p>
             </div>
+          </motion.div>
 
-            <div className="flex flex-col items-center gap-4 group">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50 text-slate-700 border border-slate-200 transition-transform duration-300 group-hover:scale-110">
-                <ShieldCheck className="h-6 w-6" strokeWidth={2.5} />
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-lg font-bold text-slate-900">
-                  Secure Cloud Sync
-                </h3>
-                <p className="text-sm text-slate-500 font-medium">
-                  Backs up when connected.
-                </p>
-              </div>
+          <motion.div
+            variants={itemVariant}
+            className="flex flex-col items-center sm:items-start text-center sm:text-left gap-4 group"
+          >
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50 text-slate-700 border border-slate-200 transition-transform duration-300 group-hover:scale-110">
+              <ShieldCheck className="h-6 w-6" strokeWidth={2.5} />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-lg font-bold text-slate-900">
+                Secure Cloud Sync
+              </h3>
+              <p className="text-sm text-slate-500 font-medium">
+                Backs up when connected.
+              </p>
             </div>
           </motion.div>
         </motion.div>

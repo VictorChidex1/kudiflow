@@ -43,14 +43,14 @@ const imageVariant: Variants = {
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden bg-white pt-12 sm:pt-20 pb-20">
+    <section className="relative overflow-hidden bg-white pt-6 sm:pt-10 pb-20">
       {/* Subtle glowing orbs for the white background */}
       <div className="absolute top-0 inset-x-0 w-full h-[600px] opacity-40 pointer-events-none overflow-hidden">
         <div className="absolute -top-1/4 left-1/4 w-[600px] h-[600px] bg-emerald-200/50 rounded-full mix-blend-multiply blur-[120px] animate-blob" />
         <div className="absolute top-1/4 right-1/4 w-[600px] h-[600px] bg-amber-100/50 rounded-full mix-blend-multiply blur-[120px] animate-blob animation-delay-2000" />
       </div>
 
-      <div className="container relative z-20 mx-auto px-4 sm:px-6 lg:px-8 mt-8 lg:mt-16">
+      <div className="container relative z-20 mx-auto px-4 sm:px-6 lg:px-8 mt-2 lg:mt-4">
         <motion.div
           variants={containerVariant}
           initial="hidden"

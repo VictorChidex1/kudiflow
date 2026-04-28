@@ -1,4 +1,7 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { auth } from "../../lib/firebase";
+import { onAuthStateChanged, type User } from "firebase/auth";
 import {
   ArrowRight,
   WifiOff,
@@ -42,6 +45,17 @@ const imageVariant: Variants = {
 };
 
 export function Hero() {
+  const [user, setUser] = useState<User | null>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setIsAuthLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
   return (
     <section className="relative overflow-hidden bg-white pt-6 sm:pt-10 pb-20">
       {/* Subtle glowing orbs for the white background */}
@@ -148,27 +162,44 @@ export function Hero() {
             {/* Minimal, Sleek CTA Buttons */}
             <motion.div
               variants={itemVariant}
-              className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 w-full sm:w-auto mb-8 relative z-20"
+              className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 w-full sm:w-auto mb-8 relative z-20 h-14"
             >
-              <Link
-                to="/signup"
-                className="group relative inline-flex w-full sm:w-[220px] items-center justify-center gap-2 overflow-hidden rounded-full bg-emerald-600 px-8 py-4 text-base font-semibold text-white shadow-xl shadow-slate-900/20 transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
-              >
-                <span className="relative z-10 transition-colors group-hover:text-emerald-300">
-                  Start Your Free Shop
-                </span>
-                <ArrowRight
-                  className="relative z-10 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-emerald-300"
-                  strokeWidth={2.5}
-                />
-              </Link>
+              {isAuthLoading ? (
+                <div className="h-full w-full sm:w-[220px] rounded-full bg-slate-100 animate-pulse border border-slate-200" />
+              ) : user ? (
+                <Link
+                  to="/dashboard"
+                  className="group relative inline-flex h-full w-full sm:w-[250px] items-center justify-center gap-2 overflow-hidden rounded-full bg-slate-900 px-8 text-base font-semibold text-white shadow-xl shadow-slate-900/20 transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
+                >
+                  Go to Dashboard
+                  <ArrowRight
+                    className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1"
+                    strokeWidth={2.5}
+                  />
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    to="/signup"
+                    className="group relative inline-flex h-full w-full sm:w-[220px] items-center justify-center gap-2 overflow-hidden rounded-full bg-emerald-600 px-8 text-base font-semibold text-white shadow-xl shadow-slate-900/20 transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
+                  >
+                    <span className="relative z-10 transition-colors group-hover:text-emerald-300">
+                      Start Your Free Shop
+                    </span>
+                    <ArrowRight
+                      className="relative z-10 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-emerald-300"
+                      strokeWidth={2.5}
+                    />
+                  </Link>
 
-              <Link
-                to="/login"
-                className="inline-flex w-full sm:w-[220px] items-center justify-center gap-2 rounded-full bg-white px-8 py-4 text-base font-semibold text-slate-700 shadow-sm border border-slate-200 transition-all duration-300 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
-              >
-                Sign In to Account
-              </Link>
+                  <Link
+                    to="/login"
+                    className="inline-flex h-full w-full sm:w-[220px] items-center justify-center gap-2 rounded-full bg-white px-8 text-base font-semibold text-slate-700 shadow-sm border border-slate-200 transition-all duration-300 hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+                  >
+                    Sign In to Account
+                  </Link>
+                </>
+              )}
             </motion.div>
 
             {/* Platform Availability Badges */}

@@ -1,4 +1,4 @@
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenAI } from "@google/genai";
 
 // ─── Gemini Client ─────────────────────────────────────────────────────────────
 // Firebase Admin is optional (for auth users).
@@ -10,19 +10,28 @@ let adminInitialized = false;
 
 async function verifyToken(idToken: string): Promise<string | null> {
   try {
-    const admin = await import('firebase-admin');
+    const admin = await import("firebase-admin");
     if (!admin.apps.length && !adminInitialized) {
       const projectId = process.env.FIREBASE_PROJECT_ID;
       const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-      const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+      const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(
+        /\\n/g,
+        "\n"
+      );
 
       if (!projectId || !clientEmail || !privateKey) {
-        console.warn('Firebase Admin env vars not set. Skipping auth verification.');
+        console.warn(
+          "Firebase Admin env vars not set. Skipping auth verification."
+        );
         return null;
       }
 
       admin.initializeApp({
-        credential: admin.credential.cert({ projectId, clientEmail, privateKey }),
+        credential: admin.credential.cert({
+          projectId,
+          clientEmail,
+          privateKey,
+        }),
       });
       adminInitialized = true;
     }
@@ -30,7 +39,7 @@ async function verifyToken(idToken: string): Promise<string | null> {
     const decoded = await admin.auth().verifyIdToken(idToken);
     return decoded.uid;
   } catch (err) {
-    console.error('Token verification failed:', err);
+    console.error("Token verification failed:", err);
     return null;
   }
 }
@@ -38,20 +47,22 @@ async function verifyToken(idToken: string): Promise<string | null> {
 // ─── Request Handler ──────────────────────────────────────────────────────────
 export default async function handler(req: any, res: any) {
   // Handle CORS preflight
-  if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === "OPTIONS") {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
     return res.status(200).end();
   }
 
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   // Validate API key is present
   if (!process.env.GEMINI_API_KEY) {
-    return res.status(500).json({ error: 'Server configuration error: GEMINI_API_KEY is not set.' });
+    return res.status(500).json({
+      error: "Server configuration error: GEMINI_API_KEY is not set.",
+    });
   }
 
   // Initialize Gemini Client inside handler to ensure env vars are fully loaded
@@ -61,12 +72,14 @@ export default async function handler(req: any, res: any) {
     const { messages, idToken } = req.body;
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
-      return res.status(400).json({ error: 'A non-empty messages array is required.' });
+      return res
+        .status(400)
+        .json({ error: "A non-empty messages array is required." });
     }
 
     // Determine user context
     let uid: string | null = null;
-    if (idToken && typeof idToken === 'string') {
+    if (idToken && typeof idToken === "string") {
       uid = await verifyToken(idToken);
     }
 
@@ -79,13 +92,13 @@ export default async function handler(req: any, res: any) {
 
     // ── Format Message History ────────────────────────────────────────────────
     const formattedContents = messages.map((msg: any) => ({
-      role: msg.role === 'assistant' ? 'model' : 'user',
+      role: msg.role === "assistant" ? "model" : "user",
       parts: [{ text: String(msg.content) }],
     }));
 
-    // ── Call Gemini 1.5 Pro ──────────────────────────────────────────────────
+    // ── Call Gemini 2.5 Flash (fast, cost-effective, latest) ────────────────
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-pro',
+      model: "gemini-2.5-flash",
       contents: formattedContents,
       config: {
         systemInstruction,
@@ -95,14 +108,13 @@ export default async function handler(req: any, res: any) {
     });
 
     return res.status(200).json({
-      role: 'assistant',
+      role: "assistant",
       content: response.text,
     });
-
   } catch (error: any) {
-    console.error('AI Chat Error:', error);
+    console.error("AI Chat Error:", error);
     return res.status(500).json({
-      error: 'Failed to process AI request.',
+      error: "Failed to process AI request.",
       details: error.message,
     });
   }

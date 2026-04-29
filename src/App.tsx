@@ -29,6 +29,9 @@ import Settings from "./pages/dashboard/Settings";
 import Debtors from "./pages/dashboard/Debtors";
 import BlogCMS from "./pages/dashboard/BlogCMS";
 
+// Global Chat Widget
+import { AIChatWidget } from "./components/chat/AIChatWidget";
+
 function App() {
   return (
     <HelmetProvider>
@@ -79,6 +82,7 @@ function App() {
             <Route path="debtors" element={<Debtors />} />
           </Route>
         </Routes>
+        <AIChatWidget />
         <ScrollToTop />
       </BrowserRouter>
     </HelmetProvider>

@@ -1,8 +1,7 @@
 import { GoogleGenAI } from '@google/genai';
 
 // ─── Gemini Client ─────────────────────────────────────────────────────────────
-// Only the GEMINI_API_KEY is required. Firebase Admin is optional (for auth users).
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY ?? '' });
+// Firebase Admin is optional (for auth users).
 
 // ─── Lazy Firebase Admin Initializer ──────────────────────────────────────────
 // We only load firebase-admin when we actually have an idToken to verify.
@@ -54,6 +53,9 @@ export default async function handler(req: any, res: any) {
   if (!process.env.GEMINI_API_KEY) {
     return res.status(500).json({ error: 'Server configuration error: GEMINI_API_KEY is not set.' });
   }
+
+  // Initialize Gemini Client inside handler to ensure env vars are fully loaded
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
   try {
     const { messages, idToken } = req.body;

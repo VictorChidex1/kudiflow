@@ -23,3 +23,11 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
+
+# ─── SECURITY: Never commit these ────────────────────────────────────────────
+*.json.key
+*firebase-adminsdk*.json
+*service-account*.json
+.env
+.env.local
+.env*.local

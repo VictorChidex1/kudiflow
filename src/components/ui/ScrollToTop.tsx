@@ -35,7 +35,7 @@ export function ScrollToTop() {
           transition={{ duration: 0.3, ease: "easeOut" }}
           onClick={scrollToTop}
           aria-label="Scroll to top"
-          className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-50 p-3 rounded-full bg-kudi-green text-white shadow-xl shadow-slate-900/20 hover:bg-kudi-dark focus:outline-none focus:ring-2 focus:ring-kudi-green focus:ring-offset-2 transition-colors duration-300 group"
+          className="fixed bottom-28 right-6 md:bottom-[104px] md:right-8 z-40 p-3 rounded-full bg-kudi-green text-white shadow-xl shadow-slate-900/20 hover:bg-kudi-dark focus:outline-none focus:ring-2 focus:ring-kudi-green focus:ring-offset-2 transition-colors duration-300 group"
         >
           <ChevronUp
             className="h-6 w-6 transform group-hover:-translate-y-0.5 transition-transform duration-300"

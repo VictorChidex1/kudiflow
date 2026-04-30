@@ -184,7 +184,7 @@ export function AIChatWidget() {
       </AnimatePresence>
 
       {/* Floating Toggle Button */}
-      <div className="fixed bottom-6 right-6 z-[60]">
+      <div className={`fixed bottom-6 right-6 z-[60] ${isOpen ? 'hidden sm:block' : ''}`}>
         <div className="relative">
           {/* Pulsing ring effect when closed */}
           {!isOpen && (

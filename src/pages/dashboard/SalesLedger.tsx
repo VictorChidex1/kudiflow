@@ -52,10 +52,11 @@ export default function SalesLedger() {
 
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
-      const matchesSearch = 
+      const matchesSearch =
         p.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (p.sku && p.sku.toLowerCase().includes(searchTerm.toLowerCase()));
-      const matchesCategory = selectedCategory === "All" || p.category === selectedCategory;
+      const matchesCategory =
+        selectedCategory === "All" || p.category === selectedCategory;
       return matchesSearch && matchesCategory;
     });
   }, [products, searchTerm, selectedCategory]);
@@ -247,17 +248,21 @@ export default function SalesLedger() {
             <button
               onClick={() => setSelectedCategory("All")}
               className={`whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
-                selectedCategory === "All" ? "bg-slate-900 text-white shadow-sm" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                selectedCategory === "All"
+                  ? "bg-slate-900 text-white shadow-sm"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
               All Items
             </button>
-            {CATEGORIES.map(cat => (
+            {CATEGORIES.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
                 className={`whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
-                  selectedCategory === cat ? "bg-slate-900 text-white shadow-sm" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  selectedCategory === cat
+                    ? "bg-slate-900 text-white shadow-sm"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                 }`}
               >
                 {cat}
@@ -292,7 +297,11 @@ export default function SalesLedger() {
                   {/* Image Section */}
                   <div className="w-full h-28 bg-slate-50 border-b border-slate-100 flex-shrink-0 flex items-center justify-center overflow-hidden">
                     {product.imageUrl ? (
-                      <img src={product.imageUrl} alt={product.productName} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                      <img
+                        src={product.imageUrl}
+                        alt={product.productName}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
                     ) : (
                       <Package className="w-8 h-8 text-slate-300" />
                     )}
@@ -524,7 +533,9 @@ export default function SalesLedger() {
                   />
                   {amountPaid < totalAmount ? (
                     <p className="text-xs text-amber-600 mt-1.5 font-medium flex items-center gap-1">
-                      Balance to pay: ₦{(totalAmount - amountPaid).toLocaleString()} (Will be marked as partial)
+                      Balance to pay: ₦
+                      {(totalAmount - amountPaid).toLocaleString()} (Will be
+                      marked as partial)
                     </p>
                   ) : amountPaid > totalAmount && paymentMethod === "cash" ? (
                     <p className="text-sm text-emerald-700 mt-2 font-bold bg-emerald-50 border border-emerald-100 px-3 py-2 rounded-lg inline-flex items-center shadow-sm">

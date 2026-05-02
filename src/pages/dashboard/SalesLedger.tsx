@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Search,
   Plus,
@@ -6,6 +6,7 @@ import {
   Trash2,
   ShoppingCart,
   CreditCard,
+  Package,
 } from "lucide-react";
 import { useInventory } from "../../hooks/useInventory";
 import { useSales } from "../../hooks/useSales";
@@ -24,8 +25,19 @@ export default function SalesLedger() {
   const { processSale } = useSales();
 
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
   const [cart, setCart] = useState<CartItem[]>([]);
   const [discount, setDiscount] = useState<number>(0);
+
+  const CATEGORIES = [
+    "Electronics & Gadgets",
+    "Fashion & Apparel",
+    "Provisions & Groceries",
+    "Pharmacy & Health",
+    "Automobile & Spare Parts",
+    "Beauty & Cosmetics",
+    "Others",
+  ];
 
   // Checkout Modal State
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
@@ -38,13 +50,15 @@ export default function SalesLedger() {
   const [completedSaleDetails, setCompletedSaleDetails] =
     useState<NewSale | null>(null);
 
-  const filteredProducts = useMemo(
-    () =>
-      products.filter((p) =>
-        p.productName.toLowerCase().includes(searchTerm.toLowerCase())
-      ),
-    [products, searchTerm]
-  );
+  const filteredProducts = useMemo(() => {
+    return products.filter((p) => {
+      const matchesSearch = 
+        p.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (p.sku && p.sku.toLowerCase().includes(searchTerm.toLowerCase()));
+      const matchesCategory = selectedCategory === "All" || p.category === selectedCategory;
+      return matchesSearch && matchesCategory;
+    });
+  }, [products, searchTerm, selectedCategory]);
 
   const subtotal = useMemo(
     () => cart.reduce((sum, item) => sum + item.subtotal, 0),
@@ -86,10 +100,28 @@ export default function SalesLedger() {
           productName: product.productName,
           quantity: 1,
           unitPrice: product.sellingPrice,
+          costPrice: product.costPrice, // Immutable profit tracking
           subtotal: product.sellingPrice,
         },
       ];
     });
+  };
+
+  // Barcode / Exact SKU Match Logic (Triggered only on Enter)
+  const handleSearchEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && searchTerm) {
+      const exactMatch = products.find(
+        (p) => p.sku && p.sku.toLowerCase() === searchTerm.toLowerCase()
+      );
+      if (exactMatch) {
+        if (exactMatch.stockLevel > 0) {
+          handleAddToCart(exactMatch);
+          setSearchTerm(""); // Clear search bar for the next scan
+        } else {
+          toast.error("Product is out of stock!");
+        }
+      }
+    }
   };
 
   const handleUpdateQuantity = (productId: string, delta: number) => {
@@ -198,22 +230,44 @@ export default function SalesLedger() {
     <div className="relative flex flex-col lg:flex-row lg:h-[calc(100vh-80px)] lg:overflow-hidden bg-slate-50 gap-4 lg:gap-6 p-4 lg:p-6 print:bg-white print:p-0">
       {/* Left Panel: Products Selection - Hidden on Print */}
       <div className="flex-1 flex flex-col bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden min-h-[60vh] lg:min-h-0 print:hidden">
-        {/* Search Bar */}
-        <div className="p-4 border-b border-slate-100 bg-white z-10">
+        {/* Search Bar & Categories */}
+        <div className="p-4 border-b border-slate-100 bg-white z-10 flex flex-col gap-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <input
               type="text"
-              placeholder="Search products to add..."
+              placeholder="Search by product name or scan barcode..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-kudi-green/20 outline-none transition-all"
+              onKeyDown={handleSearchEnter}
+              className="w-full pl-10 pr-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-kudi-green/20 outline-none transition-all font-medium"
             />
+          </div>
+          <div className="flex overflow-x-auto hide-scrollbar gap-2 pb-1">
+            <button
+              onClick={() => setSelectedCategory("All")}
+              className={`whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
+                selectedCategory === "All" ? "bg-slate-900 text-white shadow-sm" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}
+            >
+              All Items
+            </button>
+            {CATEGORIES.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
+                  selectedCategory === cat ? "bg-slate-900 text-white shadow-sm" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
           </div>
         </div>
 
         {/* Product Grid */}
-        <div className="flex-1 overflow-y-auto p-4">
+        <div className="flex-1 overflow-y-auto p-4 bg-slate-50/50">
           {isLoadingInventory ? (
             <div className="flex justify-center items-center h-full text-slate-400">
               Loading inventory...
@@ -223,34 +277,46 @@ export default function SalesLedger() {
               No products found.
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
               {filteredProducts.map((product) => (
                 <button
                   key={product.id}
                   onClick={() => handleAddToCart(product)}
                   disabled={product.stockLevel <= 0}
-                  className={`flex flex-col text-left p-4 rounded-xl border transition-all duration-300 ease-out ${
+                  className={`flex flex-col text-left rounded-2xl border transition-all duration-300 ease-out overflow-hidden bg-white ${
                     product.stockLevel <= 0
-                      ? "opacity-50 border-slate-100 bg-slate-50 cursor-not-allowed grayscale"
-                      : "border-slate-100 bg-white hover:border-kudi-green hover:shadow-lg hover:-translate-y-1 cursor-pointer active:scale-95 active:shadow-sm text-slate-900 group"
+                      ? "opacity-50 border-slate-100 cursor-not-allowed grayscale"
+                      : "border-slate-100 hover:border-kudi-green hover:shadow-lg hover:-translate-y-1 cursor-pointer active:scale-95 group shadow-sm"
                   }`}
                 >
-                  <div className="font-semibold mb-1 group-hover:text-kudi-green transition-colors line-clamp-2">
-                    {product.productName}
+                  {/* Image Section */}
+                  <div className="w-full h-28 bg-slate-50 border-b border-slate-100 flex-shrink-0 flex items-center justify-center overflow-hidden">
+                    {product.imageUrl ? (
+                      <img src={product.imageUrl} alt={product.productName} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                    ) : (
+                      <Package className="w-8 h-8 text-slate-300" />
+                    )}
                   </div>
-                  <div className="text-sm font-medium text-slate-600 mb-3">
-                    ₦{product.sellingPrice.toLocaleString()}
-                  </div>
-                  <div className="mt-auto">
-                    <span
-                      className={`text-xs px-2 py-1 rounded-md font-medium ${
-                        product.stockLevel <= 5
-                          ? "bg-rose-50 text-rose-600"
-                          : "bg-emerald-50 text-emerald-600"
-                      }`}
-                    >
-                      {product.stockLevel} in stock
-                    </span>
+
+                  {/* Details Section */}
+                  <div className="p-3 flex flex-col flex-1 w-full">
+                    <div className="font-bold text-sm mb-1 text-slate-800 group-hover:text-kudi-green transition-colors line-clamp-2 leading-tight">
+                      {product.productName}
+                    </div>
+                    <div className="text-sm font-black text-emerald-600 mb-2">
+                      ₦{product.sellingPrice.toLocaleString()}
+                    </div>
+                    <div className="mt-auto flex justify-between items-center w-full">
+                      <span
+                        className={`text-[10px] px-2 py-1 rounded-md font-bold uppercase tracking-wider ${
+                          product.stockLevel <= (product.minStockLevel || 5)
+                            ? "bg-rose-50 text-rose-600"
+                            : "bg-emerald-50 text-emerald-600"
+                        }`}
+                      >
+                        {product.stockLevel} left
+                      </span>
+                    </div>
                   </div>
                 </button>
               ))}
@@ -456,13 +522,15 @@ export default function SalesLedger() {
                     className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-kudi-green focus:border-transparent outline-none transition-all font-bold text-xl text-slate-900 shadow-inner"
                     placeholder="0"
                   />
-                  {amountPaid < totalAmount && (
-                    <p className="text-xs text-amber-600 mt-1 font-medium">
-                      Balance to pay: ₦
-                      {(totalAmount - amountPaid).toLocaleString()} (Will be
-                      marked as partial/unpaid)
+                  {amountPaid < totalAmount ? (
+                    <p className="text-xs text-amber-600 mt-1.5 font-medium flex items-center gap-1">
+                      Balance to pay: ₦{(totalAmount - amountPaid).toLocaleString()} (Will be marked as partial)
                     </p>
-                  )}
+                  ) : amountPaid > totalAmount && paymentMethod === "cash" ? (
+                    <p className="text-sm text-emerald-700 mt-2 font-bold bg-emerald-50 border border-emerald-100 px-3 py-2 rounded-lg inline-flex items-center shadow-sm">
+                      Change Due: ₦{(amountPaid - totalAmount).toLocaleString()}
+                    </p>
+                  ) : null}
                 </div>
 
                 {/* Customer Details (Optional unless Credit/Partial) */}

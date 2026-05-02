@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import SEO from "../../components/SEO";
 import {
   Plus,
@@ -44,6 +44,15 @@ export default function Inventory() {
   const [showLowStockOnly, setShowLowStockOnly] = useState(false);
   const [viewMode, setViewMode] = useState<"table" | "grid">("table");
 
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
+
+  // Reset pagination when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedCategory, showLowStockOnly]);
+
   // Drawer & Form State
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -78,6 +87,14 @@ export default function Inventory() {
       return matchesSearch && matchesCategory && matchesLowStock;
     });
   }, [products, searchTerm, selectedCategory, showLowStockOnly]);
+
+  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
+  const paginatedProducts = useMemo(() => {
+    return filteredProducts.slice(
+      (currentPage - 1) * ITEMS_PER_PAGE,
+      currentPage * ITEMS_PER_PAGE
+    );
+  }, [filteredProducts, currentPage]);
 
   const metrics = useMemo(() => {
     return products.reduce(
@@ -371,8 +388,8 @@ export default function Inventory() {
               </p>
             </div>
           ) : viewMode === "grid" ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {filteredProducts.map((product) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4">
+              {paginatedProducts.map((product) => (
                 <div
                   key={product.id}
                   className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm hover:shadow-md transition-all group flex flex-col"
@@ -451,7 +468,7 @@ export default function Inventory() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {filteredProducts.map((product) => (
+                  {paginatedProducts.map((product) => (
                     <tr
                       key={product.id}
                       className="hover:bg-slate-50/50 transition-colors group"
@@ -544,6 +561,48 @@ export default function Inventory() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+          
+          {/* Pagination Footer */}
+          {!isLoading && totalPages > 1 && (
+            <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 bg-slate-50/50 border-t border-slate-200 rounded-b-2xl gap-4 mt-auto">
+              <span className="text-sm text-slate-500 font-medium">
+                Showing <span className="text-slate-900 font-bold">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to <span className="text-slate-900 font-bold">{Math.min(currentPage * ITEMS_PER_PAGE, filteredProducts.length)}</span> of <span className="text-slate-900 font-bold">{filteredProducts.length}</span> items
+              </span>
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
+                >
+                  Previous
+                </button>
+                
+                <div className="hidden sm:flex items-center gap-1">
+                  {Array.from({ length: totalPages }).map((_, idx) => (
+                    <button
+                      key={idx + 1}
+                      onClick={() => setCurrentPage(idx + 1)}
+                      className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-bold transition-all shadow-sm ${
+                        currentPage === idx + 1 
+                          ? "bg-emerald-600 text-white border-none" 
+                          : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
+                      }`}
+                    >
+                      {idx + 1}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
+                >
+                  Next
+                </button>
+              </div>
             </div>
           )}
         </div>

@@ -61,10 +61,30 @@ service cloud.firestore {
 
     match /users/{userId}/inventory/{itemId} {
       allow read: if isOwner(userId) || isAdmin();
-      // Ensure users cannot corrupt their own inventory with negative stock or bad data types
-      allow write: if isOwner(userId) &&
-        (request.resource.data.stockLevel == null || (request.resource.data.stockLevel is number && request.resource.data.stockLevel >= 0)) &&
-        (request.resource.data.price == null || (request.resource.data.price is number && request.resource.data.price >= 0));
+      allow delete: if isOwner(userId);
+      
+      // ZERO-TRUST INVENTORY FORTIFICATION:
+      // Prevents billing attacks (massive string payloads) and schema poisoning.
+      allow create, update: if isOwner(userId) &&
+        // 1. Required Fields
+        request.resource.data.keys().hasAll(['productName', 'costPrice', 'sellingPrice', 'stockLevel', 'userId']) &&
+        request.resource.data.userId == userId &&
+        
+        // 2. Strict String Size Limits (Anti-Bloat)
+        request.resource.data.productName is string && request.resource.data.productName.size() <= 100 &&
+        (request.resource.data.get('category', '') == null || (request.resource.data.get('category', '') is string && request.resource.data.get('category', '').size() <= 50)) &&
+        (request.resource.data.get('sku', '') == null || (request.resource.data.get('sku', '') is string && request.resource.data.get('sku', '').size() <= 50)) &&
+        (request.resource.data.get('unit', '') == null || (request.resource.data.get('unit', '') is string && request.resource.data.get('unit', '').size() <= 20)) &&
+        (request.resource.data.get('expiryDate', '') == null || (request.resource.data.get('expiryDate', '') is string && request.resource.data.get('expiryDate', '').size() <= 20)) &&
+        (request.resource.data.get('notes', '') == null || (request.resource.data.get('notes', '') is string && request.resource.data.get('notes', '').size() <= 500)) &&
+        (request.resource.data.get('imageUrl', '') == null || (request.resource.data.get('imageUrl', '') is string && request.resource.data.get('imageUrl', '').size() <= 1000)) &&
+        
+        // 3. Strict Numeric Bounds (No Negative Finances)
+        request.resource.data.costPrice is number && request.resource.data.costPrice >= 0 &&
+        request.resource.data.sellingPrice is number && request.resource.data.sellingPrice >= 0 &&
+        request.resource.data.stockLevel is number && request.resource.data.stockLevel >= 0 &&
+        (request.resource.data.get('wholesalePrice', 0) == null || (request.resource.data.get('wholesalePrice', 0) is number && request.resource.data.get('wholesalePrice', 0) >= 0)) &&
+        (request.resource.data.get('minStockLevel', 0) == null || (request.resource.data.get('minStockLevel', 0) is number && request.resource.data.get('minStockLevel', 0) >= 0));
     }
 
     match /users/{userId}/sales/{saleId} {

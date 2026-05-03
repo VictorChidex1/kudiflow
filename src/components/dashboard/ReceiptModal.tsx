@@ -1,5 +1,7 @@
 import { Printer, CheckCircle2, X } from "lucide-react";
 import type { Sale, NewSale } from "../../types/sales";
+import { useSettings } from "../../hooks/useSettings";
+import { useProfile } from "../../hooks/useProfile";
 
 interface ReceiptModalProps {
   sale: Sale | NewSale;
@@ -8,6 +10,11 @@ interface ReceiptModalProps {
 }
 
 export function ReceiptModal({ sale, onClose, onNewSale }: ReceiptModalProps) {
+  const { settings } = useSettings();
+  const { profile } = useProfile();
+
+  const storeName = settings?.businessName || profile?.shopName || "KUDIFLOW STORE";
+
   let saleDate = new Date();
   const _sale = sale as unknown as { createdAt?: unknown };
   if (
@@ -40,8 +47,8 @@ export function ReceiptModal({ sale, onClose, onNewSale }: ReceiptModalProps) {
             <div className="mx-auto w-12 h-12 bg-kudi-green/10 text-kudi-green rounded-full flex items-center justify-center mb-3 print:hidden">
               <CheckCircle2 className="w-6 h-6" />
             </div>
-            <h1 className="text-xl font-bold text-slate-900 uppercase tracking-widest">
-              KudiFlow Store
+            <h1 className="text-xl font-bold text-slate-900 uppercase tracking-widest break-words px-4">
+              {storeName}
             </h1>
             <p className="text-xs text-slate-500 mt-1">
               Receipt for your transaction

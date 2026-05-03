@@ -461,8 +461,8 @@ export default function SalesLedger() {
 
       {/* Checkout Modal (Glassmorphism) */}
       {isCheckoutOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="bg-white/95 backdrop-blur-sm shadow-2xl border border-white/20 rounded-2xl w-full max-w-md overflow-hidden transform transition-all animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="bg-white/95 backdrop-blur-sm shadow-2xl border border-white/20 rounded-2xl w-full max-w-md overflow-hidden transform transition-all animate-in zoom-in-95 duration-200 flex flex-col max-h-[85dvh]">
             <div className="p-6 border-b border-slate-100 shrink-0">
               <h2 className="text-xl font-bold text-slate-900 flex items-center gap-3">
                 <span className="bg-kudi-green/10 text-kudi-green p-2 rounded-xl">

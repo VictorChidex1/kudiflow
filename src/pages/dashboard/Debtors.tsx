@@ -7,6 +7,7 @@ import {
   Phone,
   HandCoins,
   CheckCircle2,
+  Edit2,
 } from "lucide-react";
 import { useDebtors, useRepaymentHistory } from "../../hooks/useDebtors";
 import type { Debtor } from "../../types/debtors";
@@ -17,7 +18,7 @@ import { Timestamp } from "firebase/firestore";
 import { WhatsAppReminderButton } from "../../components/debtors/WhatsAppReminderButton";
 
 export default function Debtors() {
-  const { debtors, isLoading, addDebtor, logRepayment } = useDebtors();
+  const { debtors, isLoading, addDebtor, logRepayment, editDebtor } = useDebtors();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"highest" | "oldest" | "dueSoon">("highest");
@@ -28,10 +29,18 @@ export default function Debtors() {
   // Modal States
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isRepayModalOpen, setIsRepayModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [newDebtorPayload, setNewDebtorPayload] = useState({
     name: "",
     phone: "",
     initialBalance: "",
+    dueDate: "",
+    creditLimit: "",
+    notes: "",
+  });
+  const [editDebtorPayload, setEditDebtorPayload] = useState({
+    name: "",
+    phone: "",
     dueDate: "",
     creditLimit: "",
     notes: "",
@@ -41,6 +50,45 @@ export default function Debtors() {
     method: "cash" as "cash" | "transfer" | "pos",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const openEditModal = () => {
+    if (!selectedDebtor) return;
+    setEditDebtorPayload({
+      name: selectedDebtor.name,
+      phone: selectedDebtor.phone || "",
+      dueDate: selectedDebtor.dueDate && (selectedDebtor.dueDate as any).toDate ? format((selectedDebtor.dueDate as any).toDate(), "yyyy-MM-dd") : "",
+      creditLimit: selectedDebtor.creditLimit ? selectedDebtor.creditLimit.toLocaleString("en-US") : "",
+      notes: selectedDebtor.notes || "",
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditDebtorSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedDebtor || !editDebtorPayload.name) return;
+
+    setIsSubmitting(true);
+    
+    let dueTimestamp = undefined;
+    if (editDebtorPayload.dueDate) {
+      dueTimestamp = Timestamp.fromDate(new Date(editDebtorPayload.dueDate));
+    } else if (editDebtorPayload.dueDate === "") {
+        dueTimestamp = null;
+    }
+
+    const success = await editDebtor(selectedDebtor.id!, {
+      name: editDebtorPayload.name,
+      phone: editDebtorPayload.phone,
+      dueDate: dueTimestamp,
+      creditLimit: editDebtorPayload.creditLimit ? Number(editDebtorPayload.creditLimit.replace(/\D/g, "")) : null,
+      notes: editDebtorPayload.notes || null,
+    });
+
+    if (success.success) {
+      setIsEditModalOpen(false);
+    }
+    setIsSubmitting(false);
+  };
 
   const formatCurrencyInput = (value: string) => {
     const numericValue = value.replace(/\D/g, "");
@@ -364,29 +412,44 @@ export default function Debtors() {
                   </div>
                 </div>
 
-                <div className="bg-slate-800/80 backdrop-blur-md border border-slate-700 rounded-2xl p-4 sm:p-5 w-full sm:w-auto text-left sm:text-right flex flex-col justify-center shadow-inner min-w-0 shrink-0">
-                  <p className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 sm:mb-1.5">
-                    Total Balance Owed
-                  </p>
-                  <p className="text-3xl sm:text-4xl font-black text-rose-400 tracking-tight break-all sm:break-normal truncate">
-                    ₦{selectedDebtor.balanceOwed.toLocaleString()}
-                  </p>
-                  
-                  {/* Progress Bar */}
-                  {totalEverOwed > 0 && (
-                    <div className="mt-4 w-full">
-                      <div className="flex justify-between items-center mb-1.5">
-                        <span className="text-[10px] font-bold uppercase text-emerald-400">Recovered</span>
-                        <span className="text-xs font-black text-white">{progressPercent}%</span>
+                <div className="flex gap-2 w-full sm:w-auto items-stretch">
+                  <button
+                    onClick={openEditModal}
+                    className="hidden sm:flex bg-slate-800/80 hover:bg-slate-700 backdrop-blur-md border border-slate-700 rounded-2xl w-14 items-center justify-center text-slate-400 hover:text-white transition-all shadow-inner"
+                    title="Edit Profile"
+                  >
+                    <Edit2 className="w-5 h-5" />
+                  </button>
+                  <div className="bg-slate-800/80 backdrop-blur-md border border-slate-700 rounded-2xl p-4 sm:p-5 w-full text-left sm:text-right flex flex-col justify-center shadow-inner min-w-0 shrink-0 flex-1 relative">
+                    <button
+                      onClick={openEditModal}
+                      className="absolute top-4 right-4 sm:hidden text-slate-400 hover:text-white"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    <p className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 sm:mb-1.5">
+                      Total Balance Owed
+                    </p>
+                    <p className="text-3xl sm:text-4xl font-black text-rose-400 tracking-tight break-all sm:break-normal truncate">
+                      ₦{selectedDebtor.balanceOwed.toLocaleString()}
+                    </p>
+                    
+                    {/* Progress Bar */}
+                    {totalEverOwed > 0 && (
+                      <div className="mt-4 w-full">
+                        <div className="flex justify-between items-center mb-1.5">
+                          <span className="text-[10px] font-bold uppercase text-emerald-400">Recovered</span>
+                          <span className="text-xs font-black text-white">{progressPercent}%</span>
+                        </div>
+                        <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-emerald-500 rounded-full transition-all duration-1000 ease-out"
+                            style={{ width: `${progressPercent}%` }}
+                          />
+                        </div>
                       </div>
-                      <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-emerald-500 rounded-full transition-all duration-1000 ease-out"
-                          style={{ width: `${progressPercent}%` }}
-                        />
-                      </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -719,6 +782,151 @@ export default function Debtors() {
                   </button>
                 </div>
               </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Edit Debtor Modal */}
+      <AnimatePresence>
+        {isEditModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsEditModalOpen(false)}
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative bg-white w-full max-w-lg rounded-3xl shadow-xl overflow-hidden border border-slate-100 flex flex-col max-h-[90vh]"
+            >
+              <div className="p-6 border-b border-slate-100 bg-slate-50 shrink-0">
+                <h3 className="text-xl font-bold text-slate-800">
+                  Edit Profile
+                </h3>
+                <p className="text-sm text-slate-500 mt-1">
+                  Update details for {editDebtorPayload.name}.
+                </p>
+              </div>
+
+              <div className="overflow-y-auto p-6 flex-1 custom-scrollbar">
+                <form id="editDebtorForm" onSubmit={handleEditDebtorSubmit} className="space-y-5">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="col-span-2">
+                      <label className="block text-sm font-bold text-slate-700 mb-1.5">
+                        Full Name *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={editDebtorPayload.name}
+                        onChange={(e) =>
+                          setEditDebtorPayload((prev) => ({
+                            ...prev,
+                            name: e.target.value,
+                          }))
+                        }
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium text-slate-900"
+                        placeholder="e.g. John Doe"
+                      />
+                    </div>
+
+                    <div className="col-span-2">
+                      <label className="block text-sm font-bold text-slate-700 mb-1.5">
+                        Phone Number
+                      </label>
+                      <input
+                        type="tel"
+                        value={editDebtorPayload.phone}
+                        onChange={(e) =>
+                          setEditDebtorPayload((prev) => ({
+                            ...prev,
+                            phone: e.target.value,
+                          }))
+                        }
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium text-slate-900"
+                        placeholder="e.g. 08012345678"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-1.5">
+                        Due Date (Optional)
+                      </label>
+                      <input
+                        type="date"
+                        value={editDebtorPayload.dueDate}
+                        onChange={(e) =>
+                          setEditDebtorPayload((prev) => ({
+                            ...prev,
+                            dueDate: e.target.value,
+                          }))
+                        }
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium text-slate-900"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-1.5">
+                        Credit Limit (₦)
+                      </label>
+                      <input
+                        type="tel"
+                        value={editDebtorPayload.creditLimit}
+                        onChange={(e) =>
+                          setEditDebtorPayload((prev) => ({
+                            ...prev,
+                            creditLimit: formatCurrencyInput(e.target.value),
+                          }))
+                        }
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium text-slate-900 placeholder-slate-300"
+                        placeholder="e.g. 50,000"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-1.5">
+                      Notes / Guarantor Details
+                    </label>
+                    <textarea
+                      value={editDebtorPayload.notes}
+                      onChange={(e) =>
+                        setEditDebtorPayload((prev) => ({
+                          ...prev,
+                          notes: e.target.value,
+                        }))
+                      }
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium text-slate-900 resize-none"
+                      placeholder="e.g. Brought broken phone as collateral"
+                      rows={3}
+                    />
+                  </div>
+                </form>
+              </div>
+
+              <div className="p-6 border-t border-slate-100 bg-white flex gap-3 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="flex-1 py-3.5 px-4 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  form="editDebtorForm"
+                  disabled={isSubmitting}
+                  className="flex-1 py-3.5 px-4 bg-emerald-500 text-white font-bold rounded-xl hover:bg-emerald-600 transition-colors shadow-md shadow-emerald-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
             </motion.div>
           </div>
         )}

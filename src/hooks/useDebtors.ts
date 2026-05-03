@@ -135,10 +135,38 @@ export function useDebtors() {
     }
   };
 
+  // 4. Edit an existing Debtor
+  const editDebtor = async (debtorId: string, updates: Partial<Debtor>) => {
+    try {
+      const user = auth.currentUser;
+      if (!user) throw new Error("Must be logged in");
+
+      const debtorRef = doc(db, `users/${user.uid}/debtors`, debtorId);
+      
+      const payload = {
+        ...updates,
+        updatedAt: serverTimestamp(),
+      };
+      
+      const batch = writeBatch(db);
+      batch.update(debtorRef, payload);
+      await batch.commit();
+
+      toast.success("Customer profile updated");
+      return { success: true };
+    } catch (err: unknown) {
+      const error = err as Error;
+      console.error("Error updating debtor:", error);
+      toast.error(error.message || "Failed to update customer");
+      return { success: false, error: error.message };
+    }
+  };
+
   return {
     debtors,
     isLoading,
     addDebtor,
+    editDebtor,
     logRepayment,
   };
 }

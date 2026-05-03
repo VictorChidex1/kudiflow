@@ -12,6 +12,7 @@ import { useInventory } from "../../hooks/useInventory";
 import { useSales } from "../../hooks/useSales";
 import { ReceiptModal } from "../../components/dashboard/ReceiptModal";
 import type { Product } from "../../types/inventory";
+import { Timestamp } from "firebase/firestore";
 import type {
   CartItem,
   NewSale,
@@ -45,6 +46,9 @@ export default function SalesLedger() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
+  const [debtorDueDate, setDebtorDueDate] = useState("");
+  const [debtorCreditLimit, setDebtorCreditLimit] = useState("");
+  const [debtorNotes, setDebtorNotes] = useState("");
 
   // Receipt State
   const [completedSaleDetails, setCompletedSaleDetails] =
@@ -195,6 +199,11 @@ export default function SalesLedger() {
       return;
     }
 
+    let dueTimestamp = undefined;
+    if (paymentMethod === "credit" && debtorDueDate) {
+      dueTimestamp = Timestamp.fromDate(new Date(debtorDueDate));
+    }
+
     const newSale: NewSale = {
       items: cart,
       subtotal,
@@ -205,6 +214,9 @@ export default function SalesLedger() {
       paymentStatus: status,
       customerName: customerName.trim() || undefined,
       customerPhone: customerPhone.trim() || undefined,
+      debtorDueDate: dueTimestamp,
+      debtorCreditLimit: paymentMethod === "credit" && debtorCreditLimit ? Number(debtorCreditLimit.replace(/\D/g, "")) : undefined,
+      debtorNotes: paymentMethod === "credit" && debtorNotes ? debtorNotes : undefined,
     };
 
     const result = await processSale(newSale);
@@ -224,6 +236,9 @@ export default function SalesLedger() {
     setCustomerPhone("");
     setAmountPaid(0);
     setPaymentMethod("cash");
+    setDebtorDueDate("");
+    setDebtorCreditLimit("");
+    setDebtorNotes("");
     setCompletedSaleDetails(null);
   };
 
@@ -577,6 +592,46 @@ export default function SalesLedger() {
                       className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-kudi-green outline-none"
                     />
                   </div>
+
+                  {paymentMethod === "credit" && (
+                    <div className="pt-3 border-t border-slate-100 space-y-4">
+                      <p className="text-xs font-bold text-emerald-600 uppercase tracking-wider">Debtor Profile Sync</p>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-500 mb-1">Due Date</label>
+                          <input
+                            type="date"
+                            value={debtorDueDate}
+                            onChange={(e) => setDebtorDueDate(e.target.value)}
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-500 mb-1">Credit Limit (₦)</label>
+                          <input
+                            type="tel"
+                            value={debtorCreditLimit}
+                            onChange={(e) => {
+                              const numericValue = e.target.value.replace(/\D/g, "");
+                              setDebtorCreditLimit(numericValue ? Number(numericValue).toLocaleString("en-US") : "");
+                            }}
+                            placeholder="e.g. 50,000"
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none text-sm"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-500 mb-1">Guarantor / Notes</label>
+                        <input
+                          type="text"
+                          value={debtorNotes}
+                          onChange={(e) => setDebtorNotes(e.target.value)}
+                          placeholder="e.g. Left broken phone as collateral"
+                          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none text-sm"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex gap-3 pt-4">

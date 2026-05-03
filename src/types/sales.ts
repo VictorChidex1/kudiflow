@@ -24,6 +24,9 @@ export interface Sale {
   paymentStatus: PaymentStatus;
   customerName?: string;
   customerPhone?: string;
+  debtorDueDate?: Timestamp | FieldValue;
+  debtorCreditLimit?: number;
+  debtorNotes?: string;
   createdAt: Timestamp | FieldValue; // Supports both serverTimestamp and local Date fallbacks
 }
 

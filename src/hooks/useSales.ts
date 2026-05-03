@@ -102,10 +102,16 @@ export function useSales() {
 
         if (!querySnapshot.empty) {
           // Update existing debtor profile
-          batch.update(querySnapshot.docs[0].ref, {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const updates: any = {
             balanceOwed: increment(debtAmount),
             updatedAt: serverTimestamp(),
-          });
+          };
+          if (saleData.debtorDueDate !== undefined) updates.dueDate = saleData.debtorDueDate;
+          if (saleData.debtorCreditLimit !== undefined) updates.creditLimit = saleData.debtorCreditLimit;
+          if (saleData.debtorNotes !== undefined) updates.notes = saleData.debtorNotes;
+
+          batch.update(querySnapshot.docs[0].ref, updates);
         } else {
           // Create new debtor profile
           const newDebtorRef = doc(debtorsRef);
@@ -113,6 +119,9 @@ export function useSales() {
             name: saleData.customerName,
             phone: saleData.customerPhone || "",
             balanceOwed: debtAmount,
+            dueDate: saleData.debtorDueDate || null,
+            creditLimit: saleData.debtorCreditLimit || null,
+            notes: saleData.debtorNotes || null,
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp(),
           });

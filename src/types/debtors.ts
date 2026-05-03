@@ -13,6 +13,9 @@ export interface Debtor {
   name: string;
   phone: string;
   balanceOwed: number;
+  dueDate?: Timestamp | FieldValue;
+  creditLimit?: number;
+  notes?: string;
   createdAt: Timestamp | FieldValue;
   updatedAt: Timestamp | FieldValue;
   repayments?: RepaymentLog[]; // Only populated locally when viewing a specific debtor

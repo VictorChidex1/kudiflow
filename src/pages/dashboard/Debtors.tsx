@@ -10,15 +10,17 @@ import {
 } from "lucide-react";
 import { useDebtors, useRepaymentHistory } from "../../hooks/useDebtors";
 import type { Debtor } from "../../types/debtors";
-import { format } from "date-fns";
+import { format, isBefore, addDays, startOfDay } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import { auth } from "../../lib/firebase";
+import { Timestamp } from "firebase/firestore";
 import { WhatsAppReminderButton } from "../../components/debtors/WhatsAppReminderButton";
 
 export default function Debtors() {
   const { debtors, isLoading, addDebtor, logRepayment } = useDebtors();
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<"highest" | "oldest" | "dueSoon">("highest");
   const [selectedDebtor, setSelectedDebtor] = useState<Debtor | null>(null);
 
   const { repayments, isLoadingHistory } = useRepaymentHistory(selectedDebtor?.id);
@@ -30,6 +32,9 @@ export default function Debtors() {
     name: "",
     phone: "",
     initialBalance: "",
+    dueDate: "",
+    creditLimit: "",
+    notes: "",
   });
   const [repaymentPayload, setRepaymentPayload] = useState({
     amount: "",
@@ -37,32 +42,73 @@ export default function Debtors() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const formatCurrencyInput = (value: string) => {
+    const numericValue = value.replace(/\D/g, "");
+    if (!numericValue) return "";
+    return Number(numericValue).toLocaleString("en-US");
+  };
+
   // Analytics Math
   const totalOutstanding = debtors.reduce((sum, d) => sum + d.balanceOwed, 0);
   const activeDebtorsCount = debtors.filter((d) => d.balanceOwed > 0).length;
 
+  // Progress Math
+  const totalPaid = repayments.reduce((sum, r) => sum + r.amountCleared, 0);
+  const totalEverOwed = (selectedDebtor?.balanceOwed || 0) + totalPaid;
+  const progressPercent = totalEverOwed > 0 ? Math.round((totalPaid / totalEverOwed) * 100) : 0;
+
   const filteredDebtors = useMemo(() => {
-    return debtors.filter(
+    let filtered = debtors.filter(
       (d) =>
         d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         d.phone.includes(searchQuery)
     );
-  }, [debtors, searchQuery]);
+
+    if (sortBy === "highest") {
+      filtered = filtered.sort((a, b) => b.balanceOwed - a.balanceOwed);
+    } else if (sortBy === "oldest") {
+      filtered = filtered.sort((a, b) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const dateA = a.createdAt && (a.createdAt as any).toDate ? (a.createdAt as any).toDate().getTime() : 0;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const dateB = b.createdAt && (b.createdAt as any).toDate ? (b.createdAt as any).toDate().getTime() : 0;
+        return dateA - dateB;
+      });
+    } else if (sortBy === "dueSoon") {
+      filtered = filtered.sort((a, b) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const dateA = a.dueDate && (a.dueDate as any).toDate ? (a.dueDate as any).toDate().getTime() : Infinity;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const dateB = b.dueDate && (b.dueDate as any).toDate ? (b.dueDate as any).toDate().getTime() : Infinity;
+        return dateA - dateB;
+      });
+    }
+    return filtered;
+  }, [debtors, searchQuery, sortBy]);
 
   const handleAddDebtorSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newDebtorPayload.name || !newDebtorPayload.initialBalance) return;
 
     setIsSubmitting(true);
+    
+    let dueTimestamp = undefined;
+    if (newDebtorPayload.dueDate) {
+      dueTimestamp = Timestamp.fromDate(new Date(newDebtorPayload.dueDate));
+    }
+
     const success = await addDebtor({
       name: newDebtorPayload.name,
       phone: newDebtorPayload.phone,
-      balanceOwed: Number(newDebtorPayload.initialBalance),
+      balanceOwed: Number(newDebtorPayload.initialBalance.replace(/\D/g, "")),
+      dueDate: dueTimestamp,
+      creditLimit: newDebtorPayload.creditLimit ? Number(newDebtorPayload.creditLimit.replace(/\D/g, "")) : undefined,
+      notes: newDebtorPayload.notes || undefined,
     });
 
     if (success.success) {
       setIsAddModalOpen(false);
-      setNewDebtorPayload({ name: "", phone: "", initialBalance: "" });
+      setNewDebtorPayload({ name: "", phone: "", initialBalance: "", dueDate: "", creditLimit: "", notes: "" });
     }
     setIsSubmitting(false);
   };
@@ -72,7 +118,7 @@ export default function Debtors() {
     if (!selectedDebtor || !repaymentPayload.amount) return;
 
     setIsSubmitting(true);
-    const amountNum = Number(repaymentPayload.amount);
+    const amountNum = Number(repaymentPayload.amount.replace(/\D/g, ""));
 
     // Prevent overpaying
     const finalAmount =
@@ -136,18 +182,27 @@ export default function Debtors() {
           </div>
         </div>
 
-        {/* Search */}
-        <div className="p-4 border-b border-slate-100">
-          <div className="relative">
+        {/* Search & Sort */}
+        <div className="p-4 border-b border-slate-100 flex gap-2">
+          <div className="relative flex-1">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <input
               type="text"
-              placeholder="Search by name or phone..."
+              placeholder="Search name or phone..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium text-sm text-slate-700 placeholder-slate-400"
             />
           </div>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as any)}
+            className="w-32 py-3 px-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-semibold text-xs text-slate-600 appearance-none text-center cursor-pointer"
+          >
+            <option value="highest">Highest Debt</option>
+            <option value="oldest">Oldest First</option>
+            <option value="dueSoon">Due Soonest</option>
+          </select>
         </div>
 
         {/* Roster List */}
@@ -183,15 +238,28 @@ export default function Debtors() {
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3
-                        className={`font-bold text-base ${
-                          selectedDebtor?.id === debtor.id
-                            ? "text-emerald-900"
-                            : "text-slate-800"
-                        }`}
-                      >
-                        {debtor.name}
-                      </h3>
+                      <div className="flex items-center gap-2">
+                        <h3
+                          className={`font-bold text-base ${
+                            selectedDebtor?.id === debtor.id
+                              ? "text-emerald-900"
+                              : "text-slate-800"
+                          }`}
+                        >
+                          {debtor.name}
+                        </h3>
+                        {/* Debt Aging Badge Logic */}
+                        {debtor.dueDate && (debtor.dueDate as any).toDate && debtor.balanceOwed > 0 && (() => {
+                          const dueD = (debtor.dueDate as any).toDate();
+                          const today = startOfDay(new Date());
+                          if (isBefore(dueD, today)) {
+                            return <span className="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_0_2px_rgba(244,63,94,0.2)]" title="Overdue" />;
+                          } else if (isBefore(dueD, addDays(today, 3))) {
+                            return <span className="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_0_2px_rgba(251,191,36,0.2)]" title="Due Soon" />;
+                          }
+                          return <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_0_2px_rgba(52,211,153,0.2)]" title="Safe" />;
+                        })()}
+                      </div>
                       <p className="text-xs text-slate-500 font-medium mt-0.5 flex items-center gap-1">
                         <Phone className="w-3 h-3" />{" "}
                         {debtor.phone || "No phone"}
@@ -252,35 +320,73 @@ export default function Debtors() {
             <div className="p-6 sm:p-8 border-b border-slate-100 bg-slate-900 relative overflow-hidden shrink-0">
               <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
 
-              <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-5 sm:gap-6">
-                <div className="flex items-center gap-4 sm:gap-5 min-w-0">
-                  <div className="w-14 h-14 sm:w-16 sm:h-16 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/10 shrink-0">
+              <div className="relative z-10 flex flex-col sm:flex-row sm:items-start justify-between gap-5 sm:gap-6">
+                <div className="flex items-start gap-4 sm:gap-5 min-w-0 flex-1">
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/10 shrink-0 mt-1">
                     <span className="text-2xl font-black text-white">
                       {selectedDebtor.name.charAt(0)}
                     </span>
                   </div>
-                  <div className="min-w-0">
-                    <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight truncate">
+                  <div className="min-w-0 flex-1">
+                    <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight truncate flex items-center gap-2">
                       {selectedDebtor.name}
+                      {selectedDebtor.dueDate && (selectedDebtor.dueDate as any).toDate && (
+                        <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border ${(() => {
+                          const dueD = (selectedDebtor.dueDate as any).toDate();
+                          const today = startOfDay(new Date());
+                          if (isBefore(dueD, today)) return "bg-rose-500/20 text-rose-300 border-rose-500/30";
+                          if (isBefore(dueD, addDays(today, 3))) return "bg-amber-400/20 text-amber-300 border-amber-400/30";
+                          return "bg-emerald-500/20 text-emerald-300 border-emerald-500/30";
+                        })()}`}>
+                          Due: {format((selectedDebtor.dueDate as any).toDate(), "MMM d, yyyy")}
+                        </span>
+                      )}
                     </h2>
-                    <div className="flex gap-4 mt-1">
+                    <div className="flex flex-wrap gap-4 mt-1.5">
                       <a
                         href={`tel:${selectedDebtor.phone}`}
                         className="text-sm font-medium text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1.5 min-w-0"
                       >
                         <Phone className="w-4 h-4 shrink-0" /> <span className="truncate">{selectedDebtor.phone}</span>
                       </a>
+                      {selectedDebtor.creditLimit && (
+                        <span className="text-sm font-medium text-slate-400 flex items-center gap-1.5">
+                          Limit: ₦{selectedDebtor.creditLimit.toLocaleString()}
+                        </span>
+                      )}
                     </div>
+                    {selectedDebtor.notes && (
+                      <div className="mt-3 bg-slate-800/50 rounded-xl p-3 border border-slate-700/50">
+                        <p className="text-xs font-semibold text-slate-400 mb-1 uppercase tracking-wider">Notes / Guarantor</p>
+                        <p className="text-sm text-slate-300 italic">{selectedDebtor.notes}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                <div className="bg-slate-800/80 backdrop-blur-md border border-slate-700 rounded-2xl p-4 sm:p-5 w-full sm:w-auto text-left sm:text-right flex flex-col justify-center shadow-inner min-w-0">
+                <div className="bg-slate-800/80 backdrop-blur-md border border-slate-700 rounded-2xl p-4 sm:p-5 w-full sm:w-auto text-left sm:text-right flex flex-col justify-center shadow-inner min-w-0 shrink-0">
                   <p className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 sm:mb-1.5">
                     Total Balance Owed
                   </p>
                   <p className="text-3xl sm:text-4xl font-black text-rose-400 tracking-tight break-all sm:break-normal truncate">
                     ₦{selectedDebtor.balanceOwed.toLocaleString()}
                   </p>
+                  
+                  {/* Progress Bar */}
+                  {totalEverOwed > 0 && (
+                    <div className="mt-4 w-full">
+                      <div className="flex justify-between items-center mb-1.5">
+                        <span className="text-[10px] font-bold uppercase text-emerald-400">Recovered</span>
+                        <span className="text-xs font-black text-white">{progressPercent}%</span>
+                      </div>
+                      <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-emerald-500 rounded-full transition-all duration-1000 ease-out"
+                          style={{ width: `${progressPercent}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -421,18 +527,71 @@ export default function Debtors() {
                     Initial Debt Balance (₦) *
                   </label>
                   <input
-                    type="number"
+                    type="tel"
                     required
-                    min="1"
                     value={newDebtorPayload.initialBalance}
                     onChange={(e) =>
                       setNewDebtorPayload((prev) => ({
                         ...prev,
-                        initialBalance: e.target.value,
+                        initialBalance: formatCurrencyInput(e.target.value),
                       }))
                     }
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all font-bold text-rose-500 text-lg placeholder-slate-300"
                     placeholder="0"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-1.5">
+                      Due Date (Optional)
+                    </label>
+                    <input
+                      type="date"
+                      value={newDebtorPayload.dueDate}
+                      onChange={(e) =>
+                        setNewDebtorPayload((prev) => ({
+                          ...prev,
+                          dueDate: e.target.value,
+                        }))
+                      }
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium text-slate-900"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-1.5">
+                      Credit Limit (₦)
+                    </label>
+                    <input
+                      type="tel"
+                      value={newDebtorPayload.creditLimit}
+                      onChange={(e) =>
+                        setNewDebtorPayload((prev) => ({
+                          ...prev,
+                          creditLimit: formatCurrencyInput(e.target.value),
+                        }))
+                      }
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium text-slate-900 placeholder-slate-300"
+                      placeholder="e.g. 50,000"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1.5">
+                    Notes / Guarantor Details
+                  </label>
+                  <textarea
+                    value={newDebtorPayload.notes}
+                    onChange={(e) =>
+                      setNewDebtorPayload((prev) => ({
+                        ...prev,
+                        notes: e.target.value,
+                      }))
+                    }
+                    rows={2}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium text-slate-900 resize-none"
+                    placeholder="e.g. Brought broken phone as collateral"
                   />
                 </div>
 
@@ -496,7 +655,7 @@ export default function Debtors() {
                       onClick={() =>
                         setRepaymentPayload((p) => ({
                           ...p,
-                          amount: selectedDebtor.balanceOwed.toString(),
+                          amount: selectedDebtor.balanceOwed.toLocaleString("en-US"),
                         }))
                       }
                       className="text-emerald-500 hover:text-emerald-600 transition-colors"
@@ -505,15 +664,13 @@ export default function Debtors() {
                     </button>
                   </label>
                   <input
-                    type="number"
+                    type="tel"
                     required
-                    min="1"
-                    max={selectedDebtor.balanceOwed}
                     value={repaymentPayload.amount}
                     onChange={(e) =>
                       setRepaymentPayload((prev) => ({
                         ...prev,
-                        amount: e.target.value,
+                        amount: formatCurrencyInput(e.target.value),
                       }))
                     }
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-bold text-emerald-600 text-lg placeholder-slate-300"

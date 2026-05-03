@@ -462,16 +462,18 @@ export default function SalesLedger() {
       {/* Checkout Modal (Glassmorphism) */}
       {isCheckoutOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="bg-white/95 backdrop-blur-sm shadow-2xl border border-white/20 rounded-2xl w-full max-w-md overflow-hidden transform transition-all animate-in zoom-in-95 duration-200">
-            <div className="p-6">
-              <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-3">
+          <div className="bg-white/95 backdrop-blur-sm shadow-2xl border border-white/20 rounded-2xl w-full max-w-md overflow-hidden transform transition-all animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
+            <div className="p-6 border-b border-slate-100 shrink-0">
+              <h2 className="text-xl font-bold text-slate-900 flex items-center gap-3">
                 <span className="bg-kudi-green/10 text-kudi-green p-2 rounded-xl">
                   <CreditCard className="w-5 h-5" />
                 </span>
                 Complete Sale
               </h2>
+            </div>
 
-              <form onSubmit={submitSale} className="space-y-6">
+            <form onSubmit={submitSale} className="flex flex-col flex-1 overflow-hidden">
+              <div className="p-6 overflow-y-auto custom-scrollbar space-y-6">
                 {/* Payment Method Selector */}
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -633,24 +635,24 @@ export default function SalesLedger() {
                     </div>
                   )}
                 </div>
+              </div>
 
-                <div className="flex gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setIsCheckoutOpen(false)}
-                    className="flex-1 py-3 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-1 py-3 bg-kudi-green text-white rounded-xl font-bold hover:bg-kudi-green/90 transition-colors"
-                  >
-                    Confirm Sale
-                  </button>
-                </div>
-              </form>
-            </div>
+              <div className="p-6 border-t border-slate-100 bg-slate-50 flex gap-3 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setIsCheckoutOpen(false)}
+                  className="flex-1 py-3 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-colors border border-slate-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-3 bg-kudi-green text-white rounded-xl font-bold hover:bg-kudi-green/90 transition-colors shadow-md shadow-kudi-green/20"
+                >
+                  Confirm Sale
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

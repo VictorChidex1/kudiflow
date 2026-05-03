@@ -412,15 +412,15 @@ export default function Debtors() {
                   </div>
                 </div>
 
-                <div className="flex gap-2 w-full sm:w-auto items-stretch">
+                <div className="flex gap-2 w-full sm:w-auto items-stretch shrink-0">
                   <button
                     onClick={openEditModal}
-                    className="hidden sm:flex bg-slate-800/80 hover:bg-slate-700 backdrop-blur-md border border-slate-700 rounded-2xl w-14 items-center justify-center text-slate-400 hover:text-white transition-all shadow-inner"
+                    className="hidden sm:flex bg-slate-800/80 hover:bg-slate-700 backdrop-blur-md border border-slate-700 rounded-2xl w-14 items-center justify-center text-slate-400 hover:text-white transition-all shadow-inner shrink-0"
                     title="Edit Profile"
                   >
                     <Edit2 className="w-5 h-5" />
                   </button>
-                  <div className="bg-slate-800/80 backdrop-blur-md border border-slate-700 rounded-2xl p-4 sm:p-5 w-full text-left sm:text-right flex flex-col justify-center shadow-inner min-w-0 shrink-0 flex-1 relative">
+                  <div className="bg-slate-800/80 backdrop-blur-md border border-slate-700 rounded-2xl p-5 sm:p-6 w-full sm:min-w-[260px] lg:min-w-[300px] text-left sm:text-right flex flex-col justify-center shadow-inner relative">
                     <button
                       onClick={openEditModal}
                       className="absolute top-4 right-4 sm:hidden text-slate-400 hover:text-white"

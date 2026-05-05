@@ -1,10 +1,8 @@
-import fs from 'fs';
-import path from 'path';
+import admin from "firebase-admin";
 
 let adminInitialized = false;
 
 async function getAdmin() {
-  const admin = await import("firebase-admin");
   if (!admin.apps.length && !adminInitialized) {
     const projectId = process.env.FIREBASE_PROJECT_ID;
     const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
@@ -12,7 +10,11 @@ async function getAdmin() {
 
     if (projectId && clientEmail && privateKey) {
       admin.initializeApp({
-        credential: admin.credential.cert({ projectId, clientEmail, privateKey }),
+        credential: admin.credential.cert({
+          projectId,
+          clientEmail,
+          privateKey,
+        }),
       });
       adminInitialized = true;
     }
@@ -22,48 +24,70 @@ async function getAdmin() {
 
 export default async function handler(req: any, res: any) {
   try {
-    const urlPath = req.url?.split('?')[0] || '/';
-    
-    // Read the built index.html from dist
-    const indexPath = path.join(process.cwd(), 'dist', 'index.html');
-    let html = '';
-    
+    // 1. Get the path correctly from the Vercel rewrite
+    const pathQuery = Array.isArray(req.query.path)
+      ? req.query.path[0]
+      : req.query.path;
+    let urlPath = "/" + (pathQuery || "").split("?")[0];
+
+    // Clean up double slashes if any
+    urlPath = urlPath.replace(/\/\//g, "/");
+
+    // 2. Fetch the raw index.html using a secure loopback to avoid Vercel filesystem limits
+    const protocol = req.headers["x-forwarded-proto"] || "https";
+    const host = req.headers.host || "kudiflow.vercel.app";
+    const fullUrl = `${protocol}://${host}${urlPath}`;
+
+    let html = "";
     try {
-      html = fs.readFileSync(indexPath, 'utf-8');
+      const response = await fetch(`${protocol}://${host}/index.html`);
+      if (!response.ok)
+        throw new Error(`Fetch failed with status ${response.status}`);
+      html = await response.text();
     } catch (e) {
-      console.error("Could not read index.html from dist", e);
-      return res.status(500).send("Internal Server Error: Missing index.html");
+      console.error("Could not fetch index.html loopback", e);
+      // Fallback minimal HTML structure for bots if fetch fails
+      html = `<!DOCTYPE html><html lang="en"><head></head><body></body></html>`;
     }
 
     // Default Meta Tags
     let title = "KudiFlow | The Offline-First App for Smart Vendors";
-    let description = "Ditch messy ledgers. Track daily sales, manage inventory, and seamlessly collect debts—all without data.";
+    let description =
+      "Ditch messy ledgers. Track daily sales, manage inventory, and seamlessly collect debts—all without data.";
     let image = "https://kudiflow.vercel.app/assets/main-hero-image.webp";
 
-    // Route specific static meta
-    if (urlPath === '/about') {
+    if (urlPath === "/about") {
       title = "About Us | KudiFlow";
-      description = "Learn more about our mission to empower MSMEs in emerging markets.";
-    } else if (urlPath === '/contact') {
+      description =
+        "Learn more about our mission to empower MSMEs in emerging markets.";
+    } else if (urlPath === "/contact") {
       title = "Contact Us | KudiFlow";
       description = "Get in touch with the KudiFlow support team.";
-    } else if (urlPath === '/docs') {
-      title = "Documentation | KudiFlow";
-      description = "Guides and tutorials for using KudiFlow to the fullest.";
-    } else if (urlPath === '/login' || urlPath === '/signup') {
+    } else if (urlPath === "/docs" || urlPath.startsWith("/docs")) {
+      title = "Documentation & Guides | KudiFlow";
+      description =
+        "Learn how to master KudiFlow. Comprehensive guides on inventory, sales, debtors, and more.";
+    } else if (urlPath === "/login" || urlPath === "/signup") {
       title = "Join KudiFlow | Sign In & Sign Up";
-      description = "Access your KudiFlow dashboard to manage sales and inventory.";
-    } else if (urlPath === '/blog') {
-      title = "KudiFlow Blog";
-      description = "Read the latest tips, tricks, and updates for small businesses from KudiFlow.";
-    } else if (urlPath.startsWith('/blog/') && urlPath.length > 6) {
+      description =
+        "Access your KudiFlow dashboard to manage sales and inventory securely.";
+    } else if (urlPath === "/blog") {
+      title = "KudiFlow Blog | Tips for Market Vendors";
+      description =
+        "Read the latest tips, tricks, and updates for small businesses from KudiFlow.";
+    } else if (urlPath.startsWith("/blog/") && urlPath.length > 6) {
       // Dynamic blog post fetching
-      const slug = urlPath.split('/blog/')[1];
-      const admin = await getAdmin();
-      
-      if (admin.apps.length > 0) {
-        const db = admin.firestore();
-        const snapshot = await db.collection('blogs').where('slug', '==', slug).where('status', '==', 'published').limit(1).get();
+      const slug = urlPath.split("/blog/")[1].replace(/\/$/, ""); // clean trailing slash
+      const adminInstance = await getAdmin();
+
+      if (adminInstance.apps.length > 0) {
+        const db = adminInstance.firestore();
+        const snapshot = await db
+          .collection("blogs")
+          .where("slug", "==", slug)
+          .where("status", "==", "published")
+          .limit(1)
+          .get();
         if (!snapshot.empty) {
           const post = snapshot.docs[0].data();
           title = `${post.title} | KudiFlow`;
@@ -75,30 +99,43 @@ export default async function handler(req: any, res: any) {
       }
     }
 
-    // Inject Meta Tags right before </head>
+    // 4. Clean existing meta tags so we don't have duplicates
+    html = html.replace(/<title>.*?<\/title>/gi, "");
+    html = html.replace(
+      /<meta[^>]*(name|property)="(description|og:|twitter:)[^>]*>/gi,
+      ""
+    );
+
+    // 5. Inject the flawless new Meta Tags
     const ogTags = `
+    <title>${title}</title>
+    <meta name="description" content="${description}" />
+    <link rel="canonical" href="${fullUrl}" />
+    
+    <!-- Open Graph (Facebook/LinkedIn/WhatsApp) -->
     <meta property="og:title" content="${title}" />
     <meta property="og:description" content="${description}" />
     <meta property="og:image" content="${image}" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://kudiflow.vercel.app${urlPath}" />
+    <meta property="og:url" content="${fullUrl}" />
+    
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="${title}" />
     <meta name="twitter:description" content="${description}" />
     <meta name="twitter:image" content="${image}" />
+    <meta name="twitter:url" content="${fullUrl}" />
     `;
 
-    // Replace the generic <title>
-    html = html.replace(/<title>(.*?)<\/title>/, `<title>${title}</title>`);
-    
-    // Inject the OG Tags
-    html = html.replace('</head>', `${ogTags}</head>`);
+    html = html.replace("</head>", `${ogTags}\n  </head>`);
 
-    res.setHeader('Content-Type', 'text/html');
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    res.setHeader("Cache-Control", "s-maxage=60, stale-while-revalidate=86400"); // Cache for 1 min on edge, serve stale while updating
     res.status(200).send(html);
-
   } catch (err: any) {
     console.error("SEO Interceptor Error:", err);
-    res.status(500).json({ error: "Failed to process SEO request.", details: err.message });
+    res
+      .status(500)
+      .json({ error: "Failed to process SEO request.", details: err.message });
   }
 }

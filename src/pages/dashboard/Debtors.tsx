@@ -8,6 +8,8 @@ import {
   HandCoins,
   CheckCircle2,
   Edit2,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { useDebtors, useRepaymentHistory } from "../../hooks/useDebtors";
 import type { Debtor } from "../../types/debtors";
@@ -23,6 +25,9 @@ export default function Debtors() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"highest" | "oldest" | "dueSoon">("highest");
   const [selectedDebtor, setSelectedDebtor] = useState<Debtor | null>(null);
+  
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const { repayments, isLoadingHistory } = useRepaymentHistory(selectedDebtor?.id);
 
@@ -134,6 +139,14 @@ export default function Debtors() {
     return filtered;
   }, [debtors, searchQuery, sortBy]);
 
+  const totalPages = Math.max(1, Math.ceil(filteredDebtors.length / itemsPerPage));
+  const paginatedDebtors = useMemo(() => {
+    return filteredDebtors.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
+  }, [filteredDebtors, currentPage]);
+
   const handleAddDebtorSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newDebtorPayload.name || !newDebtorPayload.initialBalance) return;
@@ -238,13 +251,19 @@ export default function Debtors() {
               type="text"
               placeholder="Search name or phone..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
               className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium text-sm text-slate-700 placeholder-slate-400"
             />
           </div>
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as any)}
+            onChange={(e) => {
+              setSortBy(e.target.value as any);
+              setCurrentPage(1);
+            }}
             className="w-32 py-3 px-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-semibold text-xs text-slate-600 appearance-none text-center cursor-pointer"
           >
             <option value="highest">Highest Debt</option>
@@ -273,8 +292,9 @@ export default function Debtors() {
               </p>
             </div>
           ) : (
-            <div className="space-y-1">
-              {filteredDebtors.map((debtor) => (
+            <div className="flex flex-col h-full space-y-1">
+              <div className="space-y-1 flex-1">
+                {paginatedDebtors.map((debtor) => (
                 <button
                   key={debtor.id}
                   onClick={() => setSelectedDebtor(debtor)}
@@ -330,6 +350,34 @@ export default function Debtors() {
                   </div>
                 </button>
               ))}
+              </div>
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="mt-4 pt-4 pb-2 border-t border-slate-100 flex items-center justify-between shrink-0">
+                  <span className="text-xs font-medium text-slate-500">
+                    Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
+                    {Math.min(currentPage * itemsPerPage, filteredDebtors.length)} of{" "}
+                    {filteredDebtors.length}
+                  </span>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                      className="p-1.5 bg-white border border-slate-200 rounded-lg hover:border-emerald-500 hover:text-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                      className="p-1.5 bg-white border border-slate-200 rounded-lg hover:border-emerald-500 hover:text-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

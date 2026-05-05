@@ -6,6 +6,7 @@ import {
   ShieldCheck,
   WifiOff,
   ArrowLeft,
+  LineChart,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -15,6 +16,7 @@ export type DocCategory =
   | "daily-sales"
   | "inventory"
   | "debtors"
+  | "transactions"
   | "offline"
   | "security";
 
@@ -34,6 +36,7 @@ const categories: {
   { id: "daily-sales", label: "Recording Sales", icon: CreditCard },
   { id: "inventory", label: "Manage Inventory", icon: ShoppingBag },
   { id: "debtors", label: "Collect Debts", icon: Users },
+  { id: "transactions", label: "Transactions & Reports", icon: LineChart },
   { id: "offline", label: "Offline Mode", icon: WifiOff },
   { id: "security", label: "Account Security", icon: ShieldCheck },
 ];

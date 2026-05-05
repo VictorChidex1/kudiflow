@@ -7,6 +7,7 @@ import { useBlogPostBySlug } from "../hooks/useBlogPosts";
 import SEO from "../components/SEO";
 import { LandingNavbar } from "../components/landing/Navbar";
 import { Footer } from "../components/landing/Footer";
+import { JsonLd } from "../components/seo/JsonLd";
 
 export default function BlogPost() {
   const { slug } = useParams<{ slug: string }>();
@@ -47,12 +48,34 @@ export default function BlogPost() {
     );
   }
 
+  const getIsoString = (val: any) => {
+    if (!val) return "";
+    if (val.toDate) return val.toDate().toISOString();
+    if (val instanceof Date) return val.toISOString();
+    return new Date(val).toISOString();
+  };
+
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": post.title,
+    "image": post.coverImage ? [post.coverImage] : [],
+    "datePublished": getIsoString(post.createdAt),
+    "dateModified": getIsoString(post.updatedAt),
+    "author": [{
+        "@type": "Person",
+        "name": post.author || "KudiFlow Team",
+    }],
+    "description": post.excerpt
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <SEO 
         title={`${post.title} | KudiFlow`} 
         description={post.excerpt}
       />
+      <JsonLd data={articleSchema} />
 
       <LandingNavbar />
 

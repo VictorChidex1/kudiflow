@@ -9,6 +9,14 @@
       "destination": "/api/$1"
     },
     {
+      "source": "/sitemap.xml",
+      "destination": "/api/sitemap.xml"
+    },
+    {
+      "source": "/robots.txt",
+      "destination": "/api/robots.txt"
+    },
+    {
       "source": "/((?!assets|api|src|node_modules|@vite|@react-refresh|.*\\.).*)",
       "has": [
         {

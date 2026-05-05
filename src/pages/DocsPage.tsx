@@ -6,8 +6,39 @@ import { DocsContent } from "../components/docs/DocsContent";
 import { Menu, ArrowLeft } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import SEO from "../components/SEO";
+import { JsonLd } from "../components/seo/JsonLd";
 
 export default function DocsPage() {
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do I manage my inventory offline?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "KudiFlow allows you to use the app all day in the market without turning on your mobile data. You can log sales, view inventory, and add new products offline. When you reconnect, it automatically syncs to the cloud."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can KudiFlow track partial payments?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. If a customer's bill is ₦50,000 but they only pay ₦30,000, simply enter the amount paid. KudiFlow automatically registers it as a partial payment and pushes the remaining ₦20,000 to your Debtors list."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does the Debt Aging system work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "We visually tag debtors based on due dates. A Red badge means overdue, a Yellow badge means due within 3 days, and a Green badge means safe."
+        }
+      }
+    ]
+  };
   const [searchParams] = useSearchParams();
   const categoryParam = searchParams.get("category") as DocCategory | null;
 
@@ -35,6 +66,7 @@ export default function DocsPage() {
         title="Help Center & Documentation"
         description="Learn how to make the most of KudiFlow. Find tutorials, setup guides, and best practices for managing your shop."
       />
+      <JsonLd data={faqSchema} />
       {/* Ambient Glowing Background */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
         <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-kudi-green/10 rounded-full mix-blend-multiply blur-[120px] animate-blob" />

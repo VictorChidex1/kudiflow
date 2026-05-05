@@ -8,11 +8,36 @@ import { FAQ } from "../components/landing/FAQ";
 import { CTA } from "../components/landing/CTA";
 import { Footer } from "../components/landing/Footer";
 import SEO from "../components/SEO";
+import { JsonLd } from "../components/seo/JsonLd";
 
 export default function LandingPage() {
+  const softwareSchema = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "KudiFlow",
+    "operatingSystem": "Web, Android, iOS",
+    "applicationCategory": "BusinessApplication",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "NGN"
+    },
+    "description": "The offline-first shop manager for MSMEs. Track sales, inventory, and debtors seamlessly without internet."
+  };
+
+  const localBusinessSchema = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "KudiFlow",
+    "image": "https://kudiflow.vercel.app/assets/logo.webp",
+    "description": "Empowering emerging market vendors with offline-first point of sale technology.",
+    "url": "https://kudiflow.vercel.app"
+  };
   return (
     <div className="min-h-screen bg-kudi-bg flex flex-col">
       <SEO title="Home" />
+      <JsonLd data={softwareSchema} />
+      <JsonLd data={localBusinessSchema} />
       <LandingNavbar />
 
       <main className="flex-1 flex flex-col">

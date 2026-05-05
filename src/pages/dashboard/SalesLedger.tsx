@@ -7,6 +7,8 @@ import {
   ShoppingCart,
   CreditCard,
   Package,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { useInventory } from "../../hooks/useInventory";
 import { useSales } from "../../hooks/useSales";
@@ -64,6 +66,17 @@ export default function SalesLedger() {
       return matchesSearch && matchesCategory;
     });
   }, [products, searchTerm, selectedCategory]);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
+
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / itemsPerPage));
+  const paginatedProducts = useMemo(() => {
+    return filteredProducts.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
+  }, [filteredProducts, currentPage]);
 
   const subtotal = useMemo(
     () => cart.reduce((sum, item) => sum + item.subtotal, 0),
@@ -254,14 +267,20 @@ export default function SalesLedger() {
               type="text"
               placeholder="Search by product name or scan barcode..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
               onKeyDown={handleSearchEnter}
               className="w-full pl-10 pr-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-kudi-green/20 outline-none transition-all font-medium"
             />
           </div>
           <div className="flex overflow-x-auto hide-scrollbar gap-2 pb-1">
             <button
-              onClick={() => setSelectedCategory("All")}
+              onClick={() => {
+                setSelectedCategory("All");
+                setCurrentPage(1);
+              }}
               className={`whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
                 selectedCategory === "All"
                   ? "bg-slate-900 text-white shadow-sm"
@@ -273,7 +292,10 @@ export default function SalesLedger() {
             {CATEGORIES.map((cat) => (
               <button
                 key={cat}
-                onClick={() => setSelectedCategory(cat)}
+                onClick={() => {
+                  setSelectedCategory(cat);
+                  setCurrentPage(1);
+                }}
                 className={`whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-semibold transition-all ${
                   selectedCategory === cat
                     ? "bg-slate-900 text-white shadow-sm"
@@ -297,8 +319,9 @@ export default function SalesLedger() {
               No products found.
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
-              {filteredProducts.map((product) => (
+            <div className="flex flex-col h-full">
+              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
+                {paginatedProducts.map((product) => (
                 <button
                   key={product.id}
                   onClick={() => handleAddToCart(product)}
@@ -344,6 +367,34 @@ export default function SalesLedger() {
                   </div>
                 </button>
               ))}
+            </div>
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="mt-auto pt-6 pb-2 flex items-center justify-between">
+                  <span className="text-sm font-medium text-slate-500">
+                    Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
+                    {Math.min(currentPage * itemsPerPage, filteredProducts.length)} of{" "}
+                    {filteredProducts.length}
+                  </span>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                      className="p-2 bg-white border border-slate-200 rounded-lg hover:border-kudi-green hover:text-kudi-green disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                      className="p-2 bg-white border border-slate-200 rounded-lg hover:border-kudi-green hover:text-kudi-green disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

@@ -9,40 +9,33 @@ import {
   ChevronLeft,
   ChevronRight,
   User,
+  Download,
+  Filter,
+  Wallet,
+  AlertCircle,
+  Eye
 } from "lucide-react";
+import { subDays, startOfMonth, startOfDay, endOfDay, isWithinInterval } from "date-fns";
 
 export default function Transactions() {
   const { sales, isLoading } = useSales();
   const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
+  
+  // Filter States
   const [searchTerm, setSearchTerm] = useState("");
-
-  const filteredSales = useMemo(() => {
-    return sales.filter((sale) => {
-      // Search by customer name, or items sold
-      const term = searchTerm.toLowerCase();
-      const inCustomer = sale.customerName?.toLowerCase().includes(term);
-      const inItems = sale.items.some((item) =>
-        item.productName.toLowerCase().includes(term)
-      );
-      return inCustomer || inItems;
-    });
-  }, [sales, searchTerm]);
+  const [statusFilter, setStatusFilter] = useState<"All" | "paid" | "partial" | "unpaid">("All");
+  const [methodFilter, setMethodFilter] = useState<"All" | "cash" | "transfer" | "pos" | "credit">("All");
+  
+  type DateFilterType = "Today" | "Last 7 Days" | "This Month" | "All Time" | "Custom";
+  const [dateFilter, setDateFilter] = useState<DateFilterType>("All Time");
+  const [customDateRange, setCustomDateRange] = useState({ start: "", end: "" });
+  const [showFilters, setShowFilters] = useState(false);
 
   // Pagination Logic
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredSales.length / itemsPerPage)
-  );
-  const currentSales = filteredSales.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
-  // Format date correctly
-  const formatDate = (dateValue: unknown) => {
+  const getSaleDate = (dateValue: unknown) => {
     let d = new Date();
     const dateVal = dateValue as { toDate?: () => Date };
     if (dateVal && typeof dateVal.toDate === "function") {
@@ -52,7 +45,66 @@ export default function Transactions() {
     } else if (dateValue instanceof Date) {
       d = dateValue;
     }
+    return d;
+  };
 
+  const filteredSales = useMemo(() => {
+    return sales.filter((sale) => {
+      // 1. Search term
+      const term = searchTerm.toLowerCase();
+      const inCustomer = sale.customerName?.toLowerCase().includes(term);
+      const inItems = sale.items.some((item) =>
+        item.productName.toLowerCase().includes(term)
+      );
+      if (term && !inCustomer && !inItems) return false;
+
+      // 2. Status
+      if (statusFilter !== "All" && sale.paymentStatus !== statusFilter) return false;
+
+      // 3. Method
+      if (methodFilter !== "All" && sale.paymentMethod !== methodFilter) return false;
+
+      // 4. Date
+      const saleDate = getSaleDate(sale.createdAt);
+      const today = new Date();
+      if (dateFilter === "Today") {
+        if (!isWithinInterval(saleDate, { start: startOfDay(today), end: endOfDay(today) })) return false;
+      } else if (dateFilter === "Last 7 Days") {
+        if (!isWithinInterval(saleDate, { start: subDays(startOfDay(today), 7), end: endOfDay(today) })) return false;
+      } else if (dateFilter === "This Month") {
+        if (!isWithinInterval(saleDate, { start: startOfMonth(today), end: endOfDay(today) })) return false;
+      } else if (dateFilter === "Custom" && customDateRange.start && customDateRange.end) {
+        const start = startOfDay(new Date(customDateRange.start));
+        const end = endOfDay(new Date(customDateRange.end));
+        if (!isWithinInterval(saleDate, { start, end })) return false;
+      }
+
+      return true;
+    });
+  }, [sales, searchTerm, statusFilter, methodFilter, dateFilter, customDateRange]);
+
+  const metrics = useMemo(() => {
+    return filteredSales.reduce(
+      (acc, sale) => {
+        acc.totalTransactions++;
+        acc.totalRevenue += sale.amountPaid;
+        if (sale.paymentStatus !== "paid") {
+          acc.outstandingBalance += (sale.totalAmount - sale.amountPaid);
+        }
+        return acc;
+      },
+      { totalTransactions: 0, totalRevenue: 0, outstandingBalance: 0 }
+    );
+  }, [filteredSales]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredSales.length / itemsPerPage));
+  const currentSales = filteredSales.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const formatDate = (dateValue: unknown) => {
+    const d = getSaleDate(dateValue);
     return new Intl.DateTimeFormat("en-GB", {
       weekday: "short",
       day: "2-digit",
@@ -65,9 +117,46 @@ export default function Transactions() {
   };
 
   const formatItemsSold = (items: Sale["items"]) => {
-    return items
-      .map((item) => `${item.quantity} ${item.productName}`)
-      .join(", ");
+    if (items.length === 0) return "No items";
+    if (items.length === 1) return `${items[0].quantity} ${items[0].productName}`;
+    return `${items[0].quantity} ${items[0].productName} + ${items.length - 1} other item${items.length - 1 > 1 ? 's' : ''}`;
+  };
+
+  const exportToCSV = () => {
+    if (filteredSales.length === 0) return;
+    
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "Date,Customer Name,Customer Phone,Items Sold,Payment Method,Payment Status,Total Amount,Amount Paid,Balance\n";
+
+    filteredSales.forEach(sale => {
+      const date = formatDate(sale.createdAt).replace(/,/g, ''); 
+      const customer = sale.customerName ? `"${sale.customerName}"` : "N/A";
+      const phone = sale.customerPhone ? `"${sale.customerPhone}"` : "N/A";
+      const itemsString = `"${sale.items.map(i => `${i.quantity}x ${i.productName}`).join("; ")}"`;
+      const balance = sale.totalAmount - sale.amountPaid;
+      
+      const row = [
+        date,
+        customer,
+        phone,
+        itemsString,
+        sale.paymentMethod,
+        sale.paymentStatus,
+        sale.totalAmount,
+        sale.amountPaid,
+        balance
+      ].join(",");
+      
+      csvContent += row + "\n";
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `Transactions_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -77,7 +166,7 @@ export default function Transactions() {
         description="View all your complete sales history and receipts."
       />
 
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-6 max-w-7xl mx-auto pb-12">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
@@ -87,23 +176,165 @@ export default function Transactions() {
               View and print receipts for all your past sales.
             </p>
           </div>
+          <button
+            onClick={exportToCSV}
+            disabled={filteredSales.length === 0}
+            className="flex items-center justify-center gap-2 px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold rounded-xl shadow-lg shadow-slate-900/20 transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Download className="w-4 h-4" /> Export CSV
+          </button>
         </div>
 
-        {/* Filters / Search Bar */}
-        <div className="sticky top-0 z-20 p-4 border border-slate-200/60 shadow-sm sm:shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white/80 backdrop-blur-xl rounded-2xl flex items-center gap-4 transition-all">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search by customer name or item..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-kudi-green/20 outline-none transition-all"
-            />
+        {/* KPI Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-1">
+            <div className="flex items-center gap-2 text-slate-500 mb-2">
+              <CalendarDays className="w-4 h-4" />
+              <span className="text-sm font-semibold uppercase tracking-wider">
+                Total Transactions
+              </span>
+            </div>
+            <span className="text-2xl font-extrabold text-slate-900">
+              {metrics.totalTransactions.toLocaleString()}
+            </span>
           </div>
+
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-1">
+            <div className="flex items-center gap-2 text-emerald-600 mb-2">
+              <Wallet className="w-4 h-4" />
+              <span className="text-sm font-semibold uppercase tracking-wider">
+                Revenue Collected
+              </span>
+            </div>
+            <span className="text-2xl font-extrabold text-slate-900">
+              ₦{metrics.totalRevenue.toLocaleString()}
+            </span>
+          </div>
+
+          <div className={`p-5 rounded-2xl border flex flex-col gap-1 transition-colors ${metrics.outstandingBalance > 0 ? "bg-rose-50 border-rose-200" : "bg-white border-slate-200 shadow-sm"}`}>
+            <div className={`flex items-center gap-2 mb-2 ${metrics.outstandingBalance > 0 ? "text-rose-600" : "text-slate-500"}`}>
+              <AlertCircle className="w-4 h-4" />
+              <span className="text-sm font-semibold uppercase tracking-wider">
+                Outstanding Balance
+              </span>
+            </div>
+            <span className={`text-2xl font-extrabold ${metrics.outstandingBalance > 0 ? "text-rose-700" : "text-slate-900"}`}>
+              ₦{metrics.outstandingBalance.toLocaleString()}
+            </span>
+          </div>
+        </div>
+
+        {/* Filters & Search Bar */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col gap-4">
+          <div className="flex flex-col lg:flex-row items-center gap-4">
+            <div className="relative flex-1 w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search by customer name or item..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-kudi-green/20 outline-none transition-all"
+              />
+            </div>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border font-bold transition-all w-full lg:w-auto ${
+                showFilters ? "bg-slate-900 text-white border-slate-900" : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+              }`}
+            >
+              <Filter className="w-4 h-4" /> Filters
+            </button>
+          </div>
+
+          {showFilters && (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-slate-100 animate-in slide-in-from-top-2 duration-200">
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Date Range</label>
+                <select
+                  value={dateFilter}
+                  onChange={(e) => {
+                    setDateFilter(e.target.value as DateFilterType);
+                    setCurrentPage(1);
+                  }}
+                  className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-kudi-green outline-none text-sm font-medium"
+                >
+                  <option value="All Time">All Time</option>
+                  <option value="Today">Today</option>
+                  <option value="Last 7 Days">Last 7 Days</option>
+                  <option value="This Month">This Month</option>
+                  <option value="Custom">Custom Range</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Payment Status</label>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => {
+                    setStatusFilter(e.target.value as any);
+                    setCurrentPage(1);
+                  }}
+                  className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-kudi-green outline-none text-sm font-medium"
+                >
+                  <option value="All">All Statuses</option>
+                  <option value="paid">Paid</option>
+                  <option value="partial">Partial</option>
+                  <option value="unpaid">Unpaid</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Payment Method</label>
+                <select
+                  value={methodFilter}
+                  onChange={(e) => {
+                    setMethodFilter(e.target.value as any);
+                    setCurrentPage(1);
+                  }}
+                  className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-kudi-green outline-none text-sm font-medium capitalize"
+                >
+                  <option value="All">All Methods</option>
+                  <option value="cash">Cash</option>
+                  <option value="transfer">Transfer</option>
+                  <option value="pos">POS</option>
+                  <option value="credit">Credit</option>
+                </select>
+              </div>
+
+              {dateFilter === "Custom" && (
+                <div className="sm:col-span-3 grid grid-cols-2 gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Start Date</label>
+                    <input
+                      type="date"
+                      value={customDateRange.start}
+                      onChange={(e) => {
+                        setCustomDateRange(prev => ({ ...prev, start: e.target.value }));
+                        setCurrentPage(1);
+                      }}
+                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-kudi-green outline-none text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">End Date</label>
+                    <input
+                      type="date"
+                      value={customDateRange.end}
+                      onChange={(e) => {
+                        setCustomDateRange(prev => ({ ...prev, end: e.target.value }));
+                        setCurrentPage(1);
+                      }}
+                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-kudi-green outline-none text-sm"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Transactions List */}
@@ -139,7 +370,7 @@ export default function Transactions() {
                 No transactions found
               </h3>
               <p className="text-slate-500 text-sm">
-                You haven't made any sales that match this search yet.
+                Try adjusting your filters or search terms.
               </p>
             </div>
           ) : (
@@ -170,10 +401,10 @@ export default function Transactions() {
                           : "📝"}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-bold text-slate-900 group-hover:text-emerald-700 transition-colors leading-tight break-words">
-                          {formatItemsSold(sale.items)}{" "}
-                          <span className="text-slate-500 font-normal">
-                            Sold
+                        <h4 className="font-bold text-slate-900 group-hover:text-kudi-green transition-colors leading-tight break-words flex items-center gap-2">
+                          {formatItemsSold(sale.items)}
+                          <span className="hidden sm:inline-flex opacity-0 group-hover:opacity-100 transition-opacity bg-slate-100 p-1 rounded-md text-slate-500 hover:text-slate-700">
+                            <Eye className="w-3 h-3" />
                           </span>
                         </h4>
                         {sale.customerName && (

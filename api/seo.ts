@@ -71,6 +71,21 @@ export default async function handler(req: any, res: any) {
       title = "Join KudiFlow | Sign In & Sign Up";
       description =
         "Access your KudiFlow dashboard to manage sales and inventory securely.";
+    } else if (urlPath === "/forgot-password" || urlPath === "/reset-password") {
+      title = "Account Recovery | KudiFlow";
+      description = "Recover or reset your KudiFlow account password securely.";
+    } else if (urlPath === "/verify-email") {
+      title = "Verify Email | KudiFlow";
+      description = "Verify your email address to unlock full KudiFlow features.";
+    } else if (urlPath === "/privacy-policy") {
+      title = "Privacy Policy | KudiFlow";
+      description = "Learn how KudiFlow protects your data and respects your privacy.";
+    } else if (urlPath === "/terms-of-service") {
+      title = "Terms of Service | KudiFlow";
+      description = "Read the terms and conditions for using the KudiFlow platform.";
+    } else if (urlPath === "/coming-soon") {
+      title = "Coming Soon | KudiFlow";
+      description = "We are working on exciting new features. Stay tuned!";
     } else if (urlPath === "/blog") {
       title = "KudiFlow Blog | Tips for Market Vendors";
       description =
@@ -107,10 +122,16 @@ export default async function handler(req: any, res: any) {
     );
 
     // 5. Inject the flawless new Meta Tags
+    let robotsTag = '';
+    if (urlPath.startsWith('/dashboard')) {
+      robotsTag = `<meta name="robots" content="noindex, nofollow" />`;
+    }
+
     const ogTags = `
     <title>${title}</title>
     <meta name="description" content="${description}" />
     <link rel="canonical" href="${fullUrl}" />
+    ${robotsTag}
     
     <!-- Open Graph (Facebook/LinkedIn/WhatsApp) -->
     <meta property="og:title" content="${title}" />

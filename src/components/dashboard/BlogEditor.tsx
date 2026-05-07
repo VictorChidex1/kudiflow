@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import type { BlogPost } from "../../types/blog";
 import { useBlogEditor } from "../../hooks/useBlogPosts";
 import { auth, storage } from "../../lib/firebase";
@@ -70,8 +70,10 @@ export function BlogEditor({ initialPost, onCancel, onSaveComplete }: BlogEditor
   const [linkUrl, setLinkUrl] = useState("");
 
   // --- Tiptap Editor Instance ---
-  const editor = useEditor({
-    extensions: [
+  // useMemo ensures the extensions array reference is stable across re-renders,
+  // preventing the 'Duplicate extension names' warning from Tiptap.
+  const extensions = useMemo(
+    () => [
       StarterKit.configure({
         heading: { levels: [2, 3] },
       }),
@@ -87,6 +89,11 @@ export function BlogEditor({ initialPost, onCancel, onSaveComplete }: BlogEditor
         placeholder: "Start writing your article here. Select any text and use the toolbar above to format it...",
       }),
     ],
+    []
+  );
+
+  const editor = useEditor({
+    extensions,
     content: initialPost?.content || "",
     editorProps: {
       attributes: {

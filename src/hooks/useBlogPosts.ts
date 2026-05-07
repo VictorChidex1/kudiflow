@@ -60,7 +60,7 @@ export function usePublishedBlogPosts() {
     const q = query(
       collection(db, "blogs"),
       where("status", "==", "published"),
-      orderBy("createdAt", "desc")
+      orderBy("publishedAt", "desc")
     );
 
     const unsubscribe = onSnapshot(
@@ -138,6 +138,8 @@ export function useBlogEditor() {
     try {
       await addDoc(collection(db, "blogs"), {
         ...data,
+        // publishedAt comes from data (set by the editor). If not set and publishing, default to now.
+        publishedAt: data.publishedAt ?? (data.status === "published" ? serverTimestamp() : null),
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
@@ -155,10 +157,15 @@ export function useBlogEditor() {
     setIsSaving(true);
     try {
       const docRef = doc(db, "blogs", id);
-      await updateDoc(docRef, {
+      // If being published for the first time and no publishedAt set, stamp it now.
+      const updatePayload = {
         ...data,
         updatedAt: serverTimestamp(),
-      });
+      };
+      if (data.status === "published" && data.publishedAt === undefined) {
+        (updatePayload as Record<string, unknown>).publishedAt = serverTimestamp();
+      }
+      await updateDoc(docRef, updatePayload);
       toast.success("Blog post updated!");
     } catch (error) {
       console.error("Error updating post:", error);

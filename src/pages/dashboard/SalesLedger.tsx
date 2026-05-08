@@ -56,6 +56,12 @@ export default function SalesLedger() {
   const [completedSaleDetails, setCompletedSaleDetails] =
     useState<NewSale | null>(null);
 
+  // Custom Sourced Item State
+  const [isCustomItemModalOpen, setIsCustomItemModalOpen] = useState(false);
+  const [customItemName, setCustomItemName] = useState("");
+  const [customItemCost, setCustomItemCost] = useState("");
+  const [customItemPrice, setCustomItemPrice] = useState("");
+
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
       const matchesSearch =
@@ -123,6 +129,38 @@ export default function SalesLedger() {
         },
       ];
     });
+  };
+
+  const handleAddCustomItem = (e: React.FormEvent) => {
+    e.preventDefault();
+    const name = customItemName.trim();
+    const cost = Number(customItemCost.replace(/\D/g, ""));
+    const price = Number(customItemPrice.replace(/\D/g, ""));
+
+    if (!name || isNaN(cost) || isNaN(price) || price < 0 || cost < 0) {
+      toast.error("Please fill all fields with valid numbers");
+      return;
+    }
+
+    setCart((prev) => [
+      ...prev,
+      {
+        productId: "custom-" + Date.now(),
+        productName: `${name} (Sourced)`,
+        quantity: 1,
+        unitPrice: price,
+        costPrice: cost,
+        subtotal: price,
+        isSourced: true,
+        sourcingCost: cost,
+      },
+    ]);
+
+    setIsCustomItemModalOpen(false);
+    setCustomItemName("");
+    setCustomItemCost("");
+    setCustomItemPrice("");
+    toast.success("Custom item added to cart!");
   };
 
   // Barcode / Exact SKU Match Logic (Triggered only on Enter)
@@ -261,19 +299,28 @@ export default function SalesLedger() {
       <div className="flex-1 flex flex-col bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden min-h-[60vh] lg:min-h-0 print:hidden">
         {/* Search Bar & Categories */}
         <div className="p-4 border-b border-slate-100 bg-white z-10 flex flex-col gap-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search by product name or scan barcode..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
-              }}
-              onKeyDown={handleSearchEnter}
-              className="w-full pl-10 pr-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-kudi-green/20 outline-none transition-all font-medium"
-            />
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search by product name or scan barcode..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1);
+                }}
+                onKeyDown={handleSearchEnter}
+                className="w-full pl-10 pr-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-kudi-green/20 outline-none transition-all font-medium"
+              />
+            </div>
+            <button
+              onClick={() => setIsCustomItemModalOpen(true)}
+              className="shrink-0 px-4 py-3 bg-kudi-green/10 text-kudi-green border border-kudi-green/20 rounded-xl font-bold flex items-center gap-2 hover:bg-kudi-green hover:text-white transition-all whitespace-nowrap"
+            >
+              <Plus className="w-5 h-5" />
+              <span className="hidden sm:inline">Custom Item</span>
+            </button>
           </div>
           <div className="flex overflow-x-auto hide-scrollbar gap-2 pb-1">
             <button
@@ -701,6 +748,91 @@ export default function SalesLedger() {
                   className="flex-1 py-3 bg-kudi-green text-white rounded-xl font-bold hover:bg-kudi-green/90 transition-colors shadow-md shadow-kudi-green/20"
                 >
                   Confirm Sale
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Item Modal */}
+      {isCustomItemModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="bg-white/95 backdrop-blur-sm shadow-2xl border border-white/20 rounded-2xl w-full max-w-sm overflow-hidden transform transition-all animate-in zoom-in-95 duration-200 flex flex-col max-h-[85dvh]">
+            <div className="p-6 border-b border-slate-100 shrink-0">
+              <h2 className="text-xl font-bold text-slate-900 flex items-center gap-3">
+                <span className="bg-emerald-50 text-emerald-600 p-2 rounded-xl">
+                  <Package className="w-5 h-5" />
+                </span>
+                Quick Sourced Item
+              </h2>
+              <p className="text-sm text-slate-500 mt-2 leading-relaxed">
+                Add an item you don't stock. This will track profit correctly without deducting from inventory.
+              </p>
+            </div>
+
+            <form onSubmit={handleAddCustomItem} className="flex flex-col flex-1 overflow-hidden">
+              <div className="p-6 overflow-y-auto space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Item Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={customItemName}
+                    onChange={(e) => setCustomItemName(e.target.value)}
+                    placeholder="e.g. 55-inch Wall Mount"
+                    required
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-kudi-green outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Sourcing Cost (What you paid) *
+                  </label>
+                  <input
+                    type="tel"
+                    value={customItemCost}
+                    onChange={(e) => {
+                      const numericValue = e.target.value.replace(/\D/g, "");
+                      setCustomItemCost(numericValue ? Number(numericValue).toLocaleString("en-US") : "");
+                    }}
+                    placeholder="0"
+                    required
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-kudi-green outline-none font-medium"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Selling Price (What customer pays) *
+                  </label>
+                  <input
+                    type="tel"
+                    value={customItemPrice}
+                    onChange={(e) => {
+                      const numericValue = e.target.value.replace(/\D/g, "");
+                      setCustomItemPrice(numericValue ? Number(numericValue).toLocaleString("en-US") : "");
+                    }}
+                    placeholder="0"
+                    required
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-kudi-green outline-none font-medium"
+                  />
+                </div>
+              </div>
+
+              <div className="p-6 border-t border-slate-100 bg-slate-50 flex gap-3 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setIsCustomItemModalOpen(false)}
+                  className="flex-1 py-3 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-colors border border-slate-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-3 bg-kudi-green text-white rounded-xl font-bold hover:bg-kudi-green/90 transition-colors shadow-md shadow-kudi-green/20"
+                >
+                  Add to Cart
                 </button>
               </div>
             </form>

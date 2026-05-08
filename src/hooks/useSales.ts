@@ -130,7 +130,11 @@ export function useSales() {
 
       // 2. Iterate through the Cart Items and queue stock deductions
       for (const item of saleData.items) {
+        // Skip stock deduction for custom sourced items
+        if (item.isSourced || item.productId === "custom") continue;
+        
         if (!item.productId) continue;
+        
         const productRef = doc(
           db,
           `users/${user.uid}/inventory`,

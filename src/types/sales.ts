@@ -10,6 +10,8 @@ export interface CartItem {
   unitPrice: number;
   costPrice: number;
   subtotal: number;
+  isSourced?: boolean; // Indicates if this item was sourced externally and shouldn't deduct from stock
+  sourcingCost?: number; // The actual cost paid to the neighbor/supplier
 }
 
 export interface Sale {

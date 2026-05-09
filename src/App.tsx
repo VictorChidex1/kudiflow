@@ -27,6 +27,7 @@ import SalesLedger from "./pages/dashboard/SalesLedger";
 import Transactions from "./pages/dashboard/Transactions";
 import Settings from "./pages/dashboard/Settings";
 import Debtors from "./pages/dashboard/Debtors";
+import Expenses from "./pages/dashboard/Expenses";
 import BlogCMS from "./pages/dashboard/BlogCMS";
 
 // Global Chat Widget
@@ -80,6 +81,7 @@ function App() {
             <Route path="settings" element={<Settings />} />
             <Route path="settings/cms" element={<BlogCMS />} />
             <Route path="debtors" element={<Debtors />} />
+            <Route path="expenses" element={<Expenses />} />
           </Route>
         </Routes>
         <AIChatWidget />

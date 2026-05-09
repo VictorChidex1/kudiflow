@@ -6,6 +6,7 @@ import {
   Users,
   Settings,
   LogOut,
+  TrendingDown,
 } from "lucide-react";
 import { auth } from "../../lib/firebase";
 import { signOut } from "firebase/auth";
@@ -48,6 +49,11 @@ export function Sidebar() {
       name: "Transactions",
       icon: <Receipt className="w-5 h-5" />,
       path: "/dashboard/transactions",
+    },
+    {
+      name: "Expenses",
+      icon: <TrendingDown className="w-5 h-5" />,
+      path: "/dashboard/expenses",
     },
   ];
 

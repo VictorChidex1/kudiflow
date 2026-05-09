@@ -5,6 +5,7 @@ import {
   Receipt,
   Users,
   Settings,
+  TrendingDown,
 } from "lucide-react";
 
 export function MobileNav() {
@@ -33,6 +34,11 @@ export function MobileNav() {
       name: "History",
       icon: <Receipt className="w-5 h-5 mb-1" />,
       path: "/dashboard/transactions",
+    },
+    {
+      name: "Expenses",
+      icon: <TrendingDown className="w-5 h-5 mb-1" />,
+      path: "/dashboard/expenses",
     },
     {
       name: "Settings",

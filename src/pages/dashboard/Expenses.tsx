@@ -5,7 +5,6 @@ import {
   Wallet,
   TrendingDown,
   Calendar,
-  MoreVertical,
   Trash2,
   FileText,
   CreditCard,

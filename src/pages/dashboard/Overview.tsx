@@ -6,7 +6,7 @@ import { useExpenses } from "../../hooks/useExpenses";
 import { ReceiptModal } from "../../components/dashboard/ReceiptModal";
 import { useNavigate } from "react-router-dom";
 import { useMemo, useState } from "react";
-import { User, Users, PackageSearch, Banknote, CreditCard, ArrowRightLeft, FileText, Clock, TrendingDown, ArrowUpRight, ShieldCheck, Wallet } from "lucide-react";
+import { User, Users, PackageSearch, Banknote, CreditCard, ArrowRightLeft, FileText, Clock, TrendingDown, ArrowUpRight, ShieldCheck, Wallet, TriangleAlert, CheckCircle2 } from "lucide-react";
 import type { Sale } from "../../types/sales";
 import { formatDistanceToNow } from "date-fns";
 import {
@@ -134,6 +134,13 @@ export default function Overview() {
       (sum, item) => sum + item.costPrice * item.stockLevel,
       0
     );
+  }, [products]);
+
+  // Calculate Low Stock Alerts
+  const lowStockProducts = useMemo(() => {
+    return products
+      .filter((p) => p.stockLevel <= p.minStockLevel)
+      .sort((a, b) => a.stockLevel - b.stockLevel);
   }, [products]);
 
   // Calculate 7-day rolling revenue data for the chart
@@ -361,8 +368,9 @@ export default function Overview() {
           </div>
         </div>
 
-        {/* Recent Activity */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mt-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-4">
+          {/* Recent Activity */}
+          <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center">
             <h3 className="font-bold text-slate-800">Recent Transactions</h3>
             <button
@@ -491,6 +499,65 @@ export default function Overview() {
             )}
           </div>
         </div>
+
+        {/* Low Stock Alerts */}
+        <div className="lg:col-span-1 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-full max-h-[500px]">
+          <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center shrink-0">
+            <h3 className="font-bold text-slate-800 flex items-center gap-2">
+              <TriangleAlert className="w-5 h-5 text-amber-500" />
+              Restock Alerts
+            </h3>
+            <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2.5 py-0.5 rounded-full">
+              {lowStockProducts.length} Items
+            </span>
+          </div>
+          <div className="overflow-y-auto flex-1 p-0">
+            {isLoadingInventory ? (
+              <div className="p-8 text-center">
+                <p className="text-slate-400 text-sm animate-pulse">Checking inventory...</p>
+              </div>
+            ) : lowStockProducts.length === 0 ? (
+              <div className="p-8 text-center flex flex-col items-center justify-center h-full">
+                <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mb-3">
+                  <CheckCircle2 className="w-8 h-8 text-emerald-500" />
+                </div>
+                <h4 className="font-bold text-slate-800">Stock is Healthy</h4>
+                <p className="text-sm text-slate-500 mt-1 text-center">
+                  All your products are above their minimum stock level.
+                </p>
+              </div>
+            ) : (
+              <div className="divide-y divide-slate-100">
+                {lowStockProducts.map((product) => (
+                  <div key={product.id} className="p-5 flex items-center justify-between hover:bg-slate-50 transition-colors group cursor-pointer" onClick={() => navigate("/dashboard/inventory")}>
+                    <div className="min-w-0 pr-4">
+                      <p className="font-bold text-slate-900 truncate">
+                        {product.productName}
+                      </p>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        Min limit: {product.minStockLevel}
+                      </p>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <span className="inline-flex items-center justify-center min-w-[2.5rem] px-2 py-1 bg-rose-100 text-rose-700 font-black text-sm rounded-lg border border-rose-200">
+                        {product.stockLevel}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="p-4 border-t border-slate-100 bg-slate-50 shrink-0">
+            <button
+              onClick={() => navigate("/dashboard/inventory")}
+              className="w-full py-2.5 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-100 transition-colors shadow-sm text-sm"
+            >
+              Manage Inventory
+            </button>
+          </div>
+        </div>
+      </div>
       </div>
 
       {selectedSale && (

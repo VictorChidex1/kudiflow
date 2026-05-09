@@ -2,10 +2,11 @@ import SEO from "../../components/SEO";
 import { auth } from "../../lib/firebase";
 import { useSales } from "../../hooks/useSales";
 import { useInventory } from "../../hooks/useInventory";
+import { useExpenses } from "../../hooks/useExpenses";
 import { ReceiptModal } from "../../components/dashboard/ReceiptModal";
 import { useNavigate } from "react-router-dom";
 import { useMemo, useState } from "react";
-import { User, Banknote, CreditCard, ArrowRightLeft, FileText, Clock } from "lucide-react";
+import { User, Users, PackageSearch, Banknote, CreditCard, ArrowRightLeft, FileText, Clock, TrendingDown, ArrowUpRight, ShieldCheck, Wallet } from "lucide-react";
 import type { Sale } from "../../types/sales";
 import { formatDistanceToNow } from "date-fns";
 import {
@@ -40,8 +41,11 @@ export default function Overview() {
   const navigate = useNavigate();
   const { sales, isLoading: isLoadingSales } = useSales();
   const { products, isLoading: isLoadingInventory } = useInventory();
+  const { expenses, isLoading: isLoadingExpenses } = useExpenses();
 
   const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
+
+  const currentMonthPrefix = new Date().toISOString().slice(0, 7); // "YYYY-MM"
 
   // Calculate Today's Sales directly from the real-time hook
   const todaysSalesTotal = useMemo(() => {
@@ -70,6 +74,52 @@ export default function Overview() {
       })
       .reduce((sum, sale) => sum + sale.amountPaid, 0);
   }, [sales]);
+
+  // --- MONTHLY FINANCIAL FUNNEL CALCULATIONS ---
+
+  const { monthlyRevenue, monthlyCOGS } = useMemo(() => {
+    let revenue = 0;
+    let cogs = 0;
+
+    sales.forEach((sale) => {
+      let saleDate = new Date(0);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if (sale.createdAt && typeof (sale.createdAt as any).toDate === "function") {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        saleDate = (sale.createdAt as any).toDate();
+      } else if (sale.createdAt && typeof sale.createdAt === "number") {
+        saleDate = new Date(sale.createdAt);
+      } else if (sale.createdAt instanceof Date) {
+        saleDate = sale.createdAt;
+      }
+
+      const saleMonth = saleDate.toISOString().slice(0, 7);
+      
+      if (saleMonth === currentMonthPrefix && sale.paymentStatus !== "unpaid") {
+        revenue += sale.amountPaid;
+        
+        // Calculate Cost of Goods Sold for this sale
+        sale.items.forEach(item => {
+          const cost = item.isSourced && item.sourcingCost ? item.sourcingCost : item.costPrice;
+          cogs += (cost * item.quantity);
+        });
+      }
+    });
+
+    return { monthlyRevenue: revenue, monthlyCOGS: cogs };
+  }, [sales, currentMonthPrefix]);
+
+  const monthlyGrossProfit = monthlyRevenue - monthlyCOGS;
+
+  const monthlyExpenses = useMemo(() => {
+    return expenses
+      .filter((exp) => exp.date.startsWith(currentMonthPrefix))
+      .reduce((sum, exp) => sum + exp.amount, 0);
+  }, [expenses, currentMonthPrefix]);
+
+  const monthlyNetProfit = monthlyGrossProfit - monthlyExpenses;
+
+  // --- END FINANCIAL FUNNEL ---
 
   // Upcoming Phase 3: Total Debtors calculation placeholder
   const totalDebtors = useMemo(() => {
@@ -156,29 +206,87 @@ export default function Overview() {
           </div>
         </div>
 
-        {/* Metrics Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
-            <span className="text-slate-500 font-medium mb-2 text-sm">
+        {/* MAIN HIGHLIGHT: The Financial Funnel (This Month) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          {/* 1. Gross Revenue */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col relative overflow-hidden group">
+            <div className="absolute -right-4 -top-4 w-16 h-16 bg-blue-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out" />
+            <div className="relative z-10 flex items-center justify-between mb-3">
+              <span className="text-slate-500 font-medium text-sm flex items-center gap-1.5">
+                <Wallet className="w-4 h-4" /> This Month's Revenue
+              </span>
+            </div>
+            <span className="relative z-10 text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight">
+              {isLoadingSales ? "..." : `₦${monthlyRevenue.toLocaleString()}`}
+            </span>
+          </div>
+
+          {/* 2. Gross Profit */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col relative overflow-hidden group">
+            <div className="absolute -right-4 -top-4 w-16 h-16 bg-purple-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out" />
+            <div className="relative z-10 flex items-center justify-between mb-3">
+              <span className="text-slate-500 font-medium text-sm flex items-center gap-1.5">
+                <ArrowUpRight className="w-4 h-4 text-purple-500" /> Gross Profit
+              </span>
+            </div>
+            <span className="relative z-10 text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight">
+              {isLoadingSales ? "..." : `₦${monthlyGrossProfit.toLocaleString()}`}
+            </span>
+          </div>
+
+          {/* 3. Expenses */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col relative overflow-hidden group cursor-pointer" onClick={() => navigate("/dashboard/expenses")}>
+            <div className="absolute -right-4 -top-4 w-16 h-16 bg-rose-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out" />
+            <div className="relative z-10 flex items-center justify-between mb-3">
+              <span className="text-slate-500 font-medium text-sm flex items-center gap-1.5">
+                <TrendingDown className="w-4 h-4 text-rose-500" /> Total Expenses
+              </span>
+            </div>
+            <span className="relative z-10 text-2xl lg:text-3xl font-bold text-rose-600 tracking-tight">
+              {isLoadingExpenses ? "..." : `- ₦${monthlyExpenses.toLocaleString()}`}
+            </span>
+          </div>
+
+          {/* 4. NET PROFIT (The Hero Card) */}
+          <div className="bg-gradient-to-br from-emerald-500 to-emerald-700 p-6 rounded-2xl shadow-lg shadow-emerald-500/20 flex flex-col relative overflow-hidden group">
+            <div className="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full group-hover:scale-[2] transition-transform duration-700 ease-out" />
+            <div className="relative z-10 flex items-center justify-between mb-2">
+              <span className="text-emerald-50 font-medium text-sm flex items-center gap-1.5 uppercase tracking-wider">
+                <ShieldCheck className="w-5 h-5" /> True Net Profit
+              </span>
+            </div>
+            <span className="relative z-10 text-3xl lg:text-4xl font-extrabold text-white tracking-tight mt-1">
+              {isLoadingSales || isLoadingExpenses ? "..." : `₦${monthlyNetProfit.toLocaleString()}`}
+            </span>
+            <p className="relative z-10 text-emerald-100/80 text-xs mt-3 font-medium">
+              Gross Profit minus Expenses (This Month)
+            </p>
+          </div>
+        </div>
+
+        {/* Secondary Metrics Row (Operations) */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-6 mt-2">
+          <div className="bg-white/60 backdrop-blur-sm p-4 rounded-xl border border-slate-200/60 shadow-sm flex flex-col">
+            <span className="text-slate-500 font-medium mb-1 text-xs uppercase tracking-wider">
               Today's Sales
             </span>
-            <span className="text-3xl font-bold text-slate-900">
+            <span className="text-xl font-bold text-slate-800">
               {isLoadingSales ? "..." : `₦${todaysSalesTotal.toLocaleString()}`}
             </span>
           </div>
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
-            <span className="text-slate-500 font-medium mb-2 text-sm">
-              Total Debtors (Owed)
+          <div className="bg-rose-50/50 backdrop-blur-sm p-4 rounded-xl border border-rose-100 shadow-sm flex flex-col cursor-pointer hover:bg-rose-50 transition-colors" onClick={() => navigate("/dashboard/debtors")}>
+            <span className="text-rose-500 font-medium mb-1 text-xs uppercase tracking-wider flex items-center gap-1">
+              <Users className="w-3 h-3" /> Total Debtors
             </span>
-            <span className="text-3xl font-bold text-rose-600">
+            <span className="text-xl font-bold text-rose-700">
               {isLoadingSales ? "..." : `₦${totalDebtors.toLocaleString()}`}
             </span>
           </div>
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
-            <span className="text-slate-500 font-medium mb-2 text-sm">
-              Inventory Value
+          <div className="bg-white/60 backdrop-blur-sm p-4 rounded-xl border border-slate-200/60 shadow-sm flex flex-col cursor-pointer hover:bg-white transition-colors" onClick={() => navigate("/dashboard/inventory")}>
+            <span className="text-slate-500 font-medium mb-1 text-xs uppercase tracking-wider flex items-center gap-1">
+              <PackageSearch className="w-3 h-3" /> Inventory Value
             </span>
-            <span className="text-3xl font-bold text-slate-900">
+            <span className="text-xl font-bold text-slate-800">
               {isLoadingInventory
                 ? "..."
                 : `₦${inventoryValue.toLocaleString()}`}

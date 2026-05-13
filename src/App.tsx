@@ -1,37 +1,43 @@
+import { Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { Toaster } from "react-hot-toast";
 import LandingPage from "./pages/LandingPage";
-import { Login } from "./pages/Login";
-import { Signup } from "./pages/Signup";
-import { ForgotPassword } from "./pages/ForgotPassword";
-import { ResetPassword } from "./pages/ResetPassword";
-import { VerifyEmail } from "./pages/VerifyEmail";
-import DocsPage from "./pages/DocsPage";
-import ComingSoon from "./pages/ComingSoon";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import TermsOfService from "./pages/TermsOfService";
-import BlogLanding from "./pages/BlogLanding";
-import BlogPost from "./pages/BlogPost";
+import { PageLoader } from "./components/ui/PageLoader";
+
+// Static imports for core app shell components
 import { ScrollToTop } from "./components/ui/ScrollToTop";
 import { RouteScrollToTop } from "./components/ui/RouteScrollToTop";
-
-// Phase 1: Dashboard Imports
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { DashboardLayout } from "./components/dashboard/DashboardLayout";
-import DashboardOverview from "./pages/dashboard/Overview";
-import Inventory from "./pages/dashboard/Inventory";
-import SalesLedger from "./pages/dashboard/SalesLedger";
-import Transactions from "./pages/dashboard/Transactions";
-import Settings from "./pages/dashboard/Settings";
-import Debtors from "./pages/dashboard/Debtors";
-import Expenses from "./pages/dashboard/Expenses";
-import BlogCMS from "./pages/dashboard/BlogCMS";
 
-// Global Chat Widget
-import { AIChatWidget } from "./components/chat/AIChatWidget";
+// Lazy load public pages
+const Login = lazy(() => import("./pages/Login").then(m => ({ default: m.Login })));
+const Signup = lazy(() => import("./pages/Signup").then(m => ({ default: m.Signup })));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword").then(m => ({ default: m.ForgotPassword })));
+const ResetPassword = lazy(() => import("./pages/ResetPassword").then(m => ({ default: m.ResetPassword })));
+const VerifyEmail = lazy(() => import("./pages/VerifyEmail").then(m => ({ default: m.VerifyEmail })));
+const DocsPage = lazy(() => import("./pages/DocsPage"));
+const ComingSoon = lazy(() => import("./pages/ComingSoon"));
+const About = lazy(() => import("./pages/About"));
+const Contact = lazy(() => import("./pages/Contact"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const TermsOfService = lazy(() => import("./pages/TermsOfService"));
+const BlogLanding = lazy(() => import("./pages/BlogLanding"));
+const BlogPost = lazy(() => import("./pages/BlogPost"));
+
+// Lazy load dashboard pages
+const DashboardOverview = lazy(() => import("./pages/dashboard/Overview"));
+const Inventory = lazy(() => import("./pages/dashboard/Inventory"));
+const SalesLedger = lazy(() => import("./pages/dashboard/SalesLedger"));
+const Transactions = lazy(() => import("./pages/dashboard/Transactions"));
+const Settings = lazy(() => import("./pages/dashboard/Settings"));
+const Debtors = lazy(() => import("./pages/dashboard/Debtors"));
+const Expenses = lazy(() => import("./pages/dashboard/Expenses"));
+const BlogCMS = lazy(() => import("./pages/dashboard/BlogCMS"));
+
+// Lazy load heavy widgets
+const AIChatWidget = lazy(() => import("./components/chat/AIChatWidget").then(m => ({ default: m.AIChatWidget })));
 
 function App() {
   return (
@@ -49,42 +55,44 @@ function App() {
             },
           }}
         />
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/verify-email" element={<VerifyEmail />} />
-          <Route path="/blog" element={<BlogLanding />} />
-          <Route path="/blog/:slug" element={<BlogPost />} />
-          <Route path="/docs" element={<DocsPage />} />
-          <Route path="/coming-soon" element={<ComingSoon />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/terms-of-service" element={<TermsOfService />} />
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route path="/blog" element={<BlogLanding />} />
+            <Route path="/blog/:slug" element={<BlogPost />} />
+            <Route path="/docs" element={<DocsPage />} />
+            <Route path="/coming-soon" element={<ComingSoon />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms-of-service" element={<TermsOfService />} />
 
-          {/* Phase 1: Protected Core Application Routes */}
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <DashboardLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<DashboardOverview />} />
-            <Route path="inventory" element={<Inventory />} />
-            <Route path="sales" element={<SalesLedger />} />
-            <Route path="transactions" element={<Transactions />} />
-            <Route path="settings" element={<Settings />} />
-            <Route path="settings/cms" element={<BlogCMS />} />
-            <Route path="debtors" element={<Debtors />} />
-            <Route path="expenses" element={<Expenses />} />
-          </Route>
-        </Routes>
-        <AIChatWidget />
+            {/* Phase 1: Protected Core Application Routes */}
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <DashboardLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<DashboardOverview />} />
+              <Route path="inventory" element={<Inventory />} />
+              <Route path="sales" element={<SalesLedger />} />
+              <Route path="transactions" element={<Transactions />} />
+              <Route path="settings" element={<Settings />} />
+              <Route path="settings/cms" element={<BlogCMS />} />
+              <Route path="debtors" element={<Debtors />} />
+              <Route path="expenses" element={<Expenses />} />
+            </Route>
+          </Routes>
+          <AIChatWidget />
+        </Suspense>
         <ScrollToTop />
       </BrowserRouter>
     </HelmetProvider>

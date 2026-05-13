@@ -116,24 +116,32 @@ export function Hero() {
                   <img
                     src="https://randomuser.me/api/portraits/men/70.jpg"
                     alt="Nigerian MSME Owner"
+                    width={48}
+                    height={48}
                   />
                 </div>
                 <div className="w-12 h-12 rounded-full border-[3px] border-white bg-slate-200 overflow-hidden shadow-sm shadow-slate-900/10">
                   <img
                     src="https://randomuser.me/api/portraits/women/16.jpg"
                     alt="Nigerian MSME Owner"
+                    width={48}
+                    height={48}
                   />
                 </div>
                 <div className="w-12 h-12 rounded-full border-[3px] border-white bg-slate-200 overflow-hidden shadow-sm shadow-slate-900/10">
                   <img
                     src="https://randomuser.me/api/portraits/men/53.jpg"
                     alt="Nigerian MSME Owner"
+                    width={48}
+                    height={48}
                   />
                 </div>
                 <div className="w-12 h-12 rounded-full border-[3px] border-white bg-slate-200 overflow-hidden shadow-sm shadow-slate-900/10">
                   <img
                     src="https://randomuser.me/api/portraits/women/54.jpg"
                     alt="Nigerian MSME Owner"
+                    width={48}
+                    height={48}
                   />
                 </div>
                 <div className="w-12 h-12 rounded-full border-[3px] border-white bg-emerald-100 flex items-center justify-center text-xs font-extrabold text-emerald-700 shadow-sm shadow-emerald-900/10">
@@ -228,6 +236,9 @@ export function Hero() {
                 <img
                   src="/assets/main-hero-image.webp"
                   alt="KudiFlow Marketplace Dashboard"
+                  width={1200}
+                  height={800}
+                  fetchPriority="high"
                   className="absolute inset-0 w-full h-full object-cover object-center transform transition-transform duration-2000 group-hover:scale-[1.03] ease-out will-change-transform"
                   loading="eager"
                 />

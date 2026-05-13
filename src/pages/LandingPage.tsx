@@ -1,14 +1,17 @@
+import { Suspense, lazy } from "react";
 import { LandingNavbar } from "../components/landing/Navbar";
 import { Hero } from "../components/landing/Hero";
-import { Features } from "../components/landing/Features";
-import { HowItWorks } from "../components/landing/HowItWorks";
-import { Pricing } from "../components/landing/Pricing";
-import { Testimonials } from "../components/landing/Testimonials";
-import { FAQ } from "../components/landing/FAQ";
-import { CTA } from "../components/landing/CTA";
-import { Footer } from "../components/landing/Footer";
 import SEO from "../components/SEO";
 import { JsonLd } from "../components/seo/JsonLd";
+
+// Lazy load below-the-fold sections
+const Features = lazy(() => import("../components/landing/Features").then(m => ({ default: m.Features })));
+const HowItWorks = lazy(() => import("../components/landing/HowItWorks").then(m => ({ default: m.HowItWorks })));
+const Pricing = lazy(() => import("../components/landing/Pricing").then(m => ({ default: m.Pricing })));
+const Testimonials = lazy(() => import("../components/landing/Testimonials").then(m => ({ default: m.Testimonials })));
+const FAQ = lazy(() => import("../components/landing/FAQ").then(m => ({ default: m.FAQ })));
+const CTA = lazy(() => import("../components/landing/CTA").then(m => ({ default: m.CTA })));
+const Footer = lazy(() => import("../components/landing/Footer").then(m => ({ default: m.Footer })));
 
 export default function LandingPage() {
   const softwareSchema = {
@@ -42,13 +45,15 @@ export default function LandingPage() {
 
       <main className="flex-1 flex flex-col">
         <Hero />
-        <Features />
-        <HowItWorks />
-        <Pricing />
-        <Testimonials />
-        <FAQ />
-        <CTA />
-        <Footer />
+        <Suspense fallback={<div className="min-h-[200px]" />}>
+          <Features />
+          <HowItWorks />
+          <Pricing />
+          <Testimonials />
+          <FAQ />
+          <CTA />
+          <Footer />
+        </Suspense>
       </main>
     </div>
   );

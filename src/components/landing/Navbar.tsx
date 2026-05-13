@@ -2,8 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { auth } from "../../lib/firebase";
-import { onAuthStateChanged, type User } from "firebase/auth";
+import { type User } from "firebase/auth";
 
 export function LandingNavbar() {
   const location = useLocation();
@@ -15,11 +14,19 @@ export function LandingNavbar() {
   const navRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setIsAuthLoading(false);
+    let unsubscribe: () => void;
+    // Dynamically import Firebase to prevent render-blocking on the Landing Page
+    import("../../lib/firebase").then(({ auth }) => {
+      import("firebase/auth").then(({ onAuthStateChanged }) => {
+        unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+          setUser(currentUser);
+          setIsAuthLoading(false);
+        });
+      });
     });
-    return () => unsubscribe();
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, []);
 
   useEffect(() => {

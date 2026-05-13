@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { auth } from "../../lib/firebase";
-import { onAuthStateChanged, type User } from "firebase/auth";
+import { type User } from "firebase/auth";
 import {
   ArrowRight,
   WifiOff,
@@ -49,11 +48,19 @@ export function Hero() {
   const [isAuthLoading, setIsAuthLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setIsAuthLoading(false);
+    let unsubscribe: () => void;
+    // Dynamically import Firebase to prevent render-blocking on the Landing Page
+    import("../../lib/firebase").then(({ auth }) => {
+      import("firebase/auth").then(({ onAuthStateChanged }) => {
+        unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+          setUser(currentUser);
+          setIsAuthLoading(false);
+        });
+      });
     });
-    return () => unsubscribe();
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, []);
 
   return (

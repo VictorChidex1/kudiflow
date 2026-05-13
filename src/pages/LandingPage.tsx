@@ -1,6 +1,7 @@
-import { Suspense, lazy } from "react";
+import { lazy } from "react";
 import { LandingNavbar } from "../components/landing/Navbar";
 import { Hero } from "../components/landing/Hero";
+import { LazySection } from "../components/ui/LazySection";
 import SEO from "../components/SEO";
 import { JsonLd } from "../components/seo/JsonLd";
 
@@ -45,15 +46,34 @@ export default function LandingPage() {
 
       <main className="flex-1 flex flex-col">
         <Hero />
-        <Suspense fallback={<div className="min-h-[200px]" />}>
+        
+        <LazySection>
           <Features />
+        </LazySection>
+
+        <LazySection>
           <HowItWorks />
+        </LazySection>
+
+        <LazySection>
           <Pricing />
+        </LazySection>
+
+        <LazySection>
           <Testimonials />
+        </LazySection>
+
+        <LazySection>
           <FAQ />
+        </LazySection>
+
+        <LazySection>
           <CTA />
+        </LazySection>
+
+        <LazySection>
           <Footer />
-        </Suspense>
+        </LazySection>
       </main>
     </div>
   );

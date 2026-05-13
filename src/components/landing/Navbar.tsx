@@ -15,16 +15,20 @@ export function LandingNavbar() {
 
   useEffect(() => {
     let unsubscribe: () => void;
-    // Dynamically import Firebase to prevent render-blocking on the Landing Page
-    import("../../lib/firebase").then(({ auth }) => {
-      import("firebase/auth").then(({ onAuthStateChanged }) => {
-        unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-          setUser(currentUser);
-          setIsAuthLoading(false);
+    // Delay loading Firebase to prioritize LCP and main-thread for initial render
+    const timer = setTimeout(() => {
+      import("../../lib/firebase").then(({ auth }) => {
+        import("firebase/auth").then(({ onAuthStateChanged }) => {
+          unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            setUser(currentUser);
+            setIsAuthLoading(false);
+          });
         });
       });
-    });
+    }, 3500);
+
     return () => {
+      clearTimeout(timer);
       if (unsubscribe) unsubscribe();
     };
   }, []);
@@ -144,6 +148,8 @@ export function LandingNavbar() {
               <img
                 src="/assets/logo.webp"
                 alt="KudiFlow Logo"
+                width={64}
+                height={64}
                 className="h-full w-full object-contain drop-shadow-sm"
               />
             </div>

@@ -12,9 +12,23 @@
     <title>KudiFlow | The Offline-First Shop Manager</title>
 
     <!-- Preconnect to external origins -->
-    <link rel="preconnect" href="https://apis.google.com" />
-    <link rel="preconnect" href="https://www.googletagmanager.com" />
-    <link rel="preconnect" href="https://randomuser.me" />
+     <link rel="preconnect" href="https://apis.google.com" />
+     <link rel="preconnect" href="https://www.googletagmanager.com" />
+     <link rel="preconnect" href="https://randomuser.me" />
+ 
+     <!-- Preload Critical LCP Asset -->
+     <link
+       rel="preload"
+       as="image"
+       href="/assets/main-hero-image-mobile.webp"
+       media="(max-width: 640px)"
+     />
+     <link
+       rel="preload"
+       as="image"
+       href="/assets/main-hero-image.webp"
+       media="(min-width: 641px)"
+     />
 
     <!-- Open Graph / Facebook / LinkedIn / WhatsApp -->
     <meta property="og:type" content="website" />

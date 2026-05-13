@@ -49,16 +49,20 @@ export function Hero() {
 
   useEffect(() => {
     let unsubscribe: () => void;
-    // Dynamically import Firebase to prevent render-blocking on the Landing Page
-    import("../../lib/firebase").then(({ auth }) => {
-      import("firebase/auth").then(({ onAuthStateChanged }) => {
-        unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-          setUser(currentUser);
-          setIsAuthLoading(false);
+    // Delay loading Firebase to prioritize LCP and main-thread for initial render
+    const timer = setTimeout(() => {
+      import("../../lib/firebase").then(({ auth }) => {
+        import("firebase/auth").then(({ onAuthStateChanged }) => {
+          unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            setUser(currentUser);
+            setIsAuthLoading(false);
+          });
         });
       });
-    });
+    }, 3500);
+
     return () => {
+      clearTimeout(timer);
       if (unsubscribe) unsubscribe();
     };
   }, []);
@@ -242,6 +246,8 @@ export function Hero() {
               <div className="relative w-full h-full overflow-hidden rounded-4xl lg:rounded-[3rem] shadow-2xl shadow-emerald-900/10 border-4 border-white/50">
                 <img
                   src="/assets/main-hero-image.webp"
+                  srcSet="/assets/main-hero-image-mobile.webp 600w, /assets/main-hero-image.webp 1200w"
+                  sizes="(max-width: 640px) 100vw, 50vw"
                   alt="KudiFlow Marketplace Dashboard"
                   width={1200}
                   height={800}

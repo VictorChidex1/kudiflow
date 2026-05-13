@@ -114,7 +114,7 @@ export function Hero() {
               <div className="flex -space-x-3">
                 <div className="w-12 h-12 rounded-full border-[3px] border-white bg-slate-200 overflow-hidden shadow-sm shadow-slate-900/10">
                   <img
-                    src="https://randomuser.me/api/portraits/men/70.jpg"
+                    src="https://randomuser.me/api/portraits/thumb/men/70.jpg"
                     alt="Nigerian MSME Owner"
                     width={48}
                     height={48}
@@ -122,7 +122,7 @@ export function Hero() {
                 </div>
                 <div className="w-12 h-12 rounded-full border-[3px] border-white bg-slate-200 overflow-hidden shadow-sm shadow-slate-900/10">
                   <img
-                    src="https://randomuser.me/api/portraits/women/16.jpg"
+                    src="https://randomuser.me/api/portraits/thumb/women/16.jpg"
                     alt="Nigerian MSME Owner"
                     width={48}
                     height={48}
@@ -130,7 +130,7 @@ export function Hero() {
                 </div>
                 <div className="w-12 h-12 rounded-full border-[3px] border-white bg-slate-200 overflow-hidden shadow-sm shadow-slate-900/10">
                   <img
-                    src="https://randomuser.me/api/portraits/men/53.jpg"
+                    src="https://randomuser.me/api/portraits/thumb/men/53.jpg"
                     alt="Nigerian MSME Owner"
                     width={48}
                     height={48}
@@ -138,7 +138,7 @@ export function Hero() {
                 </div>
                 <div className="w-12 h-12 rounded-full border-[3px] border-white bg-slate-200 overflow-hidden shadow-sm shadow-slate-900/10">
                   <img
-                    src="https://randomuser.me/api/portraits/women/54.jpg"
+                    src="https://randomuser.me/api/portraits/thumb/women/54.jpg"
                     alt="Nigerian MSME Owner"
                     width={48}
                     height={48}

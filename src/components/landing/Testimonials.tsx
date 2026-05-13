@@ -7,7 +7,7 @@ const testimonials = [
     id: 1,
     name: "Oluwakemi Adebayo",
     role: "Pharmacy Owner, Lagos",
-    image: "https://randomuser.me/api/portraits/women/62.jpg",
+    image: "https://randomuser.me/api/portraits/thumb/women/62.jpg",
     quote:
       "Before KudiFlow, my paper ledgers were a mess. Now I track every pill and payment instantly, even when MTN network is down. It's a lifesaver.",
   },
@@ -15,7 +15,7 @@ const testimonials = [
     id: 2,
     name: "Chukwudi Eze",
     role: "Electronics Vendor, Alaba",
-    image: "https://randomuser.me/api/portraits/men/80.jpg",
+    image: "https://randomuser.me/api/portraits/thumb/men/80.jpg",
     quote:
       "The WhatsApp debt reminder feature alone is worth a million Naira. Customers who owed me for months finally paid up when the automated message hit their phones.",
   },
@@ -23,7 +23,7 @@ const testimonials = [
     id: 3,
     name: "Aisha Mohammed",
     role: "Provisions Store, Kano",
-    image: "https://randomuser.me/api/portraits/women/89.jpg",
+    image: "https://randomuser.me/api/portraits/thumb/women/89.jpg",
     quote:
       "I love that it works 100% offline. I can record sales all day at the market without spending a Kobo on data, and it syncs perfectly when I get home.",
   },
@@ -31,7 +31,7 @@ const testimonials = [
     id: 4,
     name: "Audrey James",
     role: "Boutique Owner, Abuja",
-    image: "https://randomuser.me/api/portraits/men/75.jpg",
+    image: "https://randomuser.me/api/portraits/thumb/men/75.jpg",
     quote:
       "Tracking inventory used to take hours every weekend. Now KudiFlow tells me exactly what I have in stock and what I need to restock before I run out.",
   },
@@ -39,7 +39,7 @@ const testimonials = [
     id: 5,
     name: "Ikejiofor Okwichukwu",
     role: "Wholesale Distributor, Onitsha",
-    image: "https://randomuser.me/api/portraits/women/92.jpg",
+    image: "https://randomuser.me/api/portraits/thumb/women/92.jpg",
     quote:
       "My staff used to make so many mathematical errors in the daily sales book. KudiFlow’s 3-second ledger is idiot-proof and my accounts always balance.",
   },
@@ -47,7 +47,7 @@ const testimonials = [
     id: 6,
     name: "Emeka Okafor",
     role: "Supermarket Manager, Enugu",
-    image: "https://randomuser.me/api/portraits/men/53.jpg",
+    image: "https://randomuser.me/api/portraits/thumb/men/53.jpg",
     quote:
       "We upgraded to KudiFlow Pro and the Excel reporting is magical. My accountant was shocked at how clean the data exports are at the end of every month.",
   },

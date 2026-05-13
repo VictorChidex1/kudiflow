@@ -1,4 +1,4 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { Toaster } from "react-hot-toast";
@@ -41,6 +41,16 @@ const BlogCMS = lazy(() => import("./pages/dashboard/BlogCMS"));
 const AIChatWidget = lazy(() => import("./components/chat/AIChatWidget").then(m => ({ default: m.AIChatWidget })));
 
 function App() {
+  const [showChatWidget, setShowChatWidget] = useState(false);
+
+  useEffect(() => {
+    // Delay loading the heavy chat widget to prioritize main thread for LCP
+    const timer = setTimeout(() => {
+      setShowChatWidget(true);
+    }, 4000); // 4 seconds delay
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <HelmetProvider>
       <BrowserRouter>
@@ -93,7 +103,7 @@ function App() {
                 <Route path="expenses" element={<Expenses />} />
               </Route>
             </Routes>
-            <AIChatWidget />
+            {showChatWidget && <AIChatWidget />}
           </Suspense>
         </ErrorBoundary>
         <ScrollToTop />

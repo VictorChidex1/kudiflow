@@ -4,6 +4,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { Toaster } from "react-hot-toast";
 import LandingPage from "./pages/LandingPage";
 import { PageLoader } from "./components/ui/PageLoader";
+import { ErrorBoundary } from "./components/ui/ErrorBoundary";
 
 // Static imports for core app shell components
 import { ScrollToTop } from "./components/ui/ScrollToTop";
@@ -55,44 +56,46 @@ function App() {
             },
           }}
         />
-        <Suspense fallback={<PageLoader />}>
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/verify-email" element={<VerifyEmail />} />
-            <Route path="/blog" element={<BlogLanding />} />
-            <Route path="/blog/:slug" element={<BlogPost />} />
-            <Route path="/docs" element={<DocsPage />} />
-            <Route path="/coming-soon" element={<ComingSoon />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-            <Route path="/terms-of-service" element={<TermsOfService />} />
+        <ErrorBoundary>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/verify-email" element={<VerifyEmail />} />
+              <Route path="/blog" element={<BlogLanding />} />
+              <Route path="/blog/:slug" element={<BlogPost />} />
+              <Route path="/docs" element={<DocsPage />} />
+              <Route path="/coming-soon" element={<ComingSoon />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/terms-of-service" element={<TermsOfService />} />
 
-            {/* Phase 1: Protected Core Application Routes */}
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <DashboardLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<DashboardOverview />} />
-              <Route path="inventory" element={<Inventory />} />
-              <Route path="sales" element={<SalesLedger />} />
-              <Route path="transactions" element={<Transactions />} />
-              <Route path="settings" element={<Settings />} />
-              <Route path="settings/cms" element={<BlogCMS />} />
-              <Route path="debtors" element={<Debtors />} />
-              <Route path="expenses" element={<Expenses />} />
-            </Route>
-          </Routes>
-          <AIChatWidget />
-        </Suspense>
+              {/* Phase 1: Protected Core Application Routes */}
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route index element={<DashboardOverview />} />
+                <Route path="inventory" element={<Inventory />} />
+                <Route path="sales" element={<SalesLedger />} />
+                <Route path="transactions" element={<Transactions />} />
+                <Route path="settings" element={<Settings />} />
+                <Route path="settings/cms" element={<BlogCMS />} />
+                <Route path="debtors" element={<Debtors />} />
+                <Route path="expenses" element={<Expenses />} />
+              </Route>
+            </Routes>
+            <AIChatWidget />
+          </Suspense>
+        </ErrorBoundary>
         <ScrollToTop />
       </BrowserRouter>
     </HelmetProvider>

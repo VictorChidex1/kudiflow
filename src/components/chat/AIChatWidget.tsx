@@ -185,7 +185,7 @@ export function AIChatWidget() {
 
       {/* Floating Toggle Button */}
       <div
-        className={`fixed bottom-24 lg:bottom-6 right-4 lg:right-6 z-[60] ${
+        className={`fixed bottom-6 right-6 z-[60] ${
           isOpen ? "hidden sm:block" : ""
         }`}
       >

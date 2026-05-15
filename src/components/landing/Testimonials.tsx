@@ -79,12 +79,15 @@ export function Testimonials() {
       id="testimonials"
       className="py-24 bg-slate-50 relative overflow-hidden"
     >
-      {/* Background Living Web/Glows */}
-      <div className="absolute top-0 inset-x-0 w-full h-full opacity-50 pointer-events-none overflow-hidden">
-        <div className="absolute -top-[10%] left-[10%] w-[600px] h-[600px] bg-emerald-200/40 rounded-full mix-blend-multiply blur-[120px] animate-blob" />
-        <div className="absolute top-[20%] right-[10%] w-[500px] h-[500px] bg-amber-100/40 rounded-full mix-blend-multiply blur-[120px] animate-blob animation-delay-2000" />
-        <div className="absolute bottom-[-10%] left-[30%] w-[700px] h-[700px] bg-teal-100/40 rounded-full mix-blend-multiply blur-[120px] animate-blob animation-delay-4000" />
-      </div>
+      {/* Background — static gradient, zero GPU cost */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 pointer-events-none overflow-hidden"
+        style={{
+          background:
+            "radial-gradient(ellipse 80% 60% at 20% 30%, rgba(167,243,208,0.25) 0%, transparent 70%), radial-gradient(ellipse 60% 50% at 80% 70%, rgba(253,230,138,0.15) 0%, transparent 70%)",
+        }}
+      />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
@@ -131,7 +134,7 @@ export function Testimonials() {
                 scale: 1.02,
                 transition: { type: "spring", stiffness: 350, damping: 20 },
               }}
-              className="break-inside-avoid bg-white/50 backdrop-blur-2xl rounded-3xl p-6 sm:p-8 md:p-10 border border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,1)] hover:shadow-[0_20px_40px_rgba(16,185,129,0.15)] hover:border-white transition-shadow duration-500 relative group flex flex-col"
+              className="break-inside-avoid bg-white rounded-3xl p-6 sm:p-8 md:p-10 border border-slate-100/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(16,185,129,0.12)] hover:border-emerald-100 transition-shadow duration-500 relative group flex flex-col"
             >
               {/* Decorative Quote Icon Background */}
               <div className="absolute top-6 right-6 text-slate-200/50 group-hover:text-emerald-100/60 transition-colors duration-500 pointer-events-none transform group-hover:scale-110 ease-out">

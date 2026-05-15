@@ -12,16 +12,19 @@ export function CTA() {
           transition={{ duration: 0.7, ease: "easeOut" }}
           className="relative rounded-[2.5rem] bg-slate-900 overflow-hidden px-8 py-20 sm:px-16 sm:py-24 lg:p-24 text-center shadow-2xl"
         >
-          {/* Deep Glowing "Aurora" Background */}
+          {/* Deep Glowing "Aurora" Background — static gradients, zero GPU cost */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            {/* Base gradient dark wash */}
-            <div className="absolute inset-0 bg-linear-to-b from-slate-900 via-slate-900 to-kudi-dark opacity-90" />
-
-            {/* Huge floating animated blobs */}
-            <div className="absolute -top-[30%] -left-[10%] w-[700px] h-[700px] bg-kudi-green/20 rounded-full mix-blend-screen blur-[120px] animate-blob" />
-            <div className="absolute -bottom-[30%] -right-[10%] w-[700px] h-[700px] bg-emerald-500/20 rounded-full mix-blend-screen blur-[120px] animate-blob animation-delay-2000" />
-            <div className="absolute top-[20%] left-[20%] w-[500px] h-[500px] bg-teal-400/10 rounded-full mix-blend-screen blur-[100px] animate-blob animation-delay-4000" />
-
+            {/* Base dark wash */}
+            <div className="absolute inset-0 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950" />
+            {/* Static aurora glows */}
+            <div
+              aria-hidden="true"
+              className="absolute inset-0"
+              style={{
+                background:
+                  "radial-gradient(ellipse 70% 60% at 10% 10%, rgba(16,185,129,0.18) 0%, transparent 65%), radial-gradient(ellipse 60% 50% at 90% 90%, rgba(52,211,153,0.15) 0%, transparent 65%), radial-gradient(ellipse 50% 40% at 50% 40%, rgba(20,184,166,0.08) 0%, transparent 60%)",
+              }}
+            />
             {/* Subtle grid overlay for texture */}
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiLz48L3N2Zz4=')] opacity-30" />
           </div>

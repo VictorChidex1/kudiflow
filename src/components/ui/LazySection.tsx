@@ -12,7 +12,7 @@ export function LazySection({
   children,
   fallback,
   threshold = 0.01,
-  rootMargin = "200px",
+  rootMargin = "100px",
 }: LazySectionProps) {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -23,26 +23,39 @@ export function LazySection({
       return;
     }
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold, rootMargin }
-    );
+    // Use requestIdleCallback when available so the observer setup
+    // doesn't compete with ongoing paint/layout work on the main thread.
+    let rafId: number;
+    const setup = () => {
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+            observer.disconnect();
+          }
+        },
+        { threshold, rootMargin }
+      );
 
-    const currentRef = sectionRef.current;
-    if (currentRef) {
-      observer.observe(currentRef);
-    }
+      const currentRef = sectionRef.current;
+      if (currentRef) {
+        observer.observe(currentRef);
+      }
+
+      return () => {
+        if (currentRef) observer.unobserve(currentRef);
+        observer.disconnect();
+      };
+    };
+
+    let cleanup: (() => void) | undefined;
+    rafId = requestAnimationFrame(() => {
+      cleanup = setup();
+    });
 
     return () => {
-      if (currentRef) {
-        observer.unobserve(currentRef);
-      }
-      observer.disconnect();
+      cancelAnimationFrame(rafId);
+      cleanup?.();
     };
   }, [threshold, rootMargin]);
 

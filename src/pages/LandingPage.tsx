@@ -1,18 +1,16 @@
-import { lazy } from "react";
 import { LandingNavbar } from "../components/landing/Navbar";
 import { Hero } from "../components/landing/Hero";
-import { LazySection } from "../components/ui/LazySection";
 import SEO from "../components/SEO";
 import { JsonLd } from "../components/seo/JsonLd";
 
-// Lazy load below-the-fold sections
-const Features = lazy(() => import("../components/landing/Features").then(m => ({ default: m.Features })));
-const HowItWorks = lazy(() => import("../components/landing/HowItWorks").then(m => ({ default: m.HowItWorks })));
-const Pricing = lazy(() => import("../components/landing/Pricing").then(m => ({ default: m.Pricing })));
-const Testimonials = lazy(() => import("../components/landing/Testimonials").then(m => ({ default: m.Testimonials })));
-const FAQ = lazy(() => import("../components/landing/FAQ").then(m => ({ default: m.FAQ })));
-const CTA = lazy(() => import("../components/landing/CTA").then(m => ({ default: m.CTA })));
-const Footer = lazy(() => import("../components/landing/Footer").then(m => ({ default: m.Footer })));
+// Static imports for all sections to prevent CLS and fix hash navigation
+import { Features } from "../components/landing/Features";
+import { HowItWorks } from "../components/landing/HowItWorks";
+import { Pricing } from "../components/landing/Pricing";
+import { Testimonials } from "../components/landing/Testimonials";
+import { FAQ } from "../components/landing/FAQ";
+import { CTA } from "../components/landing/CTA";
+import { Footer } from "../components/landing/Footer";
 
 export default function LandingPage() {
   const softwareSchema = {
@@ -37,6 +35,7 @@ export default function LandingPage() {
     "description": "Empowering emerging market vendors with offline-first point of sale technology.",
     "url": "https://kudiflow.vercel.app"
   };
+
   return (
     <div className="min-h-screen bg-kudi-bg flex flex-col">
       <SEO title="Home" />
@@ -46,35 +45,15 @@ export default function LandingPage() {
 
       <main className="flex-1 flex flex-col">
         <Hero />
-        
-        <LazySection>
-          <Features />
-        </LazySection>
-
-        <LazySection>
-          <HowItWorks />
-        </LazySection>
-
-        <LazySection>
-          <Pricing />
-        </LazySection>
-
-        <LazySection>
-          <Testimonials />
-        </LazySection>
-
-        <LazySection>
-          <FAQ />
-        </LazySection>
-
-        <LazySection>
-          <CTA />
-        </LazySection>
-
-        <LazySection>
-          <Footer />
-        </LazySection>
+        <Features />
+        <HowItWorks />
+        <Pricing />
+        <Testimonials />
+        <FAQ />
+        <CTA />
+        <Footer />
       </main>
     </div>
   );
 }
+

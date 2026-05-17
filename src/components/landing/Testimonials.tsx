@@ -75,10 +75,7 @@ const cardVariant: Variants = {
 
 export function Testimonials() {
   return (
-    <section
-      id="testimonials"
-      className="py-24 bg-slate-50 relative overflow-hidden"
-    >
+    <section id="testimonials" className="py-24 bg-slate-50 relative overflow-hidden">
       {/* Background — static gradient, zero GPU cost */}
       <div
         aria-hidden="true"

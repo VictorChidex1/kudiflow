@@ -11,6 +11,13 @@ import { ScrollToTop } from "./components/ui/ScrollToTop";
 import { RouteScrollToTop } from "./components/ui/RouteScrollToTop";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { DashboardLayout } from "./components/dashboard/DashboardLayout";
+import { useHashScroll } from "./hooks/useHashScroll";
+
+// Global hash scroll handler — must live inside BrowserRouter
+function HashScrollHandler() {
+  useHashScroll();
+  return null;
+}
 
 // Lazy load public pages
 const Login = lazy(() => import("./pages/Login").then(m => ({ default: m.Login })));
@@ -55,6 +62,7 @@ function App() {
     <HelmetProvider>
       <BrowserRouter>
         <RouteScrollToTop />
+        <HashScrollHandler />
         <Toaster
           position="top-right"
           toastOptions={{

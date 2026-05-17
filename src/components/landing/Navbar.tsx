@@ -89,33 +89,9 @@ export function LandingNavbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleNavigation = (
-    e: React.MouseEvent<HTMLAnchorElement>,
-    href: string
-  ) => {
-    // If the href is a hash link (like /#features)
-    if (href.startsWith("/#")) {
-      const targetId = href.replace("/#", "");
-
-      // If we are already on the landing page, just scroll smoothly
-      if (location.pathname === "/") {
-        e.preventDefault();
-        const element = document.getElementById(targetId);
-
-        if (element) {
-          const navHeight = 80;
-          const elementPosition =
-            element.getBoundingClientRect().top + window.scrollY;
-          window.scrollTo({
-            top: elementPosition - navHeight,
-            behavior: "smooth",
-          });
-        }
-      }
-      // If we are NOT on the landing page, the normal <Link to="/#href"> behavior
-      // will transition us to the landing page and the browser will jump to the hash.
-    }
-
+  const handleNavigation = () => {
+    // useHashScroll in App.tsx handles the actual scrolling.
+    // This just closes the mobile menu on any nav click.
     setIsMobileMenuOpen(false);
   };
 
@@ -173,7 +149,7 @@ export function LandingNavbar() {
                 <Link
                   key={link.name}
                   to={link.href}
-                  onClick={(e) => handleNavigation(e, link.href)}
+                  onClick={handleNavigation}
                   className={`text-sm font-semibold transition-colors relative py-1 ${
                     isActive
                       ? "text-kudi-green"
@@ -298,7 +274,7 @@ export function LandingNavbar() {
                             ? "text-kudi-green"
                             : "text-slate-800 hover:text-kudi-green"
                         }`}
-                        onClick={(e) => handleNavigation(e, link.href)}
+                        onClick={handleNavigation}
                       >
                         {link.name}
                         {isActive && (

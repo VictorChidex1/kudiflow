@@ -47,6 +47,9 @@ const BlogCMS = lazy(() => import("./pages/dashboard/BlogCMS"));
 // Lazy load heavy widgets
 const AIChatWidget = lazy(() => import("./components/chat/AIChatWidget").then(m => ({ default: m.AIChatWidget })));
 
+// Auth Context
+import { AuthProvider } from "./contexts/AuthContext";
+
 function App() {
   const [showChatWidget, setShowChatWidget] = useState(false);
 
@@ -60,62 +63,64 @@ function App() {
 
   return (
     <HelmetProvider>
-      <BrowserRouter>
-        <RouteScrollToTop />
-        <HashScrollHandler />
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            duration: 4000,
-            style: {
-              background: "#334155",
-              color: "#fff",
-              borderRadius: "12px",
-            },
-          }}
-        />
-        <ErrorBoundary>
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/verify-email" element={<VerifyEmail />} />
-              <Route path="/blog" element={<BlogLanding />} />
-              <Route path="/blog/:slug" element={<BlogPost />} />
-              <Route path="/docs" element={<DocsPage />} />
-              <Route path="/coming-soon" element={<ComingSoon />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-              <Route path="/terms-of-service" element={<TermsOfService />} />
+      <AuthProvider>
+        <BrowserRouter>
+          <RouteScrollToTop />
+          <HashScrollHandler />
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 4000,
+              style: {
+                background: "#334155",
+                color: "#fff",
+                borderRadius: "12px",
+              },
+            }}
+          />
+          <ErrorBoundary>
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/verify-email" element={<VerifyEmail />} />
+                <Route path="/blog" element={<BlogLanding />} />
+                <Route path="/blog/:slug" element={<BlogPost />} />
+                <Route path="/docs" element={<DocsPage />} />
+                <Route path="/coming-soon" element={<ComingSoon />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="/terms-of-service" element={<TermsOfService />} />
 
-              {/* Phase 1: Protected Core Application Routes */}
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <DashboardLayout />
-                  </ProtectedRoute>
-                }
-              >
-                <Route index element={<DashboardOverview />} />
-                <Route path="inventory" element={<Inventory />} />
-                <Route path="sales" element={<SalesLedger />} />
-                <Route path="transactions" element={<Transactions />} />
-                <Route path="settings" element={<Settings />} />
-                <Route path="settings/cms" element={<BlogCMS />} />
-                <Route path="debtors" element={<Debtors />} />
-                <Route path="expenses" element={<Expenses />} />
-              </Route>
-            </Routes>
-            {showChatWidget && <AIChatWidget />}
-          </Suspense>
-        </ErrorBoundary>
-        <ScrollToTop />
-      </BrowserRouter>
+                {/* Phase 1: Protected Core Application Routes */}
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <DashboardLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route index element={<DashboardOverview />} />
+                  <Route path="inventory" element={<Inventory />} />
+                  <Route path="sales" element={<SalesLedger />} />
+                  <Route path="transactions" element={<Transactions />} />
+                  <Route path="settings" element={<Settings />} />
+                  <Route path="settings/cms" element={<BlogCMS />} />
+                  <Route path="debtors" element={<Debtors />} />
+                  <Route path="expenses" element={<Expenses />} />
+                </Route>
+              </Routes>
+              {showChatWidget && <AIChatWidget />}
+            </Suspense>
+          </ErrorBoundary>
+          <ScrollToTop />
+        </BrowserRouter>
+      </AuthProvider>
     </HelmetProvider>
   );
 }

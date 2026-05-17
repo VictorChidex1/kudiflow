@@ -1,5 +1,7 @@
 import { Outlet } from "react-router-dom";
+import { Suspense } from "react";
 import { Sidebar } from "./Sidebar";
+import { PageLoader } from "../ui/PageLoader";
 import { MobileNav } from "./MobileNav";
 import { TopHeader } from "./TopHeader";
 import { motion, AnimatePresence } from "framer-motion";
@@ -30,7 +32,9 @@ export function DashboardLayout() {
               transition={{ duration: 0.3, ease: "easeOut" }}
               className="w-full max-w-7xl mx-auto px-4 sm:px-8 py-6 lg:py-10"
             >
-              <Outlet />
+              <Suspense fallback={<PageLoader />}>
+                <Outlet />
+              </Suspense>
             </motion.div>
           </AnimatePresence>
         </div>

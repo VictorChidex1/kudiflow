@@ -1,8 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import { onAuthStateChanged } from "firebase/auth";
 import type { User } from "firebase/auth";
-import { auth } from "../lib/firebase";
 
 interface AuthContextType {
   user: User | null;
@@ -19,14 +17,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthLoading, setIsAuthLoading] = useState(true);
 
   useEffect(() => {
-    // This executes EXACTLY ONCE when the app boots up.
-    // It runs in parallel with Vite downloading JS chunks.
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setIsAuthLoading(false);
-    });
+    let unsubscribe: (() => void) | undefined;
 
-    return () => unsubscribe();
+    // By using dynamic Promise.all imports, we instruct Vite to code-split
+    // Firebase entirely out of our critical render-blocking bundle.
+    // The browser paints the HTML instantly, and Firebase loads in the background.
+    Promise.all([
+      import("../lib/firebase"),
+      import("firebase/auth")
+    ])
+      .then(([{ auth }, { onAuthStateChanged }]) => {
+        unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+          setUser(currentUser);
+          setIsAuthLoading(false);
+        });
+      })
+      .catch((err) => {
+        console.error("Failed to dynamically load Firebase:", err);
+        setIsAuthLoading(false); // Don't hang the app if network fails
+      });
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, []);
 
   return (
